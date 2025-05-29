@@ -1,0 +1,771 @@
+import 'package:easylive/Funcs.dart';
+import 'package:easylive/settings.dart';
+import 'package:easylive/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:get/get.dart';
+import 'controllers.dart';
+import 'api_service.dart';
+
+class LoginPage extends StatefulWidget {
+  final double? areaWidth;
+  final double? areaHeight;
+  const LoginPage({Key? key, this.areaWidth, this.areaHeight})
+      : super(key: key);
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final LoginController loginController = Get.find<LoginController>();
+  final AccountController accountController = Get.find<AccountController>();
+  late TextEditingController emailController;
+  late TextEditingController nickNameController;
+  late TextEditingController passwordController;
+  late TextEditingController captchaController;
+
+  @override
+  void initState() {
+    super.initState();
+    emailController = TextEditingController(text: loginController.email.value);
+    nickNameController = TextEditingController();
+    passwordController = TextEditingController();
+    captchaController = TextEditingController();
+    loginController.freshCaptcha();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    captchaController.dispose();
+    super.dispose();
+  }
+
+  void checkValid() {
+    final email = emailController.text;
+    final password = passwordController.text;
+    final regex = RegExp(Constants.REGEX_PASSWORD);
+    final emailRegex =
+        RegExp('^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\$');
+    if (!emailRegex.hasMatch(email)) throw Exception(Texts.emailFormatError);
+
+    if (!regex.hasMatch(password)) {
+      throw Exception(Texts.passwordFormatError);
+    }
+    if (captchaController.text.isEmpty) {
+      throw Exception(Texts.captchaRequired);
+    }
+  }
+
+  void tryLogin() async {
+    try {
+      checkValid();
+      var ret = await ApiService.accountLogin(
+        email: emailController.text,
+        password: passwordController.text,
+        checkCodeKey: loginController.checkCodeKey.value,
+        checkCode: captchaController.text,
+      );
+      print('登录结果: \\${ret}');
+      if (ret['code'] != 200) {
+        loginController.freshCaptcha();
+        throw Exception(ret['info'] ?? Texts.loginFailed);
+      } else {
+        loginController.email.value = emailController.text;
+        await accountController.saveAccountInfo(ret['data']);
+        Get.back();
+        Get.closeAllSnackbars();
+        Get.snackbar(
+          Texts.welcomeBack,
+          '${ret['data']['nickName'] ?? emailController.text}',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white,
+          duration: Duration(milliseconds: Constants.errorMsgDuration),
+          instantInit: true,
+        );
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
+
+  void tryRegister() async {
+    try {
+      checkValid();
+      if (nickNameController.text.isEmpty ||
+          nickNameController.text.length > 20)
+        throw Exception(Texts.userNameHelperText);
+
+      var ret = await ApiService.accountRegister(
+        email: emailController.text,
+        nickName: nickNameController.text,
+        password: passwordController.text,
+        checkCodeKey: loginController.checkCodeKey.value,
+        checkCode: captchaController.text,
+      );
+      if (ret['code'] != 200) {
+        loginController.freshCaptcha();
+        throw Exception(ret['info'] ?? Texts.loginFailed);
+      } else {
+        Get.back(id: Routes.loginPageNavId);
+        loginController.freshCaptcha();
+        Get.closeAllSnackbars();
+        Get.snackbar(
+          Texts.success,
+          Texts.registerSuccess,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white,
+          duration: Duration(milliseconds: Constants.errorMsgDuration),
+          instantInit: true,
+        );
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double formWidth = widget.areaWidth ?? context.width;
+    return Scaffold(
+      body: Stack(
+        children: [
+          // 背景网络图片
+          Positioned.fill(
+            child: Image.network(
+              ApiService.baseUrl +
+                  ApiAddr.fileGetResource +
+                  ApiAddr.LoginBackGround,
+              fit: BoxFit.cover,
+            ),
+          ),
+          // 登录表单内容
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: formWidth / 2 - 16,
+                ),
+                SizedBox(
+                    width: formWidth / 2 - 16,
+                    child: HeroControllerScope(
+                        controller: MaterialApp.createMaterialHeroController(),
+                        child: Navigator(
+                            key: Get.nestedKey(Routes.loginPageNavId),
+                            initialRoute: Routes.loginPageLoginRouteName,
+                            onGenerateRoute: (settings) {
+                              if (settings.name ==
+                                  Routes.loginPageLoginRouteName) {
+                                return PageRouteBuilder(
+                                  opaque: false,
+                                  barrierColor: Colors.transparent,
+                                  pageBuilder: (context, animation,
+                                          secondaryAnimation) =>
+                                      Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Hero(
+                                              tag: Routes
+                                                  .heroTagLoginPageSwitchBtn,
+                                              child: Tooltip(
+                                                  message: Texts.toRegister,
+                                                  child: TextButton.icon(
+                                                      onPressed: () =>
+                                                          Get.toNamed(
+                                                            Routes
+                                                                .loginPageRegisterRouteName,
+                                                            id: Routes
+                                                                .loginPageNavId,
+                                                          ),
+                                                      label:
+                                                          Text(Texts.register),
+                                                      icon: Icon(
+                                                        Icons.app_registration,
+                                                        size: 16,
+                                                      )))),
+                                        ],
+                                      ),
+                                      Hero(
+                                          tag: Routes.heroTagLoginPageEmail,
+                                          child: TextField(
+                                            controller: emailController,
+                                            decoration: InputDecoration(
+                                                labelText: Texts.email),
+                                            onChanged: (value) =>
+                                                loginController.email.value =
+                                                    value,
+                                            onSubmitted: (value) => tryLogin(),
+                                          )),
+                                      SizedBox(height: 16),
+                                      Hero(
+                                          tag: Routes.heroTagLoginPagePassword,
+                                          child: TextField(
+                                            controller: passwordController,
+                                            decoration: InputDecoration(
+                                              labelText: Texts.password,
+                                              helperText:
+                                                  Texts.passwordHelperText,
+                                            ),
+                                            obscureText: true,
+                                            onSubmitted: (value) => tryLogin(),
+                                          )),
+                                      SizedBox(height: 16),
+                                      Hero(
+                                          tag: Routes.heroTagLoginPageCaptcha,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                  child: TextField(
+                                                controller: captchaController,
+                                                decoration: InputDecoration(
+                                                    labelText: Texts.captcha),
+                                                onSubmitted: (value) =>
+                                                    tryLogin(),
+                                              )),
+                                              SizedBox(
+                                                width: 100,
+                                                child: Obx(() {
+                                                  final base64 = loginController
+                                                      .checkCode.value;
+                                                  if (base64.isEmpty) {
+                                                    return SizedBox.shrink();
+                                                  }
+                                                  try {
+                                                    final bytes =
+                                                        Uri.parse(base64)
+                                                            .data
+                                                            ?.contentAsBytes();
+                                                    if (bytes == null)
+                                                      return Text(Texts
+                                                          .decodeCaptchaFailed);
+                                                    return GestureDetector(
+                                                      onTap: () =>
+                                                          loginController
+                                                              .freshCaptcha(),
+                                                      child: Image.memory(
+                                                        bytes,
+                                                        height: 40,
+                                                        errorBuilder: (context,
+                                                                error,
+                                                                stackTrace) =>
+                                                            Text(Texts
+                                                                .loadCaptchaFailed),
+                                                      ),
+                                                    );
+                                                  } catch (e) {
+                                                    return Text(Texts
+                                                        .decodeCaptchaFailed);
+                                                  }
+                                                }),
+                                              ),
+                                            ],
+                                          )),
+                                      SizedBox(height: 16),
+                                      SizedBox(height: 32),
+                                      Hero(
+                                          tag: Routes.heroTagLoginPageActionBtn,
+                                          child: ElevatedButton(
+                                            onPressed: () => tryLogin(),
+                                            child: Text(Texts.login),
+                                          )),
+                                    ],
+                                  ),
+                                  settings: settings,
+                                );
+                              } else if (settings.name ==
+                                  Routes.loginPageRegisterRouteName) {
+                                return PageRouteBuilder(
+                                  opaque: false,
+                                  barrierColor: Colors.transparent,
+                                  transitionDuration:
+                                      Duration(milliseconds: 300),
+                                  reverseTransitionDuration:
+                                      Duration(milliseconds: 300),
+                                  transitionsBuilder: (context, animation,
+                                      secondaryAnimation, child) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    );
+                                  },
+                                  pageBuilder: (context, animation,
+                                          secondaryAnimation) =>
+                                      Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Hero(
+                                            tag: Routes
+                                                .heroTagLoginPageSwitchBtn,
+                                            child: Tooltip(
+                                                message: Texts.toLogin,
+                                                child: TextButton.icon(
+                                                    onPressed: () => Get.back(
+                                                          id: Routes
+                                                              .loginPageNavId,
+                                                        ),
+                                                    label: Text(Texts.login),
+                                                    icon: Icon(
+                                                      Icons.login,
+                                                      size: 16,
+                                                    ))),
+                                          )
+                                        ],
+                                      ),
+                                      Hero(
+                                          tag: Routes.heroTagLoginPageEmail,
+                                          child: TextField(
+                                            controller: emailController,
+                                            decoration: InputDecoration(
+                                                labelText: Texts.email),
+                                            onChanged: (value) =>
+                                                loginController.email.value =
+                                                    value,
+                                            onSubmitted: (value) =>
+                                                tryRegister(),
+                                          )),
+                                      SizedBox(height: 16),
+                                      TextField(
+                                        controller: nickNameController,
+                                        decoration: InputDecoration(
+                                            labelText: Texts.userName,
+                                            helperText:
+                                                Texts.userNameHelperText),
+                                        onSubmitted: (value) => tryRegister(),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Hero(
+                                        tag: Routes.heroTagLoginPagePassword,
+                                        child: TextField(
+                                          controller: passwordController,
+                                          decoration: InputDecoration(
+                                            labelText: Texts.password,
+                                            helperText:
+                                                Texts.passwordHelperText,
+                                          ),
+                                          obscureText: true,
+                                          onSubmitted: (value) => tryRegister(),
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Hero(
+                                          tag: Routes.heroTagLoginPageCaptcha,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                  child: TextField(
+                                                controller: captchaController,
+                                                decoration: InputDecoration(
+                                                    labelText: Texts.captcha),
+                                                onSubmitted: (value) =>
+                                                    tryRegister(),
+                                              )),
+                                              SizedBox(
+                                                width: 100,
+                                                child: Obx(() {
+                                                  final base64 = loginController
+                                                      .checkCode.value;
+                                                  if (base64.isEmpty) {
+                                                    return SizedBox.shrink();
+                                                  }
+                                                  try {
+                                                    final bytes =
+                                                        Uri.parse(base64)
+                                                            .data
+                                                            ?.contentAsBytes();
+                                                    if (bytes == null)
+                                                      return Text(Texts
+                                                          .decodeCaptchaFailed);
+                                                    return GestureDetector(
+                                                      onTap: () =>
+                                                          loginController
+                                                              .freshCaptcha(),
+                                                      child: Image.memory(
+                                                        bytes,
+                                                        height: 40,
+                                                        errorBuilder: (context,
+                                                                error,
+                                                                stackTrace) =>
+                                                            Text(Texts
+                                                                .loadCaptchaFailed),
+                                                      ),
+                                                    );
+                                                  } catch (e) {
+                                                    return Text(Texts
+                                                        .decodeCaptchaFailed);
+                                                  }
+                                                }),
+                                              ),
+                                            ],
+                                          )),
+                                      SizedBox(height: 16),
+                                      Hero(
+                                          tag: Routes.heroTagLoginPageActionBtn,
+                                          child: ElevatedButton(
+                                            onPressed: () => tryRegister(),
+                                            child: Text(Texts.register),
+                                          )),
+                                    ],
+                                  ),
+                                  settings: settings,
+                                );
+                              }
+                            })))
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LoginInfoDialog extends StatelessWidget {
+  final VoidCallback onClose;
+  const LoginInfoDialog({Key? key, required this.onClose}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+        onExit: (_) {
+          onClose();
+        },
+        child: AlertDialog(
+          title: Text(Texts.unLogin),
+          content: TextButton(
+              onPressed: () {
+                openLoginDialog();
+              },
+              child: Text(Texts.login)),
+        ));
+  }
+}
+
+class AccountInfoDialog extends StatefulWidget {
+  final GlobalKey avatarKey;
+  final VoidCallback onClose;
+  const AccountInfoDialog(
+      {Key? key, required this.avatarKey, required this.onClose})
+      : super(key: key);
+  @override
+  State<AccountInfoDialog> createState() => _AccountInfoDialogState();
+}
+
+class _AccountInfoDialogState extends State<AccountInfoDialog> {
+  final AccountController accountController = Get.find<AccountController>();
+
+  @override
+  void initState() {
+    super.initState();
+    accountController.getUserCountInfo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.toNamed('/info',
+          id: Routes.accountInfoDialogStateNavId, preventDuplicates: true);
+    });
+  }
+
+  void _handleExit(PointerExitEvent event) async {
+    final navKey = Get.nestedKey(Routes.accountInfoDialogStateNavId);
+    final navState = navKey != null ? navKey.currentState : null;
+    if (navState != null && navState.canPop()) {
+      Get.back(id: Routes.accountInfoDialogStateNavId);
+      await Future.delayed(Duration(milliseconds: 150));
+    }
+    widget.onClose();
+  }
+
+  SizedBox btns(
+      double widthInCard, VoidCallback onPressed, IconData icon, String label) {
+    return SizedBox(
+      width: widthInCard,
+      height: 40,
+      child: TextButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+        style: TextButton.styleFrom(
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onExit: _handleExit,
+      child: SizedBox(
+        width: 300,
+        height: 400,
+        child: HeroControllerScope(
+            controller: MaterialApp.createMaterialHeroController(),
+            child: Navigator(
+              key: Get.nestedKey(Routes.accountInfoDialogStateNavId),
+              initialRoute: '/avatar',
+              onGenerateRoute: (settings) {
+                if (settings.name == '/avatar') {
+                  return MaterialPageRoute(
+                    builder: (context) => SizedBox(
+                        width: 300,
+                        height: 400,
+                        child: Stack(
+                          children: [
+                            Positioned(
+                                top: 0,
+                                left: 134,
+                                child: SizedBox(
+                                    width: 32,
+                                    height: 32,
+                                    child: Hero(
+                                      createRectTween: (begin, end) =>
+                                          RectTween(begin: begin, end: end),
+                                      tag: Routes.heroTagAvatar,
+                                      child: Avatar(
+                                        avatarValue: accountController.avatar,
+                                        radius: 16,
+                                      ),
+                                    ))),
+                          ],
+                        )),
+                    settings: settings,
+                  );
+                } else if (settings.name == '/info') {
+                  double widthCard = 300;
+                  double widthInCard = widthCard - 30;
+                  return MaterialPageRoute(
+                    builder: (context) => SizedBox(
+                        width: widthCard,
+                        height: 400,
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              top: 40,
+                              left: 0,
+                              child: SizedBox(
+                                  width: widthCard,
+                                  height: 360,
+                                  child: Card(
+                                      elevation: 4,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
+                                      margin: EdgeInsets.all(8),
+                                      child: SizedBox(
+                                          width: widthInCard,
+                                          height: 360,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(height: 50),
+                                              Text(
+                                                  accountController.nickName ??
+                                                      Texts.unLogin,
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              SizedBox(height: 8),
+                                              // 关注、粉丝、硬币
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  accountDialogNumWidget(
+                                                      Texts.focus,
+                                                      count: accountController
+                                                          .focusCount),
+                                                  accountDialogNumWidget(
+                                                      Texts.fans,
+                                                      count: accountController
+                                                          .fansCount),
+                                                  accountDialogNumWidget(
+                                                      Texts.coin,
+                                                      count: accountController
+                                                          .currentCoinCount),
+                                                ],
+                                              ),
+                                              SizedBox(height: 8),
+
+                                              btns(widthInCard, () async {
+                                                Get.dialog(
+                                                  UpdateUserInfoCard(
+                                                    areaWidth: widthInCard,
+                                                    areaHeight: 300,
+                                                  ),
+                                                );
+                                              }, Icons.edit_document,
+                                                  Texts.updateUserInfo),
+                                              Divider(
+                                                height: 1,
+                                                color: Colors.grey[300],
+                                              ),
+                                              btns(widthInCard, () async {
+                                                Get.closeAllSnackbars();
+                                                var res = await ApiService
+                                                    .accountLogout();
+                                                if (showResSnackbar(res)) {
+                                                  accountController
+                                                      .saveAccountInfo({});
+                                                  widget.onClose();
+                                                }
+                                              }, Icons.logout, Texts.logout),
+                                            ],
+                                          )))),
+                            ),
+                            Positioned(
+                                top: 0,
+                                left: 100,
+                                child: SizedBox(
+                                  width: 100,
+                                  height: 100,
+                                  child: Hero(
+                                    createRectTween: (begin, end) =>
+                                        RectTween(begin: begin, end: end),
+                                    tag: Routes.heroTagAvatar,
+                                    child: Avatar(
+                                      avatarValue: accountController.avatar,
+                                      radius: 60,
+                                    ),
+                                  ),
+                                )),
+                          ],
+                        )),
+                    settings: settings,
+                  );
+                }
+                return null;
+              },
+            )),
+      ),
+    );
+  }
+}
+
+class UpdateUserInfoCard extends StatefulWidget {
+  final double? areaWidth;
+  final double? areaHeight;
+  const UpdateUserInfoCard({Key? key, this.areaWidth, this.areaHeight})
+      : super(key: key);
+  @override
+  _UpdateUserInfoCardState createState() => _UpdateUserInfoCardState();
+}
+
+class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
+  final AccountController accountController = Get.find<AccountController>();
+  // {
+  //   "userId": "0636309642",
+  //   "nickName": "神山识",
+  //   "avatar": "cover/202505\\\\zaPVfHfyRoJWX7EH5WOqLP2AytxhXB.webp",
+  //   "sex": 2,
+  //   "personIntroduction": null,
+  //   "noticeInfo": null,
+  //   "grade": null,
+  //   "birthday": null,
+  //   "school": null,
+  //   "fansCount": 1,
+  //   "focusCount": 1,
+  //   "likeCount": 0,
+  //   "playCount": 8,
+  //   "haveFocus": false,
+  //   "theme": "https://s.040905.xyz/d/v/business-spirit-unit.gif?%E2%80%A6gn=uDy2k6zQMaZr8CnNBem03KTPdcQGX-JVOIRcEBcVOhk=:0"
+  // }
+  final TextEditingController nickNameController = TextEditingController();
+  final TextEditingController personIntroductionController =
+      TextEditingController();
+  final TextEditingController noticeInfoController = TextEditingController();
+  final TextEditingController schoolController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void getUserInfo() async {
+    try {
+      var res = await ApiService.uhomeGetUserInfo(accountController.userId!);
+      if (res['code'] == 200) {
+        var data = res['data'];
+        nickNameController.text = data['nickName'] ?? '';
+        personIntroductionController.text = data['personIntroduction'] ?? '';
+        noticeInfoController.text = data['noticeInfo'] ?? '';
+        schoolController.text = data['school'] ?? '';
+      } else {
+        throw Exception(res['info'] ?? Texts.getUserInfoFailed);
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: Constants.updateUserInfoCardWidth,
+      height: Constants.updateUserInfoCardHeight,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                Texts.updateUserInfo,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: nickNameController,
+                decoration: InputDecoration(labelText: Texts.userName),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: personIntroductionController,
+                decoration:
+                    InputDecoration(labelText: Texts.personIntroduction),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: noticeInfoController,
+                decoration: InputDecoration(labelText: Texts.noticeInfo),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: schoolController,
+                decoration: InputDecoration(labelText: Texts.school),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  try {} catch (e) {
+                    showErrorSnackbar(e.toString());
+                  }
+                },
+                child: Text(Texts.update),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
