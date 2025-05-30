@@ -166,7 +166,7 @@ class ApiService {
     ));
   }
 
-  static Future<dynamic> fileGetResource({required String sourceName}) async {
+  static Future<dynamic> fileGetResource(String sourceName) async {
     return (await getBytes(
       ApiAddr.fileGetResource,
       query: {
@@ -207,7 +207,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> fileDelUploadVideo(
-      {required String uploadId}) async {
+      String uploadId) async {
     return toJson(await get(
       ApiAddr.fileDelUploadVideo,
       query: {'uploadId': uploadId},
@@ -337,7 +337,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> ucenterSaveVideoInteraction(
-      String videoId, String interaction) async {
+      {required String videoId, required String interaction}) async {
     return toJson(await get(
       ApiAddr.ucenterSaveVideoInteraction,
       query: {'videoId': videoId, 'interaction': interaction},
@@ -353,7 +353,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> ucenterLoadComment(
-      String? videoId, int? pageNo) async {
+      {required String? videoId, required int? pageNo}) async {
     return toJson(await get(
       ApiAddr.ucenterLoadComment,
       query: {'videoId': videoId ?? '', 'pageNo': pageNo?.toString() ?? ''},
@@ -370,7 +370,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> ucenterLoadDanmu(
-      String videoId, int? pageNo) async {
+      {required String videoId, required int? pageNo}) async {
     return toJson(await get(
       ApiAddr.ucenterLoadDanmu,
       query: {'videoId': videoId, 'pageNo': pageNo?.toString() ?? ''},
@@ -403,6 +403,200 @@ class ApiService {
     ));
   }
 
+  static Future<Map<String, dynamic>> videoLoadRecommendVideo() async {
+    return toJson(await get(
+      ApiAddr.videoLoadRecommendVideo,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> videoLoadVideo(
+      {int? pCategoryId, int? categoryId, int? pageNo}) async {
+    return toJson(await get(
+      ApiAddr.videoLoadVideo,
+      query: {
+        'pCategoryId': pCategoryId?.toString() ?? '',
+        'categoryId': categoryId?.toString() ?? '',
+        'pageNo': pageNo?.toString() ?? '',
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> videoGetVideoInfo(String videoId) async {
+    return toJson(await get(
+      ApiAddr.videoGetVideoInfo,
+      query: {'videoId': videoId},
+    ));
+  }
+
+  static Future<Map<String, dynamic>> videoLoadVideoPList(
+      String videoId) async {
+    return toJson(await get(
+      ApiAddr.videoLoadVideoPList,
+      query: {
+        'videoId': videoId,
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> videoReportVideoPlayOnline(
+      {required String fileId, required String deviceId}) async {
+    return toJson(await get(
+      ApiAddr.videoReportVideoPlayOnline,
+      query: {
+        'fileId': fileId,
+        'deviceId': deviceId,
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> videoSearch(
+      {required String keyword, int? orderType, int? pageNo}) async {
+    return toJson(await get(
+      ApiAddr.videoSearch,
+      query: {
+        'keyword': keyword,
+        'orderType': orderType?.toString() ?? '',
+        'pageNo': pageNo?.toString() ?? '',
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> videoGetVideoRecommend(
+      {required String keyword, required String videoId}) async {
+    return toJson(await get(
+      ApiAddr.videoGetVideoRecommend,
+      query: {
+        'keyword': keyword,
+        'videoId': videoId,
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> videoGetSearchKeywordTop() async {
+    return toJson(await get(
+      ApiAddr.videoGetSearchKeywordTop,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> danmuPostDanmu(
+      // public ResponseVO postDanmu(@NotEmpty String videoId, @NotEmpty String fileId,
+      // 	@NotEmpty @Size(max = 200) String text, @NotNull Integer mode, @NotEmpty String color,
+      // 	@NotNull Integer time)
+      {required String videoId,
+      required String fileId,
+      required String text,
+      required int mode,
+      required String color,
+      required int time}) async {
+    return toJson(await get(
+      ApiAddr.danmuPostDanmu,
+      query: {
+        'videoId': videoId,
+        'fileId': fileId,
+        'text': text,
+        'mode': mode.toString(),
+        'color': color,
+        'time': time.toString(),
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> danmuLoadDanmu(
+      {required String videoId, required String fileId}) async {
+    return toJson(await get(
+      ApiAddr.danmuLoadDanmu,
+      query: {
+        'videoId': videoId,
+        'fileId': fileId,
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> userActionDoAction(
+      // public ResponseVO doAction(@NotEmpty String videoId, @NonNull Integer actionType,
+      // @Max(2) @Min(1) Integer actionCount,
+      // Integer commentId) {
+      {required String videoId,
+      required int actionType,
+      int? actionCount,
+      int? commentId}) async {
+    return toJson(await get(
+      ApiAddr.userActionDoAction,
+      query: {
+        'videoId': videoId,
+        'actionType': actionType.toString(),
+        'actionCount': actionCount?.toString() ?? '',
+        'commentId': commentId?.toString() ?? '',
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> commentPostComment
+      // public ResponseVO postComment(@NotEmpty String videoId,
+      // 		@NotEmpty @Size(max = 500) String content, @Size(max = 50) String imgPath, Integer replyCommentId) {
+      (
+          {required String videoId,
+          required String content,
+          String? imgPath,
+          int? replyCommentId}) async {
+    return toJson(await get(
+      ApiAddr.commentPostComment,
+      query: {
+        'videoId': videoId,
+        'content': content,
+        'imgPath': imgPath ?? '',
+        'replyCommentId': replyCommentId?.toString() ?? '',
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> commentLoadComment(
+      {required String videoId, int? pageNo, int? orderType}) async {
+    return toJson(await get(
+      ApiAddr.commentLoadComment,
+      query: {
+        'videoId': videoId,
+        'pageNo': pageNo?.toString() ?? '',
+        'orderType': orderType?.toString() ?? '',
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> commentTopComment(int commentId) async {
+    return toJson(await get(
+      ApiAddr.commentTopComment,
+      query: {
+        'commentId': commentId.toString(),
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> commentCancelTopComment(
+      int commentId) async {
+    return toJson(await get(
+      ApiAddr.commentCancelTopComment,
+      query: {
+        'commentId': commentId.toString(),
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> commentUserDelComment(
+      int commentId) async {
+    return toJson(await get(
+      ApiAddr.commentUserDelComment,
+      query: {
+        'commentId': commentId.toString(),
+      },
+      useToken: true,
+    ));
+  }
+
   static Future<Map<String, dynamic>> uhomeGetUserInfo(String userId) async {
     return toJson(await get(
       ApiAddr.uhomeGetUserInfo,
@@ -412,13 +606,13 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> uhomeUpdateUserInfo(
-      String nickName,
-      String avatar,
-      int sex,
-      String birthday,
-      String school,
-      String noticeInfo,
-      String personIntroduction) async {
+      {required String nickName,
+      required String avatar,
+      required int sex,
+      required String birthday,
+      required String school,
+      required String noticeInfo,
+      required String personIntroduction}) async {
     return toJson(await get(
       ApiAddr.uhomeUpdateUserInfo,
       query: {
@@ -429,6 +623,267 @@ class ApiService {
         "school": school,
         "noticeInfo": noticeInfo,
         "personIntroduction": personIntroduction,
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSaveTheme(String theme) async {
+    return toJson(await get(
+      ApiAddr.uhomeSaveTheme,
+      query: {
+        "theme": theme,
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeFocus(String focusUserId) async {
+    return toJson(await get(
+      ApiAddr.uhomeFocus,
+      query: {
+        "focusUserId": focusUserId,
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeCancelFocus(
+      String focusUserId) async {
+    return toJson(await get(
+      ApiAddr.uhomeCancelFocus,
+      query: {
+        "focusUserId": focusUserId,
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeLoadFocusList(int? pageNo) async {
+    return toJson(await get(
+      ApiAddr.uhomeLoadFocusList,
+      query: {
+        "pageNo": pageNo?.toString() ?? '',
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeLoadFansList(int? pageNo) async {
+    return toJson(await get(
+      ApiAddr.uhomeLoadFansList,
+      query: {
+        "pageNo": pageNo?.toString() ?? '',
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeLoadVideoList(
+      // (@NotEmpty String userId, Integer type, Integer pageNo, String videoName,
+      // Integer orderType)
+      {required String userId,
+      int? type,
+      int? pageNo,
+      String? videoName,
+      int? orderType}) async {
+    return toJson(await get(
+      ApiAddr.uhomeLoadVideoList,
+      query: {
+        'userId': userId,
+        'type': type?.toString() ?? '',
+        'pageNo': pageNo?.toString() ?? '',
+        'videoName': videoName ?? '',
+        'orderType': orderType?.toString() ?? '',
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeLoadUserCollection(
+      {required String userId, int? pageNo}) async {
+    return toJson(await get(
+      ApiAddr.uhomeLoadUserCollection,
+      query: {
+        'userId': userId,
+        'pageNo': pageNo?.toString() ?? '',
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesLoadVideoSeries(
+      String userId) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesLoadVideoSeries,
+      query: {
+        'userId': userId,
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesSaveVideoSeries(
+      // (Integer seriesId, @NotEmpty @Size(max = 100) String seriesName,
+      //         @Size(max = 200) String seriesDesc, String videoIds)
+      {int? seriesId,
+      required String seriesName,
+      String? seriesDesc,
+      required String videoIds}) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesSaveVideoSeries,
+      query: {
+        'seriesId': seriesId?.toString() ?? '',
+        'seriesName': seriesName,
+        'seriesDesc': seriesDesc ?? '',
+        'videoIds': videoIds,
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesLoadAllVideo(
+      int seriesId) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesLoadAllVideo,
+      query: {
+        'seriesId': seriesId.toString(),
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesGetVideoSeriesDetail(
+      int seriesId) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesGetVideoSeriesDetail,
+      query: {
+        'seriesId': seriesId.toString(),
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesSaveSeriesVideo(
+      {required int seriesId, required String videoIds}) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesSaveSeriesVideo,
+      query: {
+        'seriesId': seriesId.toString(),
+        'videoIds': videoIds,
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesDelSeriesVideo(
+      {required int seriesId, required String videoId}) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesDelSeriesVideo,
+      query: {
+        'seriesId': seriesId.toString(),
+        'videoId': videoId,
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesDelVideoSeries(
+      int seriesId) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesDelVideoSeries,
+      query: {
+        'seriesId': seriesId.toString(),
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesChangeVideoSeriesSort(
+      String seriesIds) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesChangeVideoSeriesSort,
+      query: {
+        'seriesIds': seriesIds,
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> uhomeSeriesLoadVideoSeriesWithVideo(
+      String userId) async {
+    return toJson(await get(
+      ApiAddr.uhomeSeriesLoadVideoSeriesWithVideo,
+      query: {
+        'userId': userId,
+      },
+    ));
+  }
+
+  static Future<Map<String, dynamic>> messageGetNoReadCount() async {
+    return toJson(await get(
+      ApiAddr.messageGetNoReadCount,
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> messageGetNoReadCountGroup() async {
+    return toJson(await get(
+      ApiAddr.messageGetNoReadCountGroup,
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> messageReadAll(int messageType) async {
+    return toJson(await get(
+      ApiAddr.messageReadAll,
+      query: {
+        'messageType': messageType.toString(),
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> messageLoadMessage(
+      {required int messageType, int? pageNo}) async {
+    return toJson(await get(
+      ApiAddr.messageLoadMessage,
+      query: {
+        'messageType': messageType.toString(),
+        'pageNo': pageNo?.toString() ?? '',
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> messageDelMessage(int messageId) async {
+    return toJson(await get(
+      ApiAddr.messageDelMessage,
+      query: {
+        'messageId': messageId.toString(),
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> historyLoadHistory(int? pageNo) async {
+    return toJson(await get(
+      ApiAddr.historyLoadHistory,
+      query: {
+        'pageNo': pageNo?.toString() ?? '',
+      },
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> historyCleanHistory() async {
+    return toJson(await get(
+      ApiAddr.historyCleanHistory,
+      useToken: true,
+    ));
+  }
+
+  static Future<Map<String, dynamic>> historyDelHistory(String videoId) async {
+    return toJson(await get(
+      ApiAddr.historyDelHistory,
+      query: {
+        'videoId': videoId,
       },
       useToken: true,
     ));
@@ -455,31 +910,70 @@ class ApiAddr {
   static const String sysSettingGetSetting = '/sysSetting/getSetting';
   static const String ucenterPostVideo = '/ucenter/postVideo';
   static const String ucenterLoadVideoList = '/ucenter/loadVideoList';
-  // /ucenter/getVideoCountInfo
   static const String ucenterGetVideoCountInfo = '/ucenter/getVideoCountInfo';
-  // /ucenter/getVideoByVideoId
   static const String ucenterGetVideoByVideoId = '/ucenter/getVideoByVideoId';
-  // /ucenter/saveVideoInteraction
   static const String ucenterSaveVideoInteraction =
       '/ucenter/saveVideoInteraction';
-  // /ucenter/deleteVideo
   static const String ucenterDeleteVideo = '/ucenter/deleteVideo';
-  // /ucenter/loadAllVideo
   static const String ucenterLoadAllVideo = '/ucenter/loadAllVideo';
-  // /ucenter/loadComment
   static const String ucenterLoadComment = '/ucenter/loadComment';
-  // /ucenter/delComment
   static const String ucenterDelComment = '/ucenter/delComment';
-  // /ucenter/loadDanmu
   static const String ucenterLoadDanmu = '/ucenter/loadDanmu';
-  // /ucenter/delDanmu
   static const String ucenterDelDanmu = '/ucenter/delDanmu';
-  // /ucenter/getActualTimeStatisticsInfo
   static const String ucenterGetActualTimeStatisticsInfo =
       '/ucenter/getActualTimeStatisticsInfo';
-  // /ucenter/getWeekStatisticsInfo
   static const String ucenterGetWeekStatisticsInfo =
       '/ucenter/getWeekStatisticsInfo';
+  static const String videoLoadRecommendVideo = '/video/loadRecommendVideo';
+  static const String videoLoadVideo = '/video/loadVideo';
+  static const String videoGetVideoInfo = '/video/getVideoInfo';
+  static const String videoLoadVideoPList = '/video/loadVideoPList';
+  static const String videoReportVideoPlayOnline =
+      '/video/reportVideoPlayOnline';
+  static const String videoSearch = '/video/search';
+  static const String videoGetVideoRecommend = '/video/getVideoRecommend';
+  static const String videoGetSearchKeywordTop = '/video/getSearchKeywordTop';
+  static const String danmuPostDanmu = '/danmu/postDanmu';
+  static const String danmuLoadDanmu = '/danmu/loadDanmu';
+  static const String userActionDoAction = '/userAction/doAction';
+  static const String commentPostComment = '/comment/postComment';
+  static const String commentLoadComment = '/comment/loadComment';
+  static const String commentTopComment = '/comment/topComment';
+  static const String commentCancelTopComment = '/comment/cancelTopComment';
+  static const String commentUserDelComment = '/comment/userDelComment';
   static const String uhomeGetUserInfo = '/uhome/getUserInfo';
   static const String uhomeUpdateUserInfo = '/uhome/updateUserInfo';
+  static const String uhomeSaveTheme = '/uhome/saveTheme';
+  static const String uhomeFocus = '/uhome/focus';
+  static const String uhomeCancelFocus = '/uhome/cancelFocus';
+  static const String uhomeLoadFocusList = '/uhome/loadFocusList';
+  static const String uhomeLoadFansList = '/uhome/loadFansList';
+  static const String uhomeLoadVideoList = '/uhome/loadVideoList';
+  static const String uhomeLoadUserCollection = '/uhome/loadUserCollection';
+  static const String uhomeSeriesLoadVideoSeries =
+      '/uhome/series/loadVideoSeries';
+  static const String uhomeSeriesSaveVideoSeries =
+      '/uhome/series/saveVideoSeries';
+  static const String uhomeSeriesLoadAllVideo = '/uhome/series/loadAllVideo';
+  static const String uhomeSeriesGetVideoSeriesDetail =
+      '/uhome/series/getVideoSeriesDetail';
+  static const String uhomeSeriesSaveSeriesVideo =
+      '/uhome/series/saveSeriesVideo';
+  static const String uhomeSeriesDelSeriesVideo =
+      '/uhome/series/delSeriesVideo';
+  static const String uhomeSeriesDelVideoSeries =
+      '/uhome/series/delVideoSeries';
+  static const String uhomeSeriesChangeVideoSeriesSort =
+      '/uhome/series/changeVideoSeriesSort';
+  static const String uhomeSeriesLoadVideoSeriesWithVideo =
+      '/uhome/series/loadVideoSeriesWithVideo';
+  static const String messageGetNoReadCount = '/message/getNoReadCount';
+  static const String messageGetNoReadCountGroup =
+      '/message/getNoReadCountGroup';
+  static const String messageReadAll = '/message/readAll';
+  static const String messageLoadMessage = '/message/loadMessage';
+  static const String messageDelMessage = '/message/delMessage';
+  static const String historyLoadHistory = '/history/loadHistory';
+  static const String historyCleanHistory = '/history/cleanHistory';
+  static const String historyDelHistory = '/history/delHistory';
 }

@@ -193,8 +193,14 @@ class UserInfoController extends GetxController {
       updateInfo.forEach((key, value) {
         userInfo[key] = value;
       });
-      var res = await ApiService.uhomeUpdateUserInfo(nickName!, avatar!, sex!,
-          birthday!, school!, noticeInfo!, personIntroduction!);
+      var res = await ApiService.uhomeUpdateUserInfo(
+          nickName: nickName,
+          avatar: avatar,
+          sex: sex,
+          birthday: birthday,
+          school: school,
+          noticeInfo: noticeInfo,
+          personIntroduction: personIntroduction);
       return res;
     } catch (e) {
       showErrorSnackbar(e.toString());
@@ -209,7 +215,7 @@ class ImageDataController extends GetxController {
   Uint8List get data => imageData.isNotEmpty ? imageData[0] : Uint8List(0);
   Future<void> loadImageFromUrl(String imageUrl) async {
     try {
-      var res = await ApiService.fileGetResource(sourceName: imageUrl);
+      var res = await ApiService.fileGetResource(imageUrl);
       imageData.value = [res];
     } catch (e) {
       showErrorSnackbar(e.toString());

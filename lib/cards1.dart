@@ -80,7 +80,7 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(children: [
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 Column(children: [
                   Text(
                     Texts.updateUserInfo,
@@ -88,18 +88,21 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
                   ),
                   SizedBox(height: 16),
                 ]),
-                GestureDetector(
-                    onTap: () async {
-                      var res = await showUploadImageCard(
-                          imagePath: userInfoController.avatar!);
-                      if (res != null) {
-                        userInfoController.avatar = res;
-                      }
-                    },
-                    child: Obx(() => Avatar(
-                          avatarValue: userInfoController.avatar,
-                          radius: 40,
-                        ))),
+                Tooltip(
+                  message: Texts.changeAvatar,
+                  child: GestureDetector(
+                      onTap: () async {
+                        var res = await showUploadImageCard(
+                            imagePath: userInfoController.avatar!);
+                        if (res != null) {
+                          userInfoController.avatar = res;
+                        }
+                      },
+                      child: Obx(() => Avatar(
+                            avatarValue: userInfoController.avatar,
+                            radius: 40,
+                          ))),
+                ),
               ]),
               TextField(
                 controller: nickNameController,

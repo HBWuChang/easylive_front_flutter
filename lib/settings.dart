@@ -138,6 +138,9 @@ class Texts {
   static String get imageProcessingError =>
       texts[Texts_mode]["imageProcessingError"] ??
       texts[Texts_Default_mode]["imageProcessingError"];
+  static String get changeAvatar =>
+      texts[Texts_mode]["changeAvatar"] ??
+      texts[Texts_Default_mode]["changeAvatar"];
   static Map<String, dynamic> get texts => {
         "zh-CN": {
           "email": "邮箱",
@@ -183,6 +186,7 @@ class Texts {
           'unLimit': '无限制',
           'originalRatio': '原图比例',
           'imageProcessingError': '图片处理错误',
+          'changeAvatar': '更换头像',
         },
         "en-US": {
           "email": "Email",
