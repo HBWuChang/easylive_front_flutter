@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/pages.dart';
+import 'package:easylive/pages2.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
 import 'package:flutter/foundation.dart';
@@ -30,11 +31,12 @@ void main() async {
       await windowManager.show();
     });
   }
-  Get.put(LoginController());
-  Get.put(AccountController());
+  Get.put(ControllersInitController());
+
+  Get.find<ControllersInitController>().initNeedControllers();
   await ApiService.init(baseUrl: Constants.baseUrl);
-  await Get.find<AccountController>().autoLogin();
-  
+  Get.find<AccountController>().autoLogin();
+
   return runApp(MyApp());
 }
 
@@ -196,12 +198,7 @@ class _HomeState extends State<Home> {
             clipBehavior: Clip.none),
 
         // 用一个简单的Get.to()即可代替Navigator.push那8行，无需上下文！
-        body: Center(
-            child: ElevatedButton(
-                child: Text("Go to Other"),
-                onPressed: () {
-                  openLoginDialog();
-                })),
+        body: PlatformPage(),
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add), onPressed: c.increment));
   }

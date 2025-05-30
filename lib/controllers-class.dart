@@ -1,10 +1,44 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 import 'Funcs.dart';
+
+class ControllersInitController extends GetxController {
+  var isLoginControllerInitialized = false.obs;
+  var isAccountControllerInitialized = false.obs;
+  var isPlatformPageSubmitControllerInitialized = false.obs;
+
+  void initNeedControllers() {
+    initLoginController();
+    initAccountController();
+    // initPlatformPageSubmitController();
+  }
+
+  void initLoginController() {
+    if (!isLoginControllerInitialized.value) {
+      Get.put(LoginController());
+      isLoginControllerInitialized.value = true;
+    }
+  }
+
+  void initAccountController() {
+    if (!isAccountControllerInitialized.value) {
+      Get.put(AccountController());
+      isAccountControllerInitialized.value = true;
+    }
+  }
+
+  void initPlatformPageSubmitController() {
+    if (!isPlatformPageSubmitControllerInitialized.value) {
+      Get.put(PlatformPageSubmitController());
+      isPlatformPageSubmitControllerInitialized.value = true;
+    }
+  }
+}
 
 class LoginController extends GetxController {
   var email = ''.obs;
@@ -301,4 +335,19 @@ class VideoInfoFilePost {
       'duration': duration,
     };
   }
+}
+
+class PlatformPageSubmitController extends GetxController {
+  var uploadFileList = <VideoInfoFilePost>[].obs;
+  var videoId = ''.obs;
+  var videoCover = ''.obs;
+  var videoName = ''.obs;
+  var pCategoryId = 0.obs;
+  var categoryId = 0.obs;
+  var postType = 0.obs;
+  var tags = ''.obs;
+  var introduction = ''.obs;
+  var interaction = ''.obs;
+  var isUploading = false.obs;
+  var prePage = false.obs;
 }

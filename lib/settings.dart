@@ -24,6 +24,7 @@ class Routes {
 
   static const int accountInfoDialogStateNavId = 1001;
   static const int loginPageNavId = 1002;
+  static const int platformPageNavId = 1003;
   static const String loginPageLoginRouteName = '/loginPageLogin';
   static const String loginPageRegisterRouteName = '/loginPageRegister';
   static const String homePage = '/home';
