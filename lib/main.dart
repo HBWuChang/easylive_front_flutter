@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
-import 'controllers.dart';
+import 'controllers-class.dart';
 import 'api_service.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';

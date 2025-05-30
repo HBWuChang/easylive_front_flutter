@@ -1,7 +1,7 @@
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'api_service.dart';
-
+import 'package:extended_image/extended_image.dart';
 Widget Avatar({String? avatarValue, double? radius = 16, Key? key}) {
   // 如果avatarValue为空或null，显示默认头像
   // 否则显示网络头像
@@ -15,8 +15,8 @@ Widget Avatar({String? avatarValue, double? radius = 16, Key? key}) {
     return CircleAvatar(
       key: key,
       radius: radius!,
-      backgroundImage: NetworkImage(
-        ApiService.baseUrl + ApiAddr.fileGetResource + avatarValue,
+      backgroundImage: ExtendedNetworkImageProvider(
+        ApiService.baseUrl + ApiAddr.fileGetResourcet + avatarValue,
       ),
     );
   }

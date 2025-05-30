@@ -6,6 +6,8 @@ class Constants {
   static const double loginDialogMinHeight = 415;
   static const double updateUserInfoCardWidth = 350;
   static const double updateUserInfoCardHeight = 550;
+  static const double uploadImageCardWidth = 450;
+  static const double uploadImageCardHeight = 550;
   static const String REGEX_PASSWORD =
       "^(?![0-9]+\$)(?![a-zA-Z]+\$)[0-9A-Za-z]{6,18}\$";
   static const int errorMsgDuration = 2000; // 错误消息持续时间，单位毫秒
@@ -118,7 +120,24 @@ class Texts {
       texts[Texts_Default_mode]["updateFailed"];
   static String get update =>
       texts[Texts_mode]["update"] ?? texts[Texts_Default_mode]["update"];
-      
+  static String get noImageSelected =>
+      texts[Texts_mode]["noImageSelected"] ??
+      texts[Texts_Default_mode]["noImageSelected"];
+  static String get selectImage =>
+      texts[Texts_mode]["selectImage"] ??
+      texts[Texts_Default_mode]["selectImage"];
+  static String get reset =>
+      texts[Texts_mode]["reset"] ?? texts[Texts_Default_mode]["reset"];
+  static String get enter =>
+      texts[Texts_mode]["enter"] ?? texts[Texts_Default_mode]["enter"];
+  static String get unLimit =>
+      texts[Texts_mode]["unLimit"] ?? texts[Texts_Default_mode]["unLimit"];
+  static String get originalRatio =>
+      texts[Texts_mode]["originalRatio"] ??
+      texts[Texts_Default_mode]["originalRatio"];
+  static String get imageProcessingError =>
+      texts[Texts_mode]["imageProcessingError"] ??
+      texts[Texts_Default_mode]["imageProcessingError"];
   static Map<String, dynamic> get texts => {
         "zh-CN": {
           "email": "邮箱",
@@ -157,6 +176,13 @@ class Texts {
           'school': '学校',
           'updateFailed': '更新失败',
           'update': '更新',
+          'noImageSelected': '未选择图片',
+          'selectImage': '选择图片',
+          'reset': '重置',
+          'enter': '确定',
+          'unLimit': '无限制',
+          'originalRatio': '原图比例',
+          'imageProcessingError': '图片处理错误',
         },
         "en-US": {
           "email": "Email",

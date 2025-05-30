@@ -1,9 +1,16 @@
 import 'dart:math';
 
+import 'package:easylive/controllers-class.dart';
 import 'package:easylive/pages.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'cards1.dart';
+// import 'package:extended_image/extended_image.dart';
+import 'dart:typed_data';
+// import 'dart:io';
+// import 'package:image/image.dart';
+import 'package:flutter/foundation.dart';
 
 void openLoginDialog() {
   Get.dialog(
@@ -74,4 +81,36 @@ void showErrorSnackbar(String msg) {
   );
 }
 
+void showUpdateUserInfoCard() async {
+  await Get.dialog(
+    Center(
+      child: SizedBox(
+        width: Constants.updateUserInfoCardWidth,
+        height: Constants.updateUserInfoCardHeight,
+        child: UpdateUserInfoCard(
+          areaWidth: Constants.updateUserInfoCardWidth,
+          areaHeight: Constants.updateUserInfoCardHeight,
+        ),
+      ),
+    ),
+    barrierDismissible: true,
+  );
+  await Get.find<AccountController>().autoLogin();
+}
 
+Future<dynamic> showUploadImageCard({String? imagePath}) async {
+  var res = await Get.dialog(
+    Center(
+      child: SizedBox(
+        width: Constants.uploadImageCardWidth,
+        height: Constants.uploadImageCardHeight,
+        child: UploadImageCard(
+          imagePath: imagePath,
+        ),
+      ),
+    ),
+    barrierColor: const Color.fromARGB(0, 0, 0, 0),
+    barrierDismissible: true,
+  );
+  return res;
+}

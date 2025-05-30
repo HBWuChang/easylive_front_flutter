@@ -4,8 +4,9 @@ import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
-import 'controllers.dart';
+import 'controllers-class.dart';
 import 'api_service.dart';
+import 'package:extended_image/extended_image.dart';
 
 class LoginPage extends StatefulWidget {
   final double? areaWidth;
@@ -135,9 +136,9 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           // 背景网络图片
           Positioned.fill(
-            child: Image.network(
+            child: ExtendedImage.network(
               ApiService.baseUrl +
-                  ApiAddr.fileGetResource +
+                  ApiAddr.fileGetResourcet +
                   ApiAddr.LoginBackGround,
               fit: BoxFit.cover,
             ),
@@ -604,12 +605,7 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                                               SizedBox(height: 8),
 
                                               btns(widthInCard, () async {
-                                                Get.dialog(
-                                                  UpdateUserInfoCard(
-                                                    areaWidth: widthInCard,
-                                                    areaHeight: 300,
-                                                  ),
-                                                );
+                                                showUpdateUserInfoCard();
                                               }, Icons.edit_document,
                                                   Texts.updateUserInfo),
                                               Divider(
@@ -653,118 +649,6 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                 return null;
               },
             )),
-      ),
-    );
-  }
-}
-
-class UpdateUserInfoCard extends StatefulWidget {
-  final double? areaWidth;
-  final double? areaHeight;
-  const UpdateUserInfoCard({Key? key, this.areaWidth, this.areaHeight})
-      : super(key: key);
-  @override
-  _UpdateUserInfoCardState createState() => _UpdateUserInfoCardState();
-}
-
-class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
-  final AccountController accountController = Get.find<AccountController>();
-  // {
-  //   "userId": "0636309642",
-  //   "nickName": "神山识",
-  //   "avatar": "cover/202505\\\\zaPVfHfyRoJWX7EH5WOqLP2AytxhXB.webp",
-  //   "sex": 2,
-  //   "personIntroduction": null,
-  //   "noticeInfo": null,
-  //   "grade": null,
-  //   "birthday": null,
-  //   "school": null,
-  //   "fansCount": 1,
-  //   "focusCount": 1,
-  //   "likeCount": 0,
-  //   "playCount": 8,
-  //   "haveFocus": false,
-  //   "theme": "https://s.040905.xyz/d/v/business-spirit-unit.gif?%E2%80%A6gn=uDy2k6zQMaZr8CnNBem03KTPdcQGX-JVOIRcEBcVOhk=:0"
-  // }
-  final TextEditingController nickNameController = TextEditingController();
-  final TextEditingController personIntroductionController =
-      TextEditingController();
-  final TextEditingController noticeInfoController = TextEditingController();
-  final TextEditingController schoolController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void getUserInfo() async {
-    try {
-      var res = await ApiService.uhomeGetUserInfo(accountController.userId!);
-      if (res['code'] == 200) {
-        var data = res['data'];
-        nickNameController.text = data['nickName'] ?? '';
-        personIntroductionController.text = data['personIntroduction'] ?? '';
-        noticeInfoController.text = data['noticeInfo'] ?? '';
-        schoolController.text = data['school'] ?? '';
-      } else {
-        throw Exception(res['info'] ?? Texts.getUserInfoFailed);
-      }
-    } catch (e) {
-      showErrorSnackbar(e.toString());
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: Constants.updateUserInfoCardWidth,
-      height: Constants.updateUserInfoCardHeight,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                Texts.updateUserInfo,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: nickNameController,
-                decoration: InputDecoration(labelText: Texts.userName),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: personIntroductionController,
-                decoration:
-                    InputDecoration(labelText: Texts.personIntroduction),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: noticeInfoController,
-                decoration: InputDecoration(labelText: Texts.noticeInfo),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: schoolController,
-                decoration: InputDecoration(labelText: Texts.school),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  try {} catch (e) {
-                    showErrorSnackbar(e.toString());
-                  }
-                },
-                child: Text(Texts.update),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
