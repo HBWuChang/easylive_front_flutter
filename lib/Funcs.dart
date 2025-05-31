@@ -98,7 +98,10 @@ void showUpdateUserInfoCard() async {
   await Get.find<AccountController>().autoLogin();
 }
 
-Future<dynamic> showUploadImageCard({String? imagePath}) async {
+Future<dynamic> showUploadImageCard(
+    {String? imagePath,
+    Map<String, double?>? cropAspectRatios,
+    bool shadow = false}) async {
   var res = await Get.dialog(
     Center(
       child: SizedBox(
@@ -106,10 +109,11 @@ Future<dynamic> showUploadImageCard({String? imagePath}) async {
         height: Constants.uploadImageCardHeight,
         child: UploadImageCard(
           imagePath: imagePath,
+          cropAspectRatios: cropAspectRatios,
         ),
       ),
     ),
-    barrierColor: const Color.fromARGB(0, 0, 0, 0),
+    barrierColor: shadow ? null : const Color.fromARGB(0, 0, 0, 0),
     barrierDismissible: true,
   );
   return res;

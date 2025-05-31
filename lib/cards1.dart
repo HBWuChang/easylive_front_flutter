@@ -161,7 +161,9 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
 class UploadImageCard extends StatefulWidget {
   // imagePath
   final String? imagePath;
-  const UploadImageCard({Key? key, this.imagePath}) : super(key: key);
+  final Map<String, double?>? cropAspectRatios;
+  const UploadImageCard({Key? key, this.imagePath, this.cropAspectRatios})
+      : super(key: key);
   @override
   _UploadImageCardState createState() => _UploadImageCardState();
 }
@@ -172,7 +174,23 @@ class _UploadImageCardState extends State<UploadImageCard> {
   final editorKey = GlobalKey<ExtendedImageEditorState>();
   @override
   final ImageEditorController _imageEditorController = ImageEditorController();
+  Map<String, double?> _cropAspectRatios = {
+    Texts.unLimit: null,
+    Texts.originalRatio: 0.0,
+    '4:3': 4 / 3,
+    '16:9': 16 / 9,
+    '1:1': 1.0,
+    '3:4': 3 / 4,
+    '9:16': 9 / 16,
+  };
+  @override
   void initState() {
+    if (widget.cropAspectRatios != null) {
+      _cropAspectRatios = widget.cropAspectRatios!;
+    }
+    _selectedAspectRatio = _cropAspectRatios.keys.first.obs;
+    _imageEditorController
+        .updateCropAspectRatio(_cropAspectRatios[_selectedAspectRatio.value]);
     super.initState();
     loadImage();
     _imageEditorControllerListener();
@@ -186,16 +204,7 @@ class _UploadImageCardState extends State<UploadImageCard> {
 
   void _imageEditorControllerListener() {}
 
-  Map<String, double?> _cropAspectRatios = {
-    Texts.unLimit: null,
-    Texts.originalRatio: 0.0,
-    '4:3': 4 / 3,
-    '16:9': 16 / 9,
-    '1:1': 1.0,
-    '3:4': 3 / 4,
-    '9:16': 9 / 16,
-  };
-  var _selectedAspectRatio = Texts.originalRatio.obs;
+  late var _selectedAspectRatio;
   FocusNode _focusNodeDropdownButton = FocusNode();
   @override
   Widget build(BuildContext context) {
@@ -227,13 +236,16 @@ class _UploadImageCardState extends State<UploadImageCard> {
                             cropRectPadding: EdgeInsets.all(20.0),
                             hitTestSize: 20.0,
                             controller: _imageEditorController,
+                            cropAspectRatio:
+                                _cropAspectRatios[_selectedAspectRatio.value],
                           );
                         },
                       );
                     }
-                    return Text(
+                    return Center(
+                        child: Text(
                       Texts.noImageSelected,
-                    );
+                    ));
                   })),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -299,7 +311,8 @@ class _UploadImageCardState extends State<UploadImageCard> {
                   TextButton.icon(
                       onPressed: () async {
                         _imageEditorController.reset();
-                        _selectedAspectRatio.value = Texts.originalRatio;
+                        _selectedAspectRatio.value =
+                            _cropAspectRatios.keys.first;
                       },
                       icon: Icon(Icons.refresh),
                       label: Text(Texts.reset)),

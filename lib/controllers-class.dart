@@ -11,11 +11,14 @@ class ControllersInitController extends GetxController {
   var isLoginControllerInitialized = false.obs;
   var isAccountControllerInitialized = false.obs;
   var isPlatformPageSubmitControllerInitialized = false.obs;
-
+  var isSysSettingGetSettingControllerInitialized = false.obs;
+  var isCategoryLoadAllCategoryControllerInitialized = false.obs;
   void initNeedControllers() {
     initLoginController();
     initAccountController();
     // initPlatformPageSubmitController();
+    initSysSettingGetSettingController();
+    initCategoryLoadAllCategoryController();
   }
 
   void initLoginController() {
@@ -36,6 +39,20 @@ class ControllersInitController extends GetxController {
     if (!isPlatformPageSubmitControllerInitialized.value) {
       Get.put(PlatformPageSubmitController());
       isPlatformPageSubmitControllerInitialized.value = true;
+    }
+  }
+
+  void initSysSettingGetSettingController() {
+    if (!isSysSettingGetSettingControllerInitialized.value) {
+      Get.put(SysSettingGetSettingController());
+      isSysSettingGetSettingControllerInitialized.value = true;
+    }
+  }
+
+  void initCategoryLoadAllCategoryController() {
+    if (!isCategoryLoadAllCategoryControllerInitialized.value) {
+      Get.put(CategoryLoadAllCategoryController());
+      isCategoryLoadAllCategoryControllerInitialized.value = true;
     }
   }
 }
@@ -106,6 +123,11 @@ class AccountController extends GetxController {
   Future<void> _loadAccountInfo() async {
     final prefs = await SharedPreferences.getInstance();
     accountInfo.value = jsonDecode(prefs.getString('accountInfo') ?? '{}');
+    if (accountInfo.isEmpty) {
+      await autoLogin();
+    } else {
+      getUserCountInfo();
+    }
   }
 
   Future<void> saveAccountInfoToLocal(Map<String, dynamic> info) async {
@@ -293,6 +315,38 @@ class VideoInfoFilePost {
   int? updateType;
   int? transferResult;
   int? duration;
+  String? get getFileId => fileId;
+  set setFileId(String? value) => fileId = value;
+
+  String? get getUploadId => uploadId;
+  set setUploadId(String? value) => uploadId = value;
+
+  String? get getUserId => userId;
+  set setUserId(String? value) => userId = value;
+
+  String? get getVideoId => videoId;
+  set setVideoId(String? value) => videoId = value;
+
+  int? get getFileIndex => fileIndex;
+  set setFileIndex(int? value) => fileIndex = value;
+
+  String? get getFileName => fileName;
+  set setFileName(String? value) => fileName = value;
+
+  int? get getFileSize => fileSize;
+  set setFileSize(int? value) => fileSize = value;
+
+  String? get getFilePath => filePath;
+  set setFilePath(String? value) => filePath = value;
+
+  int? get getUpdateType => updateType;
+  set setUpdateType(int? value) => updateType = value;
+
+  int? get getTransferResult => transferResult;
+  set setTransferResult(int? value) => transferResult = value;
+
+  int? get getDuration => duration;
+  set setDuration(int? value) => duration = value;
 
   VideoInfoFilePost({
     this.fileId,
@@ -337,6 +391,101 @@ class VideoInfoFilePost {
   }
 }
 
+class VideoInfoFilePostController extends GetxController {
+  var process = 0.0.obs;
+  var isUploading = true.obs;
+  var uploadInfo = ''.obs;
+  Uint8List? videoData;
+  int chunkIndex = 0;
+  int chunkSize = 0;
+  int chunks = 0;
+  int totalsize = 0;
+  bool stop = false;
+  late TextEditingController videoNameController;
+  TextEditingController get getVideoNameController => videoNameController;
+  Future<void> cancelUpload() async {
+    stop = true;
+    await ApiService.fileDelUploadVideo(uploadId);
+  }
+
+  String uploadid = '';
+  String filename = '';
+  String get uploadId => uploadid;
+  set uploadId(String value) {
+    uploadid = value;
+  }
+
+  String get fileName => filename;
+  set fileName(String value) {
+    filename = value;
+  }
+
+  void creatAFinishedVideoInfoFilePost(String fileName) {
+    isUploading.value = false;
+    uploadInfo.value = '上传完成';
+    chunkIndex = 0;
+    process.value = 100.0;
+    filename = fileName;
+  }
+
+  Future<String> preUploadVideo(Uint8List videoData, String fileName) async {
+    this.videoData = videoData;
+    this.fileName = fileName;
+    totalsize = videoData.lengthInBytes;
+    chunkSize = (0.5 * 1024 * 1024).toInt(); // 0.5MB per chunk
+    chunks = (totalsize / chunkSize).ceil();
+    var res =
+        await ApiService.filePreUploadVideo(fileName: fileName, chunks: chunks);
+    if (res['code'] == 200) {
+      uploadId = res['data'];
+      uploadVideo();
+      videoNameController = TextEditingController(text: fileName);
+      return uploadId;
+    } else {
+      throw Exception('预上传视频失败: ${res['info']}');
+    }
+  }
+
+  Future<void> uploadVideo() async {
+    if (videoData == null || uploadId.isEmpty) {
+      throw Exception('视频数据或上传ID未设置');
+    }
+    isUploading.value = true;
+    try {
+      while (chunkIndex < chunks && !stop) {
+        int start = chunkIndex * chunkSize;
+        int end = (start + chunkSize).clamp(0, totalsize);
+        Uint8List chunkData = videoData!.sublist(start, end);
+        var res = await ApiService.fileUploadVideo(
+          chunkFile: chunkData,
+          chunkIndex: chunkIndex,
+          uploadId: uploadId,
+        );
+        if (res['code'] == 200) {
+          process.value = ((chunkIndex + 1) / chunks) * 100;
+          uploadInfo.value = '上传进度: ${process.value.toStringAsFixed(2)}%';
+          chunkIndex++;
+        } else {
+          throw Exception('上传视频分片失败: ${res['info']}');
+        }
+      }
+      isUploading.value = false;
+      uploadInfo.value = '上传完成';
+    } catch (e) {
+      isUploading.value = false;
+      throw e;
+    }
+  }
+
+  void updateFileName() {
+    if (videoNameController.text.isNotEmpty) {
+      filename = videoNameController.text;
+    } else {
+      throw Exception('文件名不能为空');
+    }
+  }
+}
+
 class PlatformPageSubmitController extends GetxController {
   var uploadFileList = <VideoInfoFilePost>[].obs;
   var videoId = ''.obs;
@@ -345,9 +494,193 @@ class PlatformPageSubmitController extends GetxController {
   var pCategoryId = 0.obs;
   var categoryId = 0.obs;
   var postType = 0.obs;
-  var tags = ''.obs;
+  var tags = [].obs;
   var introduction = ''.obs;
   var interaction = ''.obs;
   var isUploading = false.obs;
+  var videoPcountLimit = 0.obs;
   var prePage = false.obs;
+  final tagsFocusNode = FocusNode();
+  late TextEditingController videoNameController;
+  late TextEditingController tagsController;
+  late TextEditingController introductionController;
+  late TextEditingController interactionController;
+  PlatformPageSubmitController() {
+    videoNameController = TextEditingController();
+    tagsController = TextEditingController();
+    introductionController = TextEditingController();
+    interactionController = TextEditingController();
+    pCategoryId.value =
+        Get.find<CategoryLoadAllCategoryController>().categories.isNotEmpty
+            ? Get.find<CategoryLoadAllCategoryController>().categories[0]
+                ['categoryId']
+            : 0;
+  }
+  void removeTag(String tag) {
+    tags.remove(tag);
+  }
+
+  void addTag(String tag) {
+    if (tag.isNotEmpty && !tags.contains(tag)) {
+      tags.add(tag);
+    }
+  }
+
+  void addUploadFile(VideoInfoFilePost file) {
+    uploadFileList.add(file);
+  }
+
+  void removeUploadFile(VideoInfoFilePost file) {
+    uploadFileList.remove(file);
+  }
+
+  void updateUploadFileName(VideoInfoFilePost file, String newName) {
+    int index = uploadFileList.indexOf(file);
+    if (index != -1) {
+      uploadFileList[index].fileName = newName;
+    }
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    getVideoPcountLimit();
+  }
+
+  void getVideoPcountLimit() {
+    var settingController = Get.find<SysSettingGetSettingController>();
+    videoPcountLimit.value = settingController.videoPcount.value;
+  }
+
+  Future<void> submitVideoInfo() async {
+    videoName.value = videoNameController.text.trim();
+    introduction.value = introductionController.text.trim();
+    interaction.value = interactionController.text.trim();
+    if (videoName.value.isEmpty) {
+      throw Exception('视频名称不能为空');
+    }
+    if (uploadFileList.isEmpty) {
+      throw Exception('请上传视频文件');
+    }
+    if (pCategoryId.value == 0) {
+      throw Exception('请选择一级分类');
+    }
+    if (uploadFileList.length > videoPcountLimit.value) {
+      throw Exception('上传的视频数量超过限制: ${videoPcountLimit.value}');
+    }
+    if (videoCover.value.isEmpty) {
+      throw Exception('视频封面不能为空');
+    }
+    var res = await ApiService.ucenterPostVideo(
+        videoId: videoId.value,
+        videoCover: videoCover.value,
+        videoName: videoName.value,
+        pCategoryId: pCategoryId.value,
+        categoryId: categoryId.value == 0 ? null : categoryId.value,
+        postType: postType.value,
+        tags: tags.join(','),
+        introduction: introduction.value,
+        interaction: interaction.value,
+        uploadFileList: uploadFileList);
+    if (res['code'] == 200) {
+    } else {
+      throw Exception('提交视频信息失败: ${res['info']}');
+    }
+  }
+}
+
+class SysSettingGetSettingController extends GetxController {
+  var registerCoinCount = 0.obs;
+  var postVideoCoinCount = 0.obs;
+  var videoSize = 0.obs;
+  var videoPcount = 0.obs;
+  var videoCount = 0.obs;
+  var commentCount = 0.obs;
+  var danmuCount = 0.obs;
+  @override
+  void onInit() {
+    super.onInit();
+    getSetting();
+  }
+
+  Future<void> getSetting() async {
+    try {
+      var res = await ApiService.sysSettingGetSetting();
+      if (res['code'] == 200) {
+        registerCoinCount.value = res['data']['registerCoinCount'] ?? 0;
+        postVideoCoinCount.value = res['data']['postVideoCoinCount'] ?? 0;
+        videoSize.value = res['data']['videoSize'] ?? 0;
+        videoPcount.value = res['data']['videoPcount'] ?? 0;
+        videoCount.value = res['data']['videoCount'] ?? 0;
+        commentCount.value = res['data']['commentCount'] ?? 0;
+        danmuCount.value = res['data']['danmuCount'] ?? 0;
+      } else {
+        throw Exception('获取系统设置失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
+}
+
+class CategoryLoadAllCategoryController extends GetxController {
+//   {
+//   "status": "success",
+//   "code": 200,
+//   "info": "请求成功",
+//   "data": [
+//     {
+//       "categoryId": 1,
+//       "categoryCode": "p1",
+//       "categoryName": "分类5",
+//       "pCategoryId": 0,
+//       "icon": "cover/202505\\\\OVCjRrfxWsBSwwmx0XMiSDr6tHcwcx.webp",
+//       "background": "213213421",
+//       "sort": 1,
+//       "children": []
+//     },
+//     {
+//       "categoryId": 37,
+//       "categoryCode": "p4",
+//       "categoryName": "分类3",
+//       "pCategoryId": 0,
+//       "icon": "2",
+//       "background": "213213421",
+//       "sort": 2,
+//       "children": [
+//         {
+//           "categoryId": 38,
+//           "categoryCode": "sss",
+//           "categoryName": "分类3-1",
+//           "pCategoryId": 37,
+//           "icon": "cover/202505\\\\OVCjRrfxWsBSwwmx0XMiSDr6tHcwcx.webp",
+//           "background": "213213421",
+//           "sort": 1,
+//           "children": []
+//         }
+//       ]
+//     }
+//   ]
+// }
+
+  var categories = <Map<String, dynamic>>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadAllCategories();
+  }
+
+  Future<void> loadAllCategories() async {
+    try {
+      var res = await ApiService.categoryLoadAllCategory();
+      if (res['code'] == 200) {
+        categories.value = List<Map<String, dynamic>>.from(res['data']);
+      } else {
+        throw Exception('加载分类失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
 }

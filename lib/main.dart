@@ -31,11 +31,10 @@ void main() async {
       await windowManager.show();
     });
   }
+  await ApiService.init(baseUrl: Constants.baseUrl);
   Get.put(ControllersInitController());
 
   Get.find<ControllersInitController>().initNeedControllers();
-  await ApiService.init(baseUrl: Constants.baseUrl);
-  Get.find<AccountController>().autoLogin();
 
   return runApp(MyApp());
 }

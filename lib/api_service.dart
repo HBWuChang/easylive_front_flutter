@@ -177,12 +177,12 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> filePreUploadVideo(
-      {required String fileName, required String chunks}) async {
+      {required String fileName, required int chunks}) async {
     return toJson(await get(
-      ApiAddr.fileGetResourcet,
+      ApiAddr.filePreUploadVideo,
       query: {
-        'sourceName': fileName,
-        'chunks': chunks,
+        'fileName': fileName,
+        'chunks': chunks.toString(),
       },
       useToken: true,
     ));
@@ -296,7 +296,8 @@ class ApiService {
               return e.toJson();
             }).toList(),
           ),
-        }));
+        },
+        useToken: true));
   }
 
   static Future<Map<String, dynamic>> ucenterLoadVideoList(
