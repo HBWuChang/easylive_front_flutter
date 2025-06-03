@@ -147,7 +147,7 @@ class AccountController extends GetxController {
       accountInfo['currentCoinCount'] = response['data']['currentCoinCount'];
       saveAccountInfoToLocal(accountInfo);
     } else {
-      Get.snackbar('获取用户信息错误', response['msg'],
+      Get.snackbar('获取用户信息错误', response['info'],
           snackPosition: SnackPosition.BOTTOM);
     }
   }
@@ -496,20 +496,25 @@ class PlatformPageSubmitController extends GetxController {
   var postType = 0.obs;
   var tags = [].obs;
   var introduction = ''.obs;
-  var interaction = ''.obs;
+  var origin_info = ''.obs;
+  // var interaction = ''.obs;
+  var interaction = [].obs;
   var isUploading = false.obs;
   var videoPcountLimit = 0.obs;
   var prePage = false.obs;
+  var disableComment = false.obs;
+  var disableDanmaku = false.obs;
+
   final tagsFocusNode = FocusNode();
   late TextEditingController videoNameController;
   late TextEditingController tagsController;
   late TextEditingController introductionController;
-  late TextEditingController interactionController;
+  late TextEditingController origin_infoController;
   PlatformPageSubmitController() {
     videoNameController = TextEditingController();
     tagsController = TextEditingController();
     introductionController = TextEditingController();
-    interactionController = TextEditingController();
+    origin_infoController = TextEditingController();
     pCategoryId.value =
         Get.find<CategoryLoadAllCategoryController>().categories.isNotEmpty
             ? Get.find<CategoryLoadAllCategoryController>().categories[0]
@@ -547,15 +552,16 @@ class PlatformPageSubmitController extends GetxController {
     getVideoPcountLimit();
   }
 
-  void getVideoPcountLimit() {
+  void getVideoPcountLimit() async {
     var settingController = Get.find<SysSettingGetSettingController>();
+    await settingController.getSetting();
     videoPcountLimit.value = settingController.videoPcount.value;
   }
 
   Future<void> submitVideoInfo() async {
     videoName.value = videoNameController.text.trim();
     introduction.value = introductionController.text.trim();
-    interaction.value = interactionController.text.trim();
+    origin_info.value = origin_infoController.text.trim();
     if (videoName.value.isEmpty) {
       throw Exception('视频名称不能为空');
     }
@@ -571,6 +577,13 @@ class PlatformPageSubmitController extends GetxController {
     if (videoCover.value.isEmpty) {
       throw Exception('视频封面不能为空');
     }
+    interaction.value = [];
+    if (disableComment.value) {
+      interaction.add('0'); // 禁用评论
+    }
+    if (disableDanmaku.value) {
+      interaction.add('1'); // 禁用弹幕
+    }
     var res = await ApiService.ucenterPostVideo(
         videoId: videoId.value,
         videoCover: videoCover.value,
@@ -580,7 +593,8 @@ class PlatformPageSubmitController extends GetxController {
         postType: postType.value,
         tags: tags.join(','),
         introduction: introduction.value,
-        interaction: interaction.value,
+        interaction: interaction.join(','),
+        origin_info: origin_info.value,
         uploadFileList: uploadFileList);
     if (res['code'] == 200) {
     } else {

@@ -20,8 +20,13 @@ class ApiService {
     await Rhttp.init();
     _client = await RhttpClient.create(
       settings: baseUrl != null
-          ? ClientSettings(baseUrl: baseUrl)
-          : const ClientSettings(),
+          ? ClientSettings(
+              baseUrl: baseUrl,
+              cookieSettings: CookieSettings(storeCookies: true),
+            )
+          : const ClientSettings(
+              cookieSettings: CookieSettings(storeCookies: true),
+            ),
     );
   }
 
@@ -276,6 +281,7 @@ class ApiService {
       required int postType,
       required String tags,
       String? introduction,
+      String? origin_info,
       String? interaction,
       required List<VideoInfoFilePost> uploadFileList}) async {
     return toJson(await post(ApiAddr.ucenterPostVideo,
@@ -290,6 +296,7 @@ class ApiService {
           'postType': postType.toString(),
           'tags': tags,
           'introduction': introduction ?? '',
+          'origin_info': origin_info ?? '',
           'interaction': interaction ?? '',
           'uploadFileList': jsonEncode(
             uploadFileList.map((e) {
@@ -893,7 +900,7 @@ class ApiService {
 
 class ApiAddr {
   static const String LoginBackGround =
-      'cover/202505\\qHVupu9Jk8YNMgg5N9ovtPnu6DXAhg.webp';
+      'cover/202506/VrTlLrAokaMhyOk8rjqMuV2VCCkltH.webp';
   static const String accountLogin = '/account/login';
   static const String accountCheckCode = '/account/checkCode';
   static const String accountRegister = '/account/register';

@@ -338,7 +338,7 @@ class _UploadImageCardState extends State<UploadImageCard> {
                             height: cropRect.height.toInt(),
                           );
                           Uint8List croppedData =
-                              Uint8List.fromList(img.encodeJpg(croppedImage));
+                              Uint8List.fromList(img.encodePng(croppedImage));
                           // 上传图片
                           var res = await ApiService.fileUploadImage(
                             file: croppedData,

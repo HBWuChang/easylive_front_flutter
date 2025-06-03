@@ -1,5 +1,5 @@
 class Constants {
-  static const String baseUrl = 'http://127.0.0.1:7071';
+  static const String baseUrl = 'http://39.105.203.95:7071';
   static const double dialogResizeRate = 0.75;
   static const double loginDialogResizeRate = 0.6;
   static const double loginDialogMinWidth = 590;
@@ -12,6 +12,8 @@ class Constants {
       "^(?![0-9]+\$)(?![a-zA-Z]+\$)[0-9A-Za-z]{6,18}\$";
   static const int errorMsgDuration = 2000; // 错误消息持续时间，单位毫秒
   static const String defaultAvatar = 'assets/images/user-avatar.png';
+  static const String DISABLE_DANMU = "1"; // 禁用弹幕
+  static const String DISABLE_COMMENT = "0"; // 禁用评论
 }
 
 class Routes {

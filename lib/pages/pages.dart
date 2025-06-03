@@ -4,8 +4,8 @@ import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
-import 'controllers-class.dart';
-import 'api_service.dart';
+import '../controllers-class.dart';
+import '../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 
 class LoginPage extends StatefulWidget {

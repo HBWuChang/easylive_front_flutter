@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:easylive/controllers-class.dart';
-import 'package:easylive/pages.dart';
+import 'package:easylive/pages/pages.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

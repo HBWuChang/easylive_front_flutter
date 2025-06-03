@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:easylive/Funcs.dart';
-import 'package:easylive/pages.dart';
-import 'package:easylive/pages2.dart';
+import 'package:easylive/pages/pages.dart';
+import 'package:easylive/pages/PlatformPage/PlatformPageSubmit.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +13,8 @@ import 'controllers-class.dart';
 import 'api_service.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';
+
+import 'pages/PlatformPage/PlatformPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
