@@ -199,8 +199,6 @@ class _HomeState extends State<Home> {
             clipBehavior: Clip.none),
 
         // 用一个简单的Get.to()即可代替Navigator.push那8行，无需上下文！
-        body: PlatformPage(),
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add), onPressed: c.increment));
+        body: PlatformPage());
   }
 }

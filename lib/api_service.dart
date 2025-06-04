@@ -296,7 +296,7 @@ class ApiService {
           'postType': postType.toString(),
           'tags': tags,
           'introduction': introduction ?? '',
-          'origin_info': origin_info ?? '',
+          'originInfo': origin_info ?? '',
           'interaction': interaction ?? '',
           'uploadFileList': jsonEncode(
             uploadFileList.map((e) {

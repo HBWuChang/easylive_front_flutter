@@ -510,6 +510,7 @@ class PlatformPageSubmitController extends GetxController {
   late TextEditingController tagsController;
   late TextEditingController introductionController;
   late TextEditingController origin_infoController;
+  late PageController pageController;
   PlatformPageSubmitController() {
     videoNameController = TextEditingController();
     tagsController = TextEditingController();
@@ -600,6 +601,50 @@ class PlatformPageSubmitController extends GetxController {
     } else {
       throw Exception('提交视频信息失败: ${res['info']}');
     }
+  }
+
+  Future<void> setVideoDataFromVideoId(String videoId) async {
+    final videoInfo = await ApiService.ucenterGetVideoByVideoId(videoId);
+    if (videoInfo['code'] == 200) {
+      var data = videoInfo['data']['videoInfo'];
+      this.videoId.value = data['videoId'] ?? '';
+      videoCover.value = data['videoCover'] ?? '';
+      videoNameController.text = data['videoName'] ?? '';
+      tagsController.text = '';
+      introductionController.text = data['introduction'] ?? '';
+      origin_infoController.text = data['originInfo'] ?? '';
+      pCategoryId.value = data['pCategoryId'] ?? 0;
+      categoryId.value = data['categoryId'] ?? 0;
+      postType.value = data['postType'] ?? 0;
+      disableComment.value = data['interaction']?.contains('0') ?? false;
+      disableDanmaku.value = data['interaction']?.contains('1') ?? false;
+      tags.value = data['tags']?.split(',') ?? [];
+      for (var uploadFile in uploadFileList) {
+        var uploadId = uploadFile.uploadId;
+        Get.delete<VideoInfoFilePostController>(tag: uploadId);
+      }
+      uploadFileList.clear();
+      if (videoInfo['data']['videoInfoFilePostList'] != null) {
+        for (var file in videoInfo['data']['videoInfoFilePostList']) {
+          var videoInfoFilePostController = VideoInfoFilePostController();
+          videoInfoFilePostController.uploadId = file['uploadId'];
+          videoInfoFilePostController
+              .creatAFinishedVideoInfoFilePost(file['fileName'] ?? '');
+          Get.put(videoInfoFilePostController, tag: file['uploadId']);
+          uploadFileList.add(VideoInfoFilePost.fromJson(file));
+        }
+      }
+    } else {
+      throw Exception('获取视频信息失败: ${videoInfo['info']}');
+    }
+  }
+  @override
+  void onClose() {
+    for (var file in uploadFileList) {
+      var uploadId = file.uploadId;
+      Get.delete<VideoInfoFilePostController>(tag: uploadId);
+    }
+    super.onClose();
   }
 }
 

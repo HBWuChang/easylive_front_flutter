@@ -119,10 +119,10 @@ Future<dynamic> showUploadImageCard(
   return res;
 }
 
-Future<dynamic> showConfirmDialog(String msg) async {
+Future<dynamic> showConfirmDialog(String msg, {String title = '提示'}) async {
   var res = await Get.dialog(
     AlertDialog(
-      title: Text('提示'),
+      title: Text(title),
       content: Text(msg),
       actions: [
         TextButton(onPressed: () => Get.back(result: false), child: Text('取消')),

@@ -25,7 +25,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
   late PlatformPageSubmitController platformPageSubmitController;
   var categoryLoadAllCategoryController =
       Get.find<CategoryLoadAllCategoryController>();
-  final PageController _pageController = PageController();
+  final PageController pageController = PageController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -45,6 +45,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
       }
     }
     platformPageSubmitController = Get.find<PlatformPageSubmitController>();
+    platformPageSubmitController.pageController = pageController;
   }
 
   void uploadFiles(List<XFile> files) async {
@@ -89,7 +90,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
         }
       }
       uploadFiles(files);
-      _pageController.jumpToPage(1);
+      pageController.jumpToPage(1);
     } catch (e) {
       Get.snackbar('错误', e.toString());
     }
@@ -130,7 +131,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
   @override
   Widget build(BuildContext context) {
     return PageView(
-      controller: _pageController,
+      controller: pageController,
       physics: NeverScrollableScrollPhysics(),
       children: [
         // 第一个页面：选择/拖放上传
@@ -145,7 +146,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                           ? SizedBox.shrink()
                           : TextButton.icon(
                               onPressed: () {
-                                _pageController.jumpToPage(1);
+                                pageController.jumpToPage(1);
                               },
                               label: Text('修改上传信息'),
                               icon: Icon(Icons.edit, size: 16),
@@ -198,7 +199,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                             '已添加 ${platformPageSubmitController.uploadFileList.length} /${platformPageSubmitController.videoPcountLimit.value} '),
                         trailing: TextButton.icon(
                             onPressed: () {
-                              _pageController.jumpToPage(0);
+                              pageController.jumpToPage(0);
                             },
                             label: Text('添加视频'),
                             icon: Icon(Icons.add_circle_outline)))),
@@ -847,7 +848,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                         await platformPageSubmitController.submitVideoInfo();
                         Get.snackbar('提示', '投稿成功，等待审核');
                         initPlatformPageSubmitController(force: true);
-                        _pageController.jumpToPage(0);
+                        pageController.jumpToPage(0);
                       } catch (e) {
                         Get.snackbar('错误', e.toString());
                         return;
@@ -861,6 +862,29 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                             fontSize: 18, fontWeight: FontWeight.bold)))),
             SizedBox(
               height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                    ),
+                    onPressed: () async {
+                      bool confirm = await showConfirmDialog('确定清除当前投稿信息吗？',title: "警告");
+                      if (!confirm) return;
+                      pageController.jumpToPage(0);
+                      initPlatformPageSubmitController(force: true);
+                    },
+                    icon: Icon(Icons.delete, size: 16, color: Colors.redAccent),
+                    label: Text('清除当前投稿信息',
+                        style:
+                            TextStyle(fontSize: 14, color: Colors.redAccent)),
+                  ),
+                ],
+              ),
             )
           ])),
         ),

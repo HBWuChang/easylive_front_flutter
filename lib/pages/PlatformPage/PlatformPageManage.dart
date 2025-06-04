@@ -1,5 +1,6 @@
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/enums.dart';
+import 'package:easylive/pages/PlatformPage/PlatformPage.dart';
 import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -486,7 +487,34 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                               trailing: SizedBox(
                                   width: 80,
                                   child: Row(children: [
+                                    index != 2
+                                        ? IconButton(
+                                            tooltip: '编辑视频',
+                                            icon: Icon(Icons.edit),
+                                            onPressed: () async {
+                                              bool confirm =
+                                                  await showConfirmDialog(
+                                                      '确认编辑此视频吗？\n此操作会覆盖当前正在投稿的视频信息');
+                                              if (confirm == true) {
+                                                try {
+                                                  var platformPageSubmitController =
+                                                      Get.find<
+                                                          PlatformPageSubmitController>();
+                                                  await platformPageSubmitController
+                                                      .setVideoDataFromVideoId(
+                                                          video['videoId']);
+                                                  platformPageJumpToPage(1);
+                                                  platformPageSubmitController
+                                                      .pageController
+                                                      .jumpToPage(1);
+                                                } catch (e) {
+                                                  showErrorSnackbar("编辑视频失败$e");
+                                                }
+                                              }
+                                            })
+                                        : SizedBox(width: 40),
                                     IconButton(
+                                        tooltip: '删除视频',
                                         icon: Icon(Icons.delete),
                                         onPressed: () async {
                                           bool confirm =
@@ -505,9 +533,6 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                             }
                                           }
                                         }),
-                                    IconButton(
-                                        icon: Icon(Icons.edit),
-                                        onPressed: () {})
                                   ])),
                             )));
                   },
