@@ -118,3 +118,17 @@ Future<dynamic> showUploadImageCard(
   );
   return res;
 }
+
+Future<dynamic> showConfirmDialog(String msg) async {
+  var res = await Get.dialog(
+    AlertDialog(
+      title: Text('提示'),
+      content: Text(msg),
+      actions: [
+        TextButton(onPressed: () => Get.back(result: false), child: Text('取消')),
+        TextButton(onPressed: () => Get.back(result: true), child: Text('确定')),
+      ],
+    ),
+  );
+  return res ?? false;
+}

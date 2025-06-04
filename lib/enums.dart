@@ -211,3 +211,33 @@ enum InteractionTypeEnum {
     return null;
   }
 }
+
+enum VideoStatusEnum {
+  STATUS0(0, "转码中"),
+  STATUS1(1, "转码失败"),
+  STATUS2(2, "待审核"),
+  STATUS3(3, "审核成功"),
+  STATUS4(4, "审核不通过");
+
+  final int status;
+  final String desc;
+
+  const VideoStatusEnum(this.status, this.desc);
+
+  static VideoStatusEnum? getByStatus(int status) {
+    for (var videoStatus in VideoStatusEnum.values) {
+      if (videoStatus.status == status) {
+        return videoStatus;
+      }
+    }
+    return null;
+  }
+}
+
+enum CropAspectRatioEnum {
+  VIDEO_COVER('cover', 16 / 9);
+
+  final String type;
+  final double ratio;
+  const CropAspectRatioEnum(this.type, this.ratio);
+}

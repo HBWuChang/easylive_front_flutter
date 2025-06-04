@@ -1,4 +1,5 @@
 import 'package:easylive/Funcs.dart';
+import 'package:easylive/enums.dart';
 import 'package:easylive/pages2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,7 +12,6 @@ import 'dart:typed_data';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:dotted_decoration/dotted_decoration.dart';
-
 
 class PlatformPageSubmit extends StatefulWidget {
   const PlatformPageSubmit({Key? key}) : super(key: key);
@@ -359,7 +359,10 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                                           : platformPageSubmitController
                                                               .videoCover.value,
                                                   cropAspectRatios: {
-                                                    'cover': 16 / 9
+                                                    CropAspectRatioEnum
+                                                            .VIDEO_COVER.type:
+                                                        CropAspectRatioEnum
+                                                            .VIDEO_COVER.ratio
                                                   },
                                                   shadow: true)) ??
                                               platformPageSubmitController
