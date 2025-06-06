@@ -23,7 +23,9 @@ class PlatformPage extends StatefulWidget {
   @override
   State<PlatformPage> createState() => _PlatformPageState();
 }
-var platformPageJumpToPage ;
+
+var platformPageJumpToPage;
+
 class _PlatformPageState extends State<PlatformPage> {
   final AccountController accountController = Get.find<AccountController>();
   final PreloadPageController _pageController = PreloadPageController();

@@ -1,10 +1,12 @@
 import 'dart:math';
 
 import 'package:easylive/Funcs.dart';
+import 'package:easylive/pages/MainPage/MainPage.dart';
 import 'package:easylive/pages/pages.dart';
 import 'package:easylive/pages/PlatformPage/PlatformPageSubmit.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,8 +24,8 @@ void main() async {
   if (GetPlatform.isWindows) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = WindowOptions(
-      size: Size(1000, 700),
-      minimumSize: Size(1000, 700),
+      size: Size(1000, 800),
+      minimumSize: Size(1000, 800),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
@@ -31,13 +33,14 @@ void main() async {
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
+      await windowManager.maximize();
     });
   }
   await ApiService.init(baseUrl: Constants.baseUrl);
   Get.put(ControllersInitController());
 
   Get.find<ControllersInitController>().initNeedControllers();
-
+  await Get.find<CategoryLoadAllCategoryController>().loadAllCategories();
   return runApp(MyApp());
 }
 
@@ -55,6 +58,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         // 你可以在这里定义路由
         GetPage(name: Routes.homePage, page: () => Home()),
+        GetPage(name: Routes.platformPage, page: () => PlatformPage()),
       ],
       supportedLocales: [
         const Locale('zh', 'CN'), // 中文简体
@@ -85,16 +89,44 @@ class _HomeState extends State<Home> {
   final AccountController accountController = Get.find<AccountController>();
   final GlobalKey _avatarKey = GlobalKey();
   OverlayEntry? _overlayInfoEntry;
+  final AppBarController appBarController = Get.find<AppBarController>();
+
+  @override
+  void initState() {
+    super.initState();
+    appBarController.scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    // 当图片完全不可见时，AppBar变为不透明
+    final threshold = appBarController.imgHeight;
+    if (appBarController.scrollController.offset >= threshold &&
+        !appBarController.appBarOpaque.value) {
+      appBarController.appBarOpaque.value = true;
+    } else if (appBarController.scrollController.offset < threshold &&
+        appBarController.appBarOpaque.value) {
+      appBarController.appBarOpaque.value = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget appBar = Obx(
+    Widget appBarContent = Obx(
       () => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
               tooltip: "${c.count}",
-              onPressed: () {},
+              onPressed: () {
+                Get.find<AppBarController>().extendBodyBehindAppBar.value =
+                        true;
+                Get.back(id: Routes.mainGetId);
+              },
               icon: Icon(
                 Icons.arrow_back_ios_new,
                 size: 13,
@@ -168,11 +200,12 @@ class _HomeState extends State<Home> {
                   },
                 ),
                 IconButton(
-                  tooltip: Texts.minimize,
-                  icon: Icon(Icons.minimize, size: 13),
+                  tooltip: '创作中心',
+                  icon: Icon(Icons.create, size: 13),
                   onPressed: () {
-                    windowManager.minimize();
-                    windowManager.setSkipTaskbar(false);
+                    Get.find<AppBarController>().extendBodyBehindAppBar.value =
+                        false;
+                    Get.toNamed(Routes.platformPage, id: Routes.mainGetId);
                   },
                 ),
                 IconButton(
@@ -191,14 +224,45 @@ class _HomeState extends State<Home> {
         ],
       ),
     );
-    return Scaffold(
-        // 使用Obx(()=>每当改变计数时，就更新Text()。
-        appBar: AppBar(
-            title:
-                GetPlatform.isDesktop ? DragToMoveArea(child: appBar) : appBar,
-            clipBehavior: Clip.none),
-
-        // 用一个简单的Get.to()即可代替Navigator.push那8行，无需上下文！
-        body: PlatformPage());
+    return Obx(() => Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: Obx(() => AppBar(
+                backgroundColor: appBarController.appBarOpaque.value
+                    ? Colors.white
+                    : Colors.transparent,
+                elevation: 0,
+                title: GetPlatform.isDesktop
+                    ? DragToMoveArea(child: appBarContent)
+                    : appBarContent,
+                toolbarHeight: kToolbarHeight,
+                automaticallyImplyLeading: false,
+                titleSpacing: 0,
+              )),
+        ),
+        extendBodyBehindAppBar: appBarController.extendBodyBehindAppBar.value,
+        body: Navigator(
+          key: Get.nestedKey(Routes.mainGetId),
+          initialRoute: '/main',
+          onGenerateRoute: (settings) {
+            if (settings.name == '/main') {
+              // 不要在build期间修改observable
+              return GetPageRoute(
+                settings: settings,
+                page: () => MainPage(),
+                transition: Transition.noTransition,
+              );
+            }
+            if (settings.name == Routes.platformPage) {
+              return GetPageRoute(
+                settings: settings,
+                page: () => PlatformPage(),
+                transition: Transition.fadeIn,
+              );
+            }
+            // 可扩展更多页面
+            return null;
+          },
+        )));
   }
 }

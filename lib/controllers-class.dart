@@ -13,12 +13,17 @@ class ControllersInitController extends GetxController {
   var isPlatformPageSubmitControllerInitialized = false.obs;
   var isSysSettingGetSettingControllerInitialized = false.obs;
   var isCategoryLoadAllCategoryControllerInitialized = false.obs;
+  var isAppBarControllerInitialized = false.obs;
+  var isWindowSizeControllerInitialized = false.obs;
   void initNeedControllers() {
     initLoginController();
     initAccountController();
     // initPlatformPageSubmitController();
     initSysSettingGetSettingController();
     initCategoryLoadAllCategoryController();
+    initAppBarController();
+    initWindowSizeController();
+    initVideoLoadRecommendVideoController();
   }
 
   void initLoginController() {
@@ -53,6 +58,25 @@ class ControllersInitController extends GetxController {
     if (!isCategoryLoadAllCategoryControllerInitialized.value) {
       Get.put(CategoryLoadAllCategoryController());
       isCategoryLoadAllCategoryControllerInitialized.value = true;
+    }
+  }
+
+  void initAppBarController() {
+    if (!isAppBarControllerInitialized.value) {
+      Get.put(AppBarController());
+      isAppBarControllerInitialized.value = true;
+    }
+  }
+
+  void initWindowSizeController() {
+    if (!isWindowSizeControllerInitialized.value) {
+      Get.put(WindowSizeController());
+      isWindowSizeControllerInitialized.value = true;
+    }
+  }
+  void initVideoLoadRecommendVideoController() {
+    if (!Get.isRegistered<VideoLoadRecommendVideoController>()) {
+      Get.put(VideoLoadRecommendVideoController());
     }
   }
 }
@@ -638,6 +662,7 @@ class PlatformPageSubmitController extends GetxController {
       throw Exception('获取视频信息失败: ${videoInfo['info']}');
     }
   }
+
   @override
   void onClose() {
     for (var file in uploadFileList) {
@@ -724,11 +749,11 @@ class CategoryLoadAllCategoryController extends GetxController {
 
   var categories = <Map<String, dynamic>>[].obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    loadAllCategories();
-  }
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //   loadAllCategories();
+  // }
 
   Future<void> loadAllCategories() async {
     try {
@@ -741,5 +766,221 @@ class CategoryLoadAllCategoryController extends GetxController {
     } catch (e) {
       showErrorSnackbar(e.toString());
     }
+  }
+}
+
+class AppBarController extends GetxController {
+  var opacity = 0.0.obs;
+  var appBarOpaque = false.obs;
+  ScrollController scrollController = ScrollController();
+  double imgHeight = 180.0;
+  var extendBodyBehindAppBar = true.obs;
+}
+
+// 新增：窗口宽度响应式控制器
+class WindowSizeController extends GetxController {
+  var width = 0.0.obs;
+  void updateWidth(double w) {
+    if (width.value != w) width.value = w;
+  }
+}
+
+class VideoLoadRecommendVideoController extends GetxController {
+  var recommendVideos = <VideoInfo>[].obs;
+  var isLoading = false.obs;
+  @override
+  void onInit() {
+    super.onInit();
+    loadRecommendVideos();
+  }
+  Future<void> loadRecommendVideos() async {
+    isLoading.value = true;
+    try {
+      var res = await ApiService.videoLoadRecommendVideo();
+      if (res['code'] == 200) {
+        recommendVideos.value = (res['data'] as List)
+            .map((item) => VideoInfo(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('加载推荐视频失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}
+
+class VideoInfo {
+// public class VideoInfo implements Serializable {
+
+// 	/**
+// 	 * 视频ID
+// 	 */
+// 	private String videoId;
+
+// 	/**
+// 	 * 视频封面
+// 	 */
+// 	private String videoCover;
+
+// 	/**
+// 	 * 视频名称
+// 	 */
+// 	private String videoName;
+
+// 	/**
+// 	 * 用户ID
+// 	 */
+// 	private String userId;
+
+// 	/**
+// 	 * 创建时间
+// 	 */
+// 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+// 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+// 	private Date createTime;
+
+// 	/**
+// 	 * 最后更新时间
+// 	 */
+// 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+// 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+// 	private Date lastUpdateTime;
+
+// 	/**
+// 	 * 父级分类ID
+// 	 */
+// 	private Integer pCategoryId;
+
+// 	/**
+// 	 * 分类ID
+// 	 */
+// 	private Integer categoryId;
+
+// 	/**
+// 	 * 0:自制作 1:转载
+// 	 */
+// 	private Integer postType;
+
+// 	/**
+// 	 * 原资源说明
+// 	 */
+// 	private String originInfo;
+
+// 	/**
+// 	 * 标签
+// 	 */
+// 	private String tags;
+
+// 	/**
+// 	 * 简介
+// 	 */
+// 	private String introduction;
+
+// 	/**
+// 	 * 互动设置
+// 	 */
+// 	private String interaction;
+
+// 	/**
+// 	 * 持续时间（秒）
+// 	 */
+// 	private Integer duration;
+
+// 	/**
+// 	 * 播放数量
+// 	 */
+// 	private Integer playCount;
+
+// 	/**
+// 	 * 点赞数量
+// 	 */
+// 	private Integer likeCount;
+
+// 	/**
+// 	 * 弹幕数量
+// 	 */
+// 	private Integer danmuCount;
+
+// 	/**
+// 	 * 评论数量
+// 	 */
+// 	private Integer commentCount;
+
+// 	/**
+// 	 * 投币数量
+// 	 */
+// 	private Integer coinCount;
+
+// 	/**
+// 	 * 收藏数量
+// 	 */
+// 	private Integer collectCount;
+
+// 	/**
+// 	 * 是否推荐0：未推荐1：已推荐
+// 	 */
+// 	private Integer recommendType;
+
+// 	/**
+// 	 * 最后播放时间
+// 	 */
+// 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+// 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+// 	private Date lastPlayTime;
+
+// 	private String nickName;
+// 	private String avatar;
+  String? videoId;
+  String? videoCover;
+  String? videoName;
+  String? userId;
+  DateTime? createTime;
+  DateTime? lastUpdateTime;
+  int? pCategoryId;
+  int? categoryId;
+  int? postType;
+  String? originInfo;
+  String? tags;
+  String? introduction;
+  String? interaction;
+  int? duration;
+  int? playCount;
+  int? likeCount;
+  int? danmuCount;
+  int? commentCount;
+  int? coinCount;
+  int? collectCount;
+  int? recommendType;
+  DateTime? lastPlayTime;
+  String? nickName;
+  String? avatar;
+  VideoInfo(Map<String, dynamic> json) {
+    videoId = json['videoId'];
+    videoCover = json['videoCover'];
+    videoName = json['videoName'];
+    userId = json['userId'];
+    createTime = DateTime.tryParse(json['createTime'] ?? '');
+    lastUpdateTime = DateTime.tryParse(json['lastUpdateTime'] ?? '');
+    pCategoryId = json['pCategoryId'];
+    categoryId = json['categoryId'];
+    postType = json['postType'];
+    originInfo = json['originInfo'];
+    tags = json['tags'];
+    introduction = json['introduction'];
+    interaction = json['interaction'];
+    duration = json['duration'];
+    playCount = json['playCount'];
+    likeCount = json['likeCount'];
+    danmuCount = json['danmuCount'];
+    commentCount = json['commentCount'];
+    coinCount = json['coinCount'];
+    collectCount = json['collectCount'];
+    recommendType = json['recommendType'];
+    lastPlayTime = DateTime.tryParse(json['lastPlayTime'] ?? '');
+    nickName = json['nickName'];
+    avatar = json['avatar'];
   }
 }

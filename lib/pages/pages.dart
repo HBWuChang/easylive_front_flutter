@@ -520,129 +520,148 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
               initialRoute: '/avatar',
               onGenerateRoute: (settings) {
                 if (settings.name == '/avatar') {
-                  return MaterialPageRoute(
-                    builder: (context) => SizedBox(
-                        width: 300,
-                        height: 400,
-                        child: Stack(
-                          children: [
-                            Positioned(
-                                top: 0,
-                                left: 134,
+                  return PageRouteBuilder(
+                    opaque: false,
+                    barrierColor: Colors.transparent,
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                      Material(
+                        color: Colors.transparent,
+                        child: SizedBox(
+                          width: 300,
+                          height: 400,
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                  top: 0,
+                                  left: 134,
+                                  child: SizedBox(
+                                      width: 32,
+                                      height: 32,
+                                      child: Hero(
+                                        createRectTween: (begin, end) =>
+                                            RectTween(begin: begin, end: end),
+                                        tag: Routes.heroTagAvatar,
+                                        child: Avatar(
+                                          avatarValue: accountController.avatar,
+                                          radius: 16,
+                                        ),
+                                      ))),
+                            ],
+                          ),
+                        ),
+                      ),
+                    settings: settings,
+                  );
+                } else if (settings.name == '/info') {
+                  double widthCard = 300;
+                  double widthInCard = widthCard - 30;
+                  return PageRouteBuilder(
+                    opaque: false,
+                    barrierColor: Colors.transparent,
+                    transitionDuration: Duration(milliseconds: 300),
+                    reverseTransitionDuration: Duration(milliseconds: 300),
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                      Material(
+                        color: Colors.transparent,
+                        child: SizedBox(
+                          width: widthCard,
+                          height: 400,
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                top: 40,
+                                left: 0,
                                 child: SizedBox(
-                                    width: 32,
-                                    height: 32,
+                                    width: widthCard,
+                                    height: 360,
+                                    child: Card(
+                                        elevation: 4,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8)),
+                                        margin: EdgeInsets.all(8),
+                                        child: SizedBox(
+                                            width: widthInCard,
+                                            height: 360,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                SizedBox(height: 50),
+                                                Text(
+                                                    accountController.nickName ??
+                                                        Texts.unLogin,
+                                                    style: TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                SizedBox(height: 8),
+                                                // 关注、粉丝、硬币
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    accountDialogNumWidget(
+                                                        Texts.focus,
+                                                        count: accountController
+                                                            .focusCount),
+                                                    accountDialogNumWidget(
+                                                        Texts.fans,
+                                                        count: accountController.fansCount),
+                                                    accountDialogNumWidget(
+                                                        Texts.coin,
+                                                        count: accountController.currentCoinCount),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 8),
+
+                                                btns(widthInCard, () async {
+                                                  showUpdateUserInfoCard();
+                                                }, Icons.edit_document,
+                                                    Texts.updateUserInfo),
+                                                Divider(
+                                                  height: 1,
+                                                  color: Colors.grey[300],
+                                                ),
+                                                btns(widthInCard, () async {
+                                                  Get.closeAllSnackbars();
+                                                  var res = await ApiService
+                                                      .accountLogout();
+                                                  if (showResSnackbar(res)) {
+                                                    accountController
+                                                        .saveAccountInfo({});
+                                                    widget.onClose();
+                                                  }
+                                                }, Icons.logout, Texts.logout),
+                                              ],
+                                            )))),
+                              ),
+                              Positioned(
+                                  top: 0,
+                                  left: 100,
+                                  child: SizedBox(
+                                    width: 100,
+                                    height: 100,
                                     child: Hero(
                                       createRectTween: (begin, end) =>
                                           RectTween(begin: begin, end: end),
                                       tag: Routes.heroTagAvatar,
                                       child: Avatar(
                                         avatarValue: accountController.avatar,
-                                        radius: 16,
+                                        radius: 60,
                                       ),
-                                    ))),
-                          ],
-                        )),
-                    settings: settings,
-                  );
-                } else if (settings.name == '/info') {
-                  double widthCard = 300;
-                  double widthInCard = widthCard - 30;
-                  return MaterialPageRoute(
-                    builder: (context) => SizedBox(
-                        width: widthCard,
-                        height: 400,
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              top: 40,
-                              left: 0,
-                              child: SizedBox(
-                                  width: widthCard,
-                                  height: 360,
-                                  child: Card(
-                                      elevation: 4,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
-                                      margin: EdgeInsets.all(8),
-                                      child: SizedBox(
-                                          width: widthInCard,
-                                          height: 360,
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              SizedBox(height: 50),
-                                              Text(
-                                                  accountController.nickName ??
-                                                      Texts.unLogin,
-                                                  style: TextStyle(
-                                                      fontSize: 20,
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                              SizedBox(height: 8),
-                                              // 关注、粉丝、硬币
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceEvenly,
-                                                children: [
-                                                  accountDialogNumWidget(
-                                                      Texts.focus,
-                                                      count: accountController
-                                                          .focusCount),
-                                                  accountDialogNumWidget(
-                                                      Texts.fans,
-                                                      count: accountController
-                                                          .fansCount),
-                                                  accountDialogNumWidget(
-                                                      Texts.coin,
-                                                      count: accountController
-                                                          .currentCoinCount),
-                                                ],
-                                              ),
-                                              SizedBox(height: 8),
-
-                                              btns(widthInCard, () async {
-                                                showUpdateUserInfoCard();
-                                              }, Icons.edit_document,
-                                                  Texts.updateUserInfo),
-                                              Divider(
-                                                height: 1,
-                                                color: Colors.grey[300],
-                                              ),
-                                              btns(widthInCard, () async {
-                                                Get.closeAllSnackbars();
-                                                var res = await ApiService
-                                                    .accountLogout();
-                                                if (showResSnackbar(res)) {
-                                                  accountController
-                                                      .saveAccountInfo({});
-                                                  widget.onClose();
-                                                }
-                                              }, Icons.logout, Texts.logout),
-                                            ],
-                                          )))),
-                            ),
-                            Positioned(
-                                top: 0,
-                                left: 100,
-                                child: SizedBox(
-                                  width: 100,
-                                  height: 100,
-                                  child: Hero(
-                                    createRectTween: (begin, end) =>
-                                        RectTween(begin: begin, end: end),
-                                    tag: Routes.heroTagAvatar,
-                                    child: Avatar(
-                                      avatarValue: accountController.avatar,
-                                      radius: 60,
                                     ),
-                                  ),
-                                )),
-                          ],
-                        )),
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ),
                     settings: settings,
                   );
                 }

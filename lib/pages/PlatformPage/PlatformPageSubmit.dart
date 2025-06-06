@@ -31,7 +31,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
   @override
   void initState() {
     super.initState();
-    initPlatformPageSubmitController();
+    initPlatformPageSubmitController(force: true);
   }
 
   initPlatformPageSubmitController({bool force = false}) {

@@ -24,6 +24,7 @@ class Routes {
   static const String heroTagLoginPageActionBtn = 'heroTagLoginPageActionBtn';
   static const String heroTagLoginPageSwitchBtn = 'heroTagLoginPageSwitchBtn';
 
+  static const int mainGetId = 1000;
   static const int accountInfoDialogStateNavId = 1001;
   static const int loginPageNavId = 1002;
   static const int platformPageNavId = 1003;
@@ -31,6 +32,7 @@ class Routes {
   static const String loginPageRegisterRouteName = '/loginPageRegister';
   static const String homePage = '/home';
   static const String loginPage = '/login';
+  static const String platformPage = '/platform';
 }
 
 class Texts {
