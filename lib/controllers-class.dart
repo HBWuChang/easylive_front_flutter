@@ -74,6 +74,7 @@ class ControllersInitController extends GetxController {
       isWindowSizeControllerInitialized.value = true;
     }
   }
+
   void initVideoLoadRecommendVideoController() {
     if (!Get.isRegistered<VideoLoadRecommendVideoController>()) {
       Get.put(VideoLoadRecommendVideoController());
@@ -171,8 +172,7 @@ class AccountController extends GetxController {
       accountInfo['currentCoinCount'] = response['data']['currentCoinCount'];
       saveAccountInfoToLocal(accountInfo);
     } else {
-      Get.snackbar('获取用户信息错误', response['info'],
-          snackPosition: SnackPosition.BOTTOM);
+      autoLogin();
     }
   }
 
@@ -791,8 +791,8 @@ class VideoLoadRecommendVideoController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadRecommendVideos();
   }
+
   Future<void> loadRecommendVideos() async {
     isLoading.value = true;
     try {
@@ -982,5 +982,202 @@ class VideoInfo {
     lastPlayTime = DateTime.tryParse(json['lastPlayTime'] ?? '');
     nickName = json['nickName'];
     avatar = json['avatar'];
+  }
+}
+
+class VideoLoadVideoPListController extends GetxController {
+  var videoPList = <VideoInfoFile>[].obs;
+  var isLoading = false.obs;
+
+  VideoLoadVideoPListController(String videoId) {
+    loadVideoPList(videoId);
+  }
+
+  Future<void> loadVideoPList(String videoId) async {
+    isLoading.value = true;
+    try {
+      var res = await ApiService.videoLoadVideoPList(videoId);
+      if (res['code'] == 200) {
+        videoPList.value = (res['data'] as List)
+            .map((item) => VideoInfoFile(item as Map<String, dynamic>))
+            .toList();
+        if (videoPList.isEmpty) {
+          throw Exception('视频分片列表为空');
+        }
+      } else {
+        throw Exception('加载视频列表失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+}
+
+class VideoInfoFile {
+  String? fileId;
+  String? userId;
+  String? videoId;
+  String? fileName;
+  int? fileIndex;
+  int? fileSize;
+  String? filePath;
+  int? duration;
+  VideoInfoFile(Map<String, dynamic> json) {
+    fileId = json['fileId'];
+    userId = json['userId'];
+    videoId = json['videoId'];
+    fileName = json['fileName'];
+    fileIndex = json['fileIndex'];
+    fileSize = json['fileSize'];
+    filePath = json['filePath'];
+    duration = json['duration'];
+  }
+}
+
+class CommentController extends GetxController {
+  var commentDataList = <VideoComment>[].obs;
+  var commentDataTotalCount = 0.obs;
+  var commentDataPageNo = 1.obs;
+  var commentDataPageTotal = 1.obs;
+  var userActionListList = <UserAction>[].obs;
+
+  var isLoading = false.obs;
+  String videoId = '';
+  bool isLoadingMore = false;
+  Future<void> loadComments(String videoId) async {
+    isLoading.value = true;
+    try {
+      var res = await ApiService.commentLoadComment(videoId: videoId);
+      if (res['code'] == 200) {
+        commentDataList.value = (res['data']['commentData']['list'] as List)
+            .map((item) => VideoComment(item as Map<String, dynamic>))
+            .toList();
+        commentDataTotalCount.value =
+            res['data']['commentData']['totalCount'] ?? 0;
+        commentDataPageNo.value = res['data']['commentData']['pageNo'] ?? 1;
+        commentDataPageTotal.value =
+            res['data']['commentData']['pageTotal'] ?? 1;
+        userActionListList.value = (res['data']['userActionList'] as List)
+            .map((item) => UserAction(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('加载评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loadMore() async {
+    if (isLoadingMore ||
+        commentDataPageNo.value >= commentDataPageTotal.value) {
+      return; // 已经在加载或没有更多数据
+    }
+    isLoadingMore = true;
+    try {
+      var res = await ApiService.commentLoadComment(
+        videoId: videoId,
+        pageNo: commentDataPageNo.value + 1,
+      );
+      if (res['code'] == 200) {
+        var newComments = (res['data']['commentData']['list'] as List)
+            .map((item) => VideoComment(item as Map<String, dynamic>))
+            .toList();
+        commentDataList.addAll(newComments);
+        commentDataTotalCount.value =
+            res['data']['commentData']['totalCount'] ?? 0;
+        commentDataPageNo.value = res['data']['commentData']['pageNo'] ?? 1;
+        commentDataPageTotal.value =
+            res['data']['commentData']['pageTotal'] ?? 1;
+        userActionListList.addAll((res['data']['userActionList'] as List)
+            .map((item) => UserAction(item as Map<String, dynamic>))
+            .toList());
+      } else {
+        throw Exception('加载更多评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      isLoadingMore = false;
+    }
+    update();
+  }
+}
+
+class VideoComment {
+  int? commentId;
+  int? pCommentId;
+  String? videoId;
+  String? videoUserId;
+  String? content;
+  String? imgPath;
+  String? userId;
+  String? replyUserId;
+  int? topType;
+  DateTime? postTime;
+  int? likeCount;
+  int? hateCount;
+  String? avatar;
+  String? nickName;
+  String? replyAvatar;
+  String? replyNickName;
+  List<VideoComment> children = [];
+  String? videoCover;
+  String? videoName;
+
+  VideoComment(Map<String, dynamic> json) {
+    commentId = json['commentId'];
+    pCommentId = json['pCommentId'];
+    videoId = json['videoId'];
+    videoUserId = json['videoUserId'];
+    content = json['content'];
+    imgPath = json['imgPath'];
+    userId = json['userId'];
+    replyUserId = json['replyUserId'];
+    topType = json['topType'];
+    postTime = DateTime.tryParse(json['postTime'] ?? '');
+    likeCount = json['likeCount'];
+    hateCount = json['hateCount'];
+    avatar = json['avatar'];
+    nickName = json['nickName'];
+    replyAvatar = json['replyAvatar'];
+    replyNickName = json['replyNickName'];
+    if (json['children'] != null) {
+      children =
+          (json['children'] as List).map((item) => VideoComment(item)).toList();
+    }
+    videoCover = json['videoCover'];
+    videoName = json['videoName'];
+  }
+}
+
+class UserAction {
+  int? actionId;
+  String? videoId;
+  String? videoUserId;
+  int? commentId;
+  int? actionType; // 0:评论喜欢点赞, 1:讨厌评论, 2:视频点赞, 3:视频收藏, 4:视频投币
+  int? actionCount;
+  String? userId;
+  DateTime? actionTime;
+  String? videoCover;
+  String? videoName;
+
+  UserAction(Map<String, dynamic> json) {
+    actionId = json['actionId'];
+    videoId = json['videoId'];
+    videoUserId = json['videoUserId'];
+    commentId = json['commentId'];
+    actionType = json['actionType'];
+    actionCount = json['actionCount'];
+    userId = json['userId'];
+    actionTime = DateTime.tryParse(json['actionTime'] ?? '');
+    videoCover = json['videoCover'];
+    videoName = json['videoName'];
   }
 }

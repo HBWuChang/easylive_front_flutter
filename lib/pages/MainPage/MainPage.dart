@@ -14,6 +14,7 @@ import 'dart:typed_data';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:dotted_decoration/dotted_decoration.dart';
+import 'dart:ui' as ui;
 
 class MainPage extends StatelessWidget {
   MainPage({Key? key}) : super(key: key);
@@ -22,7 +23,8 @@ class MainPage extends StatelessWidget {
       Get.find<CategoryLoadAllCategoryController>();
   final CategoryViewStateController categoryViewStateController =
       Get.put(CategoryViewStateController());
-  final VideoLoadRecommendVideoController videoLoadRecommendVideoController = Get.find<VideoLoadRecommendVideoController>();
+  final VideoLoadRecommendVideoController videoLoadRecommendVideoController =
+      Get.find<VideoLoadRecommendVideoController>();
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -105,13 +107,16 @@ class MainPage extends StatelessWidget {
               builder: (videoController) {
                 final List<VideoInfo> videos = videoController.recommendVideos;
                 final List<VideoInfo> carouselVideos = videos.take(5).toList();
-                final List<VideoInfo> recommendVideos = videos.skip(5).take(6).toList();
+                final List<VideoInfo> recommendVideos =
+                    videos.skip(5).take(6).toList();
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       // 设定整体宽高比，例如 16:5
-                      double aspectRatio = CropAspectRatioEnum.VIDEO_COVER.ratio;
+                      double aspectRatio =
+                          AspectRatioEnum.MainPageRecommendVideoArea.ratio;
                       double width = constraints.maxWidth;
                       double height = width / aspectRatio;
                       return SizedBox(
@@ -125,11 +130,13 @@ class MainPage extends StatelessWidget {
                               // 左侧轮播区
                               Expanded(
                                 flex: 2,
-                                child: SizedBox(
-                                  height: double.infinity,
+                                child: AspectRatio(
+                                  aspectRatio: AspectRatioEnum
+                                      .MainPageRecommendVideoLeft.ratio,
                                   child: carouselVideos.isEmpty
                                       ? Center(child: Text('暂无推荐'))
-                                      : CarouselVideoWidget(videos: carouselVideos),
+                                      : CarouselVideoWidget(
+                                          videos: carouselVideos),
                                 ),
                               ),
                               SizedBox(width: 16),
@@ -139,17 +146,22 @@ class MainPage extends StatelessWidget {
                                 child: SizedBox(
                                   height: double.infinity,
                                   child: GridView.builder(
+                                    padding: EdgeInsets.zero, // 保证顶部无额外间距
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 3,
                                       mainAxisSpacing: 12,
                                       crossAxisSpacing: 12,
-                                      childAspectRatio: 16 / 11,
+                                      childAspectRatio: AspectRatioEnum
+                                          .MainPageRecommendVideoRightchild
+                                          .ratio,
                                     ),
                                     itemCount: recommendVideos.length,
                                     itemBuilder: (context, idx) {
-                                      return VideoInfoWidget(video: recommendVideos[idx]);
+                                      return VideoInfoWidget(
+                                          video: recommendVideos[idx]);
                                     },
                                   ),
                                 ),
@@ -206,8 +218,6 @@ class CategoryViewStateController extends GetxController {
   var selectedCategoryName = ''.obs;
 }
 
-
-
 // 新增：分区按钮Wrap及弹窗组件
 class _CategoryWrap extends StatelessWidget {
   final List categories;
@@ -222,7 +232,8 @@ class _CategoryWrap extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    final WindowSizeController windowSizeController = Get.find<WindowSizeController>();
+    final WindowSizeController windowSizeController =
+        Get.find<WindowSizeController>();
     // 监听窗口宽度变化
     WidgetsBinding.instance.addPostFrameCallback((_) {
       windowSizeController.updateWidth(MediaQuery.of(context).size.width);
@@ -242,7 +253,8 @@ class _CategoryWrap extends StatelessWidget {
           runSpacing: 4,
           children: List.generate(displayCats.length, (index) {
             final cat = displayCats[index];
-            final hasChildren = cat['children'] != null && (cat['children'] as List).isNotEmpty;
+            final hasChildren =
+                cat['children'] != null && (cat['children'] as List).isNotEmpty;
             return _CategoryButton(
               cat: cat,
               hasChildren: hasChildren,
@@ -450,16 +462,30 @@ class VideoInfoWidget extends StatelessWidget {
       children: [
         Stack(
           children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: video.videoCover != null && video.videoCover!.isNotEmpty
-                    ? ExtendedImage.network(
-                        Constants.baseUrl + ApiAddr.fileGetResourcet + video.videoCover!,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(color: Colors.grey[200]),
+            GestureDetector(
+              onTap: () {
+                final videoId = video.videoId;
+                if (videoId != null) {
+                  Get.find<AppBarController>().extendBodyBehindAppBar.value =
+                      false;
+                  Get.toNamed('${Routes.videoPlayPage}?videoId=$videoId',
+                      id: Routes.mainGetId);
+                }
+              },
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child:
+                      video.videoCover != null && video.videoCover!.isNotEmpty
+                          ? ExtendedImage.network(
+                              Constants.baseUrl +
+                                  ApiAddr.fileGetResourcet +
+                                  video.videoCover!,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(color: Colors.grey[200]),
+                ),
               ),
             ),
             Positioned(
@@ -469,7 +495,8 @@ class VideoInfoWidget extends StatelessWidget {
               child: Container(
                 height: 38,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+                  borderRadius:
+                      BorderRadius.vertical(bottom: Radius.circular(8)),
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -487,14 +514,20 @@ class VideoInfoWidget extends StatelessWidget {
                   SizedBox(width: 2),
                   Text(
                     (video.playCount ?? 0).toString(),
-                    style: TextStyle(color: Colors.white, fontSize: 13, shadows: [Shadow(color: Colors.black, blurRadius: 2)]),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        shadows: [Shadow(color: Colors.black, blurRadius: 2)]),
                   ),
                   SizedBox(width: 10),
-                  Icon(Icons.forum, color: Colors.white, size: 16),
+                  Icon(Icons.subtitles, color: Colors.white, size: 16),
                   SizedBox(width: 2),
                   Text(
                     (video.danmuCount ?? 0).toString(),
-                    style: TextStyle(color: Colors.white, fontSize: 13, shadows: [Shadow(color: Colors.black, blurRadius: 2)]),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        shadows: [Shadow(color: Colors.black, blurRadius: 2)]),
                   ),
                 ],
               ),
@@ -504,7 +537,7 @@ class VideoInfoWidget extends StatelessWidget {
         SizedBox(height: 6),
         Text(
           video.videoName ?? '',
-          maxLines: 2,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
@@ -513,7 +546,8 @@ class VideoInfoWidget extends StatelessWidget {
           children: [
             Icon(Icons.person, size: 14, color: Colors.grey),
             SizedBox(width: 3),
-            Text(video.nickName ?? '', style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+            Text(video.nickName ?? '',
+                style: TextStyle(fontSize: 13, color: Colors.grey[700])),
             SizedBox(width: 10),
             Icon(Icons.access_time, size: 14, color: Colors.grey),
             SizedBox(width: 3),
@@ -664,6 +698,7 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
   int _currentPage = 0;
   Timer? _timer;
   bool _hovering = false;
+  final Map<int, Color> _avgColorCache = {};
 
   @override
   void initState() {
@@ -676,7 +711,9 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
     _timer?.cancel();
     _timer = Timer.periodic(Duration(seconds: 3), (_) {
       if (!_hovering && widget.videos.length > 1) {
-        _currentPage = (_currentPage + 1) % widget.videos.length;
+        setState(() {
+          _currentPage = (_currentPage + 1) % widget.videos.length;
+        });
         _pageController.animateToPage(
           _currentPage,
           duration: Duration(milliseconds: 400),
@@ -714,14 +751,233 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
         controller: _pageController,
         itemCount: widget.videos.length,
         onPageChanged: (idx) {
-          _currentPage = idx;
+          setState(() {
+            _currentPage = idx;
+          });
         },
         itemBuilder: (context, idx) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: VideoInfoWidget(video: widget.videos[idx]),
+          final video = widget.videos[idx];
+          return Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child:
+                      video.videoCover != null && video.videoCover!.isNotEmpty
+                          ? ExtendedImage.network(
+                              Constants.baseUrl +
+                                  ApiAddr.fileGetResourcet +
+                                  video.videoCover!,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(color: Colors.grey[200]),
+                ),
+              ),
+              // 阴影与内容区域
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0, // 向下延伸到图片外
+                child: FutureBuilder<Color>(
+                  future: _getBottomAverageColor(idx),
+                  builder: (context, snapshot) {
+                    final avgColor =
+                        snapshot.data ?? Colors.black.withOpacity(0.55);
+                    return _buildShadowBar(context, video, idx, avgColor);
+                  },
+                ),
+              ),
+            ],
           );
         },
+      ),
+    );
+  }
+
+  // 新增：底部均值色提取
+  Future<Color> _getBottomAverageColor(int idx) async {
+    if (_avgColorCache.containsKey(idx)) return _avgColorCache[idx]!;
+    final video = widget.videos[idx];
+    if (video.videoCover == null || video.videoCover!.isEmpty) {
+      _avgColorCache[idx] = Colors.black.withOpacity(0.55);
+      return _avgColorCache[idx]!;
+    }
+    final imageProvider = ExtendedNetworkImageProvider(
+      Constants.baseUrl + ApiAddr.fileGetResourcet + video.videoCover!,
+    );
+    final Completer<ui.Image> completer = Completer();
+    final stream = imageProvider.resolve(ImageConfiguration());
+    late ImageStreamListener listener;
+    listener = ImageStreamListener((ImageInfo info, bool _) {
+      completer.complete(info.image);
+      stream.removeListener(listener);
+    }, onError: (dynamic _, __) {
+      completer.completeError('error');
+      stream.removeListener(listener);
+    });
+    stream.addListener(listener);
+    try {
+      final ui.Image img = await completer.future;
+      final int width = img.width;
+      final int height = img.height;
+      final int bottomH = (height * 0.15).toInt();
+      final ByteData? data =
+          await img.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (data == null) throw Exception('no data');
+      int r = 0, g = 0, b = 0, count = 0;
+      for (int y = height - bottomH; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          int i = (y * width + x) * 4;
+          r += data.getUint8(i);
+          g += data.getUint8(i + 1);
+          b += data.getUint8(i + 2);
+          count++;
+        }
+      }
+      final avg = Color.fromARGB(255, r ~/ count, g ~/ count, b ~/ count);
+      _avgColorCache[idx] = avg.withOpacity(0.7);
+      return _avgColorCache[idx]!;
+    } catch (e) {
+      _avgColorCache[idx] = Colors.black.withOpacity(0.55);
+      return _avgColorCache[idx]!;
+    }
+  }
+
+  // 修改：_buildShadowBar 增加 avgColor 参数
+  Widget _buildShadowBar(
+      BuildContext context, VideoInfo video, int idx, Color shadowColor) {
+    // 计算图片高度，保证阴影高度和渐变区域成比例缩放
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    final double imageHeight = box?.size.width ?? 260; // 兜底值
+    final double shadowHeight = imageHeight * 0.24; // 阴影高度为图片高度的28%
+    final double borderRadius = imageHeight * 0.08; // 圆角为图片高度的8%
+    // 渐变区域占阴影高度的比例
+    final double gradStop1 = 0.0;
+    final double gradStop2 = 0.65;
+    final double gradStop3 = 0.78;
+    final double gradStop4 = 1.0;
+    return Container(
+      height: shadowHeight,
+      decoration: BoxDecoration(
+        borderRadius:
+            BorderRadius.vertical(bottom: Radius.circular(borderRadius)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.transparent, // 图片区域上方完全透明
+            shadowColor, // 图片底部渐变到均值色
+            shadowColor, // 图片下方完全不透明
+            shadowColor, // 下方延伸区域完全不透明
+          ],
+          stops: [gradStop1, gradStop2, gradStop3, gradStop4],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: shadowColor,
+            blurRadius: 64 * (shadowHeight / 130), // 阴影模糊度也随比例缩放
+            spreadRadius: 0,
+            offset: Offset(0, 16 * (shadowHeight / 130)),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // 左上标题
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, top: 12, bottom: 16),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  video.videoName ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // 圆点指示器
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(widget.videos.length, (dotIdx) {
+                final bool isActive = dotIdx == _currentPage;
+                return GestureDetector(
+                  onTap: () {
+                    _pageController.animateToPage(
+                      dotIdx,
+                      duration: Duration(milliseconds: 400),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 200),
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    width: isActive ? 16 : 8,
+                    height: isActive ? 16 : 8,
+                    decoration: BoxDecoration(
+                      color: isActive ? Colors.white : Colors.white54,
+                      shape: BoxShape.circle,
+                      boxShadow: isActive
+                          ? [BoxShadow(color: Colors.black26, blurRadius: 4)]
+                          : [],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+          // 右侧箭头按钮
+          Padding(
+            padding: const EdgeInsets.only(right: 12, bottom: 12),
+            child: Row(
+              children: [
+                _buildArrowButton(context, false),
+                SizedBox(width: 8),
+                _buildArrowButton(context, true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 新增方法：构建底部阴影与内容
+  Widget _buildArrowButton(BuildContext context, bool isRight) {
+    return GestureDetector(
+      onTap: () {
+        int next = isRight ? _currentPage + 1 : _currentPage - 1;
+        if (next >= 0 && next < widget.videos.length) {
+          _pageController.animateToPage(
+            next,
+            duration: Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        }
+      },
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: Colors.black54,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Icon(
+          isRight ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+          color: Colors.white,
+          size: 16,
+        ),
       ),
     );
   }

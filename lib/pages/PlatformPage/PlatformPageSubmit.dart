@@ -360,9 +360,9 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                                           : platformPageSubmitController
                                                               .videoCover.value,
                                                   cropAspectRatios: {
-                                                    CropAspectRatioEnum
+                                                    AspectRatioEnum
                                                             .VIDEO_COVER.type:
-                                                        CropAspectRatioEnum
+                                                        AspectRatioEnum
                                                             .VIDEO_COVER.ratio
                                                   },
                                                   shadow: true)) ??

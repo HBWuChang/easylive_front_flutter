@@ -257,7 +257,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                               subtitle: Row(children: [
                                 SizedBox(
                                     width: 120 *
-                                        CropAspectRatioEnum.VIDEO_COVER.ratio,
+                                        AspectRatioEnum.VIDEO_COVER.ratio,
                                     height: 120,
                                     child: Card(
                                         clipBehavior: Clip.hardEdge,

@@ -132,3 +132,15 @@ Future<dynamic> showConfirmDialog(String msg, {String title = '提示'}) async {
   );
   return res ?? false;
 }
+Map<String, String>? toParameters(String name) {
+  name=name.substring(name.indexOf('?') + 1);
+  Map<String, String> parameters = {};
+  List<String> pairs = name.split('&');
+  for (String pair in pairs) {
+    List<String> keyValue = pair.split('=');
+    if (keyValue.length == 2) {
+      parameters[keyValue[0]] = keyValue[1];
+    }
+  }
+  return parameters.isNotEmpty ? parameters : null;
+}

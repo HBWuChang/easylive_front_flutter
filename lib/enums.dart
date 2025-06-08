@@ -234,10 +234,14 @@ enum VideoStatusEnum {
   }
 }
 
-enum CropAspectRatioEnum {
-  VIDEO_COVER('cover', 16 / 9);
+enum AspectRatioEnum {
+  VIDEO_COVER('cover', 16 / 9),
+  VIDEO_PLAY_AREA('VIDEO_PLAY_AREA', 20 / 9),
+  MainPageRecommendVideoArea('MainPageRecommendVideoArea', 1478 / 493),
+  MainPageRecommendVideoLeft('MainPageRecommendVideoLeft', 579 / 385),
+  MainPageRecommendVideoRightchild('MainPageRecommendVideoRightchild', 277 / 212);
 
   final String type;
   final double ratio;
-  const CropAspectRatioEnum(this.type, this.ratio);
+  const AspectRatioEnum(this.type, this.ratio);
 }

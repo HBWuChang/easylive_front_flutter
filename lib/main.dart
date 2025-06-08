@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/pages/MainPage/MainPage.dart';
+import 'package:easylive/pages/VideoPlayPage/VideoPlayPage.dart';
 import 'package:easylive/pages/pages.dart';
 import 'package:easylive/pages/PlatformPage/PlatformPageSubmit.dart';
 import 'package:easylive/settings.dart';
@@ -18,14 +19,17 @@ import 'dart:io';
 
 import 'pages/PlatformPage/PlatformPage.dart';
 
+import 'package:media_kit/media_kit.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   // 确保在使用Get之前初始化SharedPreferences
   if (GetPlatform.isWindows) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = WindowOptions(
-      size: Size(1000, 800),
-      minimumSize: Size(1000, 800),
+      size: Size(1312, 800),
+      minimumSize: Size(1312, 800),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
@@ -41,6 +45,7 @@ void main() async {
 
   Get.find<ControllersInitController>().initNeedControllers();
   await Get.find<CategoryLoadAllCategoryController>().loadAllCategories();
+  await Get.find<VideoLoadRecommendVideoController>().loadRecommendVideos();
   return runApp(MyApp());
 }
 
@@ -124,7 +129,7 @@ class _HomeState extends State<Home> {
               tooltip: "${c.count}",
               onPressed: () {
                 Get.find<AppBarController>().extendBodyBehindAppBar.value =
-                        true;
+                    true;
                 Get.back(id: Routes.mainGetId);
               },
               icon: Icon(
@@ -257,6 +262,14 @@ class _HomeState extends State<Home> {
               return GetPageRoute(
                 settings: settings,
                 page: () => PlatformPage(),
+                transition: Transition.fadeIn,
+              );
+            }
+            if (settings.name!.startsWith(Routes.videoPlayPage)) {
+              return GetPageRoute(
+                settings: settings,
+                routeName: settings.name,
+                page: () => VideoPlayPage(),
                 transition: Transition.fadeIn,
               );
             }
