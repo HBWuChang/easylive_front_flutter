@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:easylive/controllers-class2.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -985,6 +986,30 @@ class VideoInfo {
   }
 }
 
+class VideoGetVideoInfoController extends GetxController {
+  var videoInfo = VideoInfo({}).obs;
+  var isLoading = false.obs;
+  var userActionList = <UserAction>[].obs;
+  Future<void> loadVideoInfo(String videoId) async {
+    isLoading.value = true;
+    try {
+      var res = await ApiService.videoGetVideoInfo(videoId);
+      if (res['code'] == 200) {
+        videoInfo.value = VideoInfo(res['data']['videoInfo']);
+        userActionList.value = (res['data']['userActionList'] as List)
+            .map((item) => UserAction(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('加载视频信息失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}
+
 class VideoLoadVideoPListController extends GetxController {
   var videoPList = <VideoInfoFile>[].obs;
   var isLoading = false.obs;
@@ -1042,7 +1067,7 @@ class CommentController extends GetxController {
   var commentDataTotalCount = 0.obs;
   var commentDataPageNo = 1.obs;
   var commentDataPageTotal = 1.obs;
-  var userActionListList = <UserAction>[].obs;
+  var userActionList = <UserAction>[].obs;
 
   var isLoading = false.obs;
   String videoId = '';
@@ -1060,7 +1085,7 @@ class CommentController extends GetxController {
         commentDataPageNo.value = res['data']['commentData']['pageNo'] ?? 1;
         commentDataPageTotal.value =
             res['data']['commentData']['pageTotal'] ?? 1;
-        userActionListList.value = (res['data']['userActionList'] as List)
+        userActionList.value = (res['data']['userActionList'] as List)
             .map((item) => UserAction(item as Map<String, dynamic>))
             .toList();
       } else {
@@ -1094,7 +1119,7 @@ class CommentController extends GetxController {
         commentDataPageNo.value = res['data']['commentData']['pageNo'] ?? 1;
         commentDataPageTotal.value =
             res['data']['commentData']['pageTotal'] ?? 1;
-        userActionListList.addAll((res['data']['userActionList'] as List)
+        userActionList.addAll((res['data']['userActionList'] as List)
             .map((item) => UserAction(item as Map<String, dynamic>))
             .toList());
       } else {
@@ -1179,5 +1204,22 @@ class UserAction {
     actionTime = DateTime.tryParse(json['actionTime'] ?? '');
     videoCover = json['videoCover'];
     videoName = json['videoName'];
+  }
+}
+
+class UhomeGetUserInfoController extends GetxController {
+  var userInfo = UserInfo({}).obs;
+
+  Future<void> getUserInfo(String userId) async {
+    try {
+      var res = await ApiService.uhomeGetUserInfo(userId);
+      if (res['code'] == 200) {
+        userInfo.value = UserInfo(res['data']);
+      } else {
+        throw Exception(res['info']);
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
   }
 }

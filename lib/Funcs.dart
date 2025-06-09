@@ -81,6 +81,21 @@ void showErrorSnackbar(String msg) {
   );
 }
 
+String toShowNumText(int showCount) {
+  String showText;
+  if (showCount >= 1000000) {
+    showText = (showCount / 1000000)
+            .toStringAsFixed(showCount % 1000000 == 0 ? 0 : 1) +
+        'M';
+  } else if (showCount >= 1000) {
+    showText =
+        (showCount / 1000).toStringAsFixed(showCount % 1000 == 0 ? 0 : 1) + 'K';
+  } else {
+    showText = showCount.toString();
+  }
+  return showText;
+}
+
 void showUpdateUserInfoCard() async {
   await Get.dialog(
     Center(
@@ -132,8 +147,9 @@ Future<dynamic> showConfirmDialog(String msg, {String title = '提示'}) async {
   );
   return res ?? false;
 }
+
 Map<String, String>? toParameters(String name) {
-  name=name.substring(name.indexOf('?') + 1);
+  name = name.substring(name.indexOf('?') + 1);
   Map<String, String> parameters = {};
   List<String> pairs = name.split('&');
   for (String pair in pairs) {

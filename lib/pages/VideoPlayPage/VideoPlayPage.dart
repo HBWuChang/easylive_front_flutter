@@ -1,8 +1,9 @@
 import 'dart:async';
+import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/enums.dart';
-import 'package:easylive/pages2.dart';
 import 'package:easylive/settings.dart';
+import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers-class.dart';
@@ -17,6 +18,8 @@ import 'package:dotted_decoration/dotted_decoration.dart';
 import 'dart:ui' as ui;
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class VideoPlayPage extends StatelessWidget {
   const VideoPlayPage({Key? key}) : super(key: key);
@@ -26,8 +29,29 @@ class VideoPlayPage extends StatelessWidget {
     final routeName = ModalRoute.of(context)?.settings.name;
     print('当前路由名称: $routeName');
     final videoId = toParameters(routeName!)?['videoId'];
+    // put 前判断是否已存在对应 tag 的 controller，若存在则不再 put
+    CommentController commentController;
+    if (Get.isRegistered<CommentController>(
+        tag: '${videoId!}CommentController')) {
+      commentController =
+          Get.find<CommentController>(tag: '${videoId}CommentController');
+    } else {
+      commentController =
+          Get.put(CommentController(), tag: '${videoId}CommentController');
+    }
+    VideoGetVideoInfoController videoGetVideoInfoController;
+    if (Get.isRegistered<VideoGetVideoInfoController>(
+        tag: '${videoId}VideoGetVideoInfoController')) {
+      videoGetVideoInfoController = Get.find<VideoGetVideoInfoController>(
+          tag: '${videoId}VideoGetVideoInfoController');
+    } else {
+      videoGetVideoInfoController = Get.put(VideoGetVideoInfoController(),
+          tag: '${videoId}VideoGetVideoInfoController');
+    }
+    videoGetVideoInfoController.loadVideoInfo(videoId);
+    commentController.loadComments(videoId);
     return GetBuilder(
-        init: VideoLoadVideoPListController(videoId!),
+        init: VideoLoadVideoPListController(videoId),
         builder: (controller) {
           if (controller.isLoading.value) {
             return CircularProgressIndicator();
@@ -52,8 +76,7 @@ class VideoPlayPage extends StatelessWidget {
                     final RxInt nowTabIndex = 0.obs;
                     final pageController =
                         PreloadPageController(initialPage: 0);
-                    CommentController commentController = CommentController();
-                    commentController.loadComments(videoId);
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -213,9 +236,11 @@ class VideoPlayPage extends StatelessWidget {
                             },
                             itemBuilder: (context, tabIndex) {
                               if (tabIndex == 0) {
-                                return VideoPlayPageInfo(fileId: fileId);
+                                return VideoPlayPageInfo(
+                                  videoId: videoId,
+                                );
                               } else {
-                                return VideoPlayPageComments(fileId: fileId);
+                                return VideoPlayPageComments(videoId: videoId);
                               }
                             },
                           ),
@@ -274,51 +299,287 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 }
 
 class VideoPlayPageInfo extends StatelessWidget {
-  final String fileId;
-  const VideoPlayPageInfo({required this.fileId, Key? key}) : super(key: key);
-
+  final String videoId;
+  final RxBool expandInfo = false.obs; // 是否展开更多信息
+  VideoPlayPageInfo({required this.videoId, super.key});
   @override
   Widget build(BuildContext context) {
-    return GetBuilder(
-        init: VideoLoadVideoPListController(fileId),
-        builder: (controller) {
-          if (controller.isLoading.value) {
-            return CircularProgressIndicator();
-          } else {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(controller.videoPList[0].fileName ?? '',
-                    style: TextStyle(fontSize: 20)),
-                // 可扩展更多分P信息
-              ],
-            );
-          }
-        });
+    final infoColor1 = Theme.of(context).colorScheme.secondary;
+    final infoColor2 = Theme.of(context).colorScheme.tertiary;
+    // 直接使用已在 VideoPlayPage put 的 controller
+    return GetBuilder<VideoGetVideoInfoController>(
+        tag: '${videoId}VideoGetVideoInfoController',
+        builder: (videoGetVideoInfoController) => Obx(() {
+              if (videoGetVideoInfoController.isLoading.value) {
+                return CircularProgressIndicator();
+              } else {
+                UhomeGetUserInfoController uhomeGetUserInfoController =
+                    UhomeGetUserInfoController();
+                uhomeGetUserInfoController.getUserInfo(
+                    videoGetVideoInfoController.videoInfo.value.userId ?? '');
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SizedBox(
+                          height: 54,
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                  width: 54,
+                                  child: Avatar(
+                                      avatarValue: videoGetVideoInfoController
+                                              .videoInfo.value.avatar ??
+                                          '',
+                                      radius: 27)),
+                              SizedBox(
+                                  width: 300,
+                                  child: ListTile(
+                                    title: Text(
+                                      videoGetVideoInfoController
+                                              .videoInfo.value.nickName ??
+                                          '',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    subtitle: Obx(() => Text(
+                                          '${toShowNumText(uhomeGetUserInfoController.userInfo.value.fansCount ?? 0)}粉丝·${toShowNumText(uhomeGetUserInfoController.userInfo.value.likeCount ?? 0)}点赞',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        )),
+                                    trailing: Obx(() => ElevatedButton(
+                                          onPressed: () async {
+                                            if (uhomeGetUserInfoController
+                                                .userInfo.value.haveFocus) {
+                                              // 取消关注
+                                              var res = await ApiService
+                                                  .uhomeCancelFocus(
+                                                      videoGetVideoInfoController
+                                                          .videoInfo
+                                                          .value
+                                                          .userId!);
+                                              showResSnackbar(res);
+                                            } else {
+                                              // 关注
+                                              var res =
+                                                  await ApiService.uhomeFocus(
+                                                      videoGetVideoInfoController
+                                                          .videoInfo
+                                                          .value
+                                                          .userId!);
+                                              showResSnackbar(res);
+                                            }
+                                            uhomeGetUserInfoController
+                                                .getUserInfo(
+                                                    videoGetVideoInfoController
+                                                            .videoInfo
+                                                            .value
+                                                            .userId ??
+                                                        '');
+                                          },
+                                          child: Text(
+                                            uhomeGetUserInfoController
+                                                    .userInfo.value.haveFocus
+                                                ? '已关注'
+                                                : '关注',
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            backgroundColor:
+                                                uhomeGetUserInfoController
+                                                        .userInfo
+                                                        .value
+                                                        .haveFocus
+                                                    ? Colors.grey[200]
+                                                    : null,
+                                            foregroundColor:
+                                                uhomeGetUserInfoController
+                                                        .userInfo
+                                                        .value
+                                                        .haveFocus
+                                                    ? Colors.black87
+                                                    : null,
+                                            elevation:
+                                                uhomeGetUserInfoController
+                                                        .userInfo
+                                                        .value
+                                                        .haveFocus
+                                                    ? 0
+                                                    : 2,
+                                          ),
+                                        )),
+                                  )),
+                            ],
+                          )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: ListTile(
+                        title: Obx(() => Text(
+                              videoGetVideoInfoController
+                                      .videoInfo.value.videoName ??
+                                  '',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                              maxLines: expandInfo.value ? null : 1,
+                              overflow: expandInfo.value
+                                  ? TextOverflow.visible
+                                  : TextOverflow.ellipsis,
+                            )),
+                        subtitle: Obx(() => Column(children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.play_arrow_rounded,
+                                    color: infoColor1,
+                                    size: 14,
+                                  ),
+                                  Text(
+                                    ' ${toShowNumText(videoGetVideoInfoController.videoInfo.value.playCount ?? 0)}',
+                                    style: TextStyle(
+                                        fontSize: 12, color: infoColor1),
+                                  ),
+                                  SizedBox(width: 16),
+                                  Icon(
+                                    Icons.subtitles,
+                                    color: infoColor1,
+                                    size: 14,
+                                  ),
+                                  Text(
+                                    ' ${toShowNumText(videoGetVideoInfoController.videoInfo.value.danmuCount ?? 0)}',
+                                    style: TextStyle(
+                                        fontSize: 12, color: infoColor1),
+                                  ),
+                                  SizedBox(width: 16),
+                                  // 创建时间
+                                  Icon(
+                                    Icons.calendar_today,
+                                    color: infoColor1,
+                                    size: 14,
+                                  ),
+                                  Text(
+                                    '${(videoGetVideoInfoController.videoInfo.value.createTime ?? '')}'
+                                        .substring(0, 19),
+                                    style: TextStyle(
+                                        fontSize: 12, color: infoColor1),
+                                  ),
+                                ],
+                              ),
+                              if (expandInfo.value)
+                                Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      videoGetVideoInfoController
+                                              .videoInfo.value.videoId ??
+                                          '',
+                                      style: TextStyle(
+                                          fontSize: 12, color: infoColor1),
+                                    )),
+                              if (expandInfo.value) SizedBox(height: 6),
+                              if (expandInfo.value)
+                                Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: _buildIntroductionText(
+                                      videoGetVideoInfoController
+                                              .videoInfo.value.introduction ??
+                                          '',
+                                      infoColor2,
+                                    )),
+                            ])),
+                        trailing: Obx(
+                          () => TextButton.icon(
+                            iconAlignment: IconAlignment.end,
+                            onPressed: () {
+                              expandInfo.value = !expandInfo.value;
+                            },
+                            label: Text(
+                              expandInfo.value ? '收起' : '展开',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            icon: AnimatedRotation(
+                              turns: expandInfo.value ? 0.5 : 0.0, // 0.5圈=180度
+                              duration: Duration(milliseconds: 200),
+                              child: Icon(
+                                Icons.expand_more,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    // 可扩展更多分P信息
+                  ],
+                );
+              }
+            }));
+  }
+
+  Widget _buildIntroductionText(String text, Color color) {
+    final urlReg = RegExp(r'(https?://[\w\-._~:/?#\[\]@!$&()*+,;=%]+)');
+    final spans = <TextSpan>[];
+    int start = 0;
+    for (final match in urlReg.allMatches(text)) {
+      if (match.start > start) {
+        spans.add(TextSpan(
+            text: text.substring(start, match.start),
+            style: TextStyle(fontSize: 12, color: color)));
+      }
+      final url = match.group(0)!;
+      spans.add(TextSpan(
+        text: url,
+        style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(Get.context!).colorScheme.primary,
+            decoration: TextDecoration.underline),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            final uri = Uri.parse(url);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+      ));
+      start = match.end;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(
+          text: text.substring(start),
+          style: TextStyle(fontSize: 12, color: color)));
+    }
+    return Text.rich(TextSpan(children: spans));
   }
 }
 
 class VideoPlayPageComments extends StatelessWidget {
-  final String fileId;
-  const VideoPlayPageComments({required this.fileId, Key? key})
+  final String videoId;
+  const VideoPlayPageComments({required this.videoId, Key? key})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder(
-        init: VideoLoadVideoPListController(fileId),
-        builder: (controller) {
-          if (controller.isLoading.value) {
-            return CircularProgressIndicator();
-          } else {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('评论区', style: TextStyle(fontSize: 20)),
-                // 可扩展评论列表
-              ],
-            );
-          }
-        });
+        init: VideoLoadVideoPListController(videoId),
+        builder: (controller) => Obx(() {
+              if (controller.isLoading.value) {
+                return CircularProgressIndicator();
+              } else {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('评论区', style: TextStyle(fontSize: 20)),
+                    // 可扩展评论列表
+                  ],
+                );
+              }
+            }));
   }
 }

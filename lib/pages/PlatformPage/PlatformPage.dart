@@ -1,5 +1,4 @@
 import 'package:easylive/Funcs.dart';
-import 'package:easylive/pages2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers-class.dart';
