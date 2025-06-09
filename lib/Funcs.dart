@@ -41,7 +41,8 @@ void openLoginDialog() {
   );
 }
 
-bool showResSnackbar(Map<String, dynamic> res) {
+bool showResSnackbar(Map<String, dynamic> res,
+    {bool notShowIfSuccess = false}) {
   Get.closeAllSnackbars();
   if (res['code'] != 200) {
     Get.snackbar(
@@ -55,6 +56,7 @@ bool showResSnackbar(Map<String, dynamic> res) {
     );
     return false;
   } else {
+    if (notShowIfSuccess) return true;
     Get.snackbar(
       Texts.success,
       res['info'],

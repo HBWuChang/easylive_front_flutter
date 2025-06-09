@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:easylive/controllers-class2.dart';
+import 'package:easylive/enums.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -988,10 +989,18 @@ class VideoInfo {
 
 class VideoGetVideoInfoController extends GetxController {
   var videoInfo = VideoInfo({}).obs;
-  var isLoading = false.obs;
+  var isLoading = true.obs;
   var userActionList = <UserAction>[].obs;
+  bool get hasLike => userActionList.any((action) =>
+      (action.actionType == UserActionEnum.VIDEO_LIKE.type &&
+          action.userId == Get.find<AccountController>().userId));
+  bool get hasCollect => userActionList.any((action) =>
+      action.actionType == UserActionEnum.VIDEO_COLLECT.type &&
+      action.userId == Get.find<AccountController>().userId);
+  bool get hasCoin => userActionList.any((action) =>
+      action.actionType == UserActionEnum.VIDEO_COIN.type &&
+      action.userId == Get.find<AccountController>().userId);
   Future<void> loadVideoInfo(String videoId) async {
-    isLoading.value = true;
     try {
       var res = await ApiService.videoGetVideoInfo(videoId);
       if (res['code'] == 200) {
@@ -1013,7 +1022,7 @@ class VideoGetVideoInfoController extends GetxController {
 class VideoLoadVideoPListController extends GetxController {
   var videoPList = <VideoInfoFile>[].obs;
   var isLoading = false.obs;
-
+  var selectFileId = ''.obs;
   VideoLoadVideoPListController(String videoId) {
     loadVideoPList(videoId);
   }
@@ -1026,6 +1035,8 @@ class VideoLoadVideoPListController extends GetxController {
         videoPList.value = (res['data'] as List)
             .map((item) => VideoInfoFile(item as Map<String, dynamic>))
             .toList();
+        selectFileId.value =
+            videoPList.isNotEmpty ? videoPList[0].fileId ?? '' : '';
         if (videoPList.isEmpty) {
           throw Exception('视频分片列表为空');
         }

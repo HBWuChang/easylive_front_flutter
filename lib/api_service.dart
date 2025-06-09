@@ -22,6 +22,7 @@ class ApiService {
       settings: baseUrl != null
           ? ClientSettings(
               baseUrl: baseUrl,
+              // proxySettings: ProxySettings.proxy('http://localhost:9000'),
               cookieSettings: CookieSettings(storeCookies: true),
             )
           : const ClientSettings(
@@ -433,6 +434,7 @@ class ApiService {
     return toJson(await get(
       ApiAddr.videoGetVideoInfo,
       query: {'videoId': videoId},
+      useToken: true,
     ));
   }
 

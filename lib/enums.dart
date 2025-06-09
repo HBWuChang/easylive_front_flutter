@@ -131,6 +131,27 @@ enum UserActionTypeEnum {
   }
 }
 
+enum UserActionEnum {
+  // 0:评论喜欢点赞1：讨厌评论2：视频点赞3：视频收藏4：视频投币
+  COMMENT_LIKE(0, "评论点赞"),
+  COMMENT_HATE(1, "讨厌评论"),
+  VIDEO_LIKE(2, "视频点赞"),
+  VIDEO_COLLECT(3, "视频收藏"),
+  VIDEO_COIN(4, "视频投币");
+
+  final int type;
+  final String desc;
+  const UserActionEnum(this.type, this.desc);
+  static UserActionEnum? getByType(int type) {
+    for (var actionType in UserActionEnum.values) {
+      if (actionType.type == type) {
+        return actionType;
+      }
+    }
+    return null;
+  }
+}
+
 enum UserSexEnum {
   WOMAN(0, "女"),
   MAN(1, "男"),
@@ -239,7 +260,8 @@ enum AspectRatioEnum {
   VIDEO_PLAY_AREA('VIDEO_PLAY_AREA', 20 / 9),
   MainPageRecommendVideoArea('MainPageRecommendVideoArea', 1478 / 493),
   MainPageRecommendVideoLeft('MainPageRecommendVideoLeft', 579 / 385),
-  MainPageRecommendVideoRightchild('MainPageRecommendVideoRightchild', 277 / 212);
+  MainPageRecommendVideoRightchild(
+      'MainPageRecommendVideoRightchild', 277 / 212);
 
   final String type;
   final double ratio;

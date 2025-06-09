@@ -47,3 +47,31 @@ Widget accountDialogNumWidget(String info, {int? count}) {
     ),
   );
 }
+
+Widget DividerWithPaddingHorizontal({
+  double padding = 32.0,
+  Color? color,
+}) {
+  final Color effectiveColor = color ?? Colors.grey[300]!;
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: padding),
+    child: Divider(
+      color: effectiveColor,
+      height: 1,
+    ),
+  );
+}
+
+Widget DividerWithPaddingVertical({
+  double padding = 32.0,
+  Color? color,
+}) {
+  final Color effectiveColor = color ?? Colors.grey[300]!;
+  return Padding(
+    padding: EdgeInsets.symmetric(vertical: padding),
+    child: Divider(
+      color: effectiveColor,
+      height: 1,
+    ),
+  );
+}
