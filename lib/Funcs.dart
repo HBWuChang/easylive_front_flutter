@@ -98,6 +98,23 @@ String toShowNumText(int showCount) {
   return showText;
 }
 
+String toShowdurationText(int duration) {
+  String showText;
+  int hours = duration ~/ 3600;
+  int minutes = (duration % 3600) ~/ 60;
+  int seconds = duration % 60;
+  if (hours > 0) {
+    // showText = '$hours:$minutes:$seconds'
+    showText = '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  } else if (minutes > 0) {
+    // showText = '$minutes:$seconds';
+    showText = '$minutes:${seconds.toString().padLeft(2, '0')}';
+  } else {
+    showText = '$seconds';
+  }
+  return showText;
+}
+
 void showUpdateUserInfoCard() async {
   await Get.dialog(
     Center(

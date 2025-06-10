@@ -17,6 +17,7 @@ class ControllersInitController extends GetxController {
   var isCategoryLoadAllCategoryControllerInitialized = false.obs;
   var isAppBarControllerInitialized = false.obs;
   var isWindowSizeControllerInitialized = false.obs;
+  var isLocalSettingsControllerInitialized = false.obs;
   void initNeedControllers() {
     initLoginController();
     initAccountController();
@@ -26,6 +27,7 @@ class ControllersInitController extends GetxController {
     initAppBarController();
     initWindowSizeController();
     initVideoLoadRecommendVideoController();
+    initLocalSettingsControllerController();
   }
 
   void initLoginController() {
@@ -80,6 +82,13 @@ class ControllersInitController extends GetxController {
   void initVideoLoadRecommendVideoController() {
     if (!Get.isRegistered<VideoLoadRecommendVideoController>()) {
       Get.put(VideoLoadRecommendVideoController());
+    }
+  }
+
+  void initLocalSettingsControllerController() {
+    if (!isLocalSettingsControllerInitialized.value) {
+      Get.put(LocalSettingsController());
+      isLocalSettingsControllerInitialized.value = true;
     }
   }
 }
@@ -1023,6 +1032,11 @@ class VideoLoadVideoPListController extends GetxController {
   var videoPList = <VideoInfoFile>[].obs;
   var isLoading = false.obs;
   var selectFileId = ''.obs;
+  int get selectFileIndex {
+    return videoPList.indexWhere((file) => file.fileId == selectFileId.value);
+  }
+
+  bool get multi => videoPList.length > 1;
   VideoLoadVideoPListController(String videoId) {
     loadVideoPList(videoId);
   }
@@ -1232,5 +1246,38 @@ class UhomeGetUserInfoController extends GetxController {
     } catch (e) {
       showErrorSnackbar(e.toString());
     }
+  }
+}
+
+class LocalSettingsController extends GetxController {
+  var settings = <String, dynamic>{}.obs;
+  void setSetting(String key, dynamic value) {
+    settings[key] = value;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    ever(settings, (_) {
+      saveSettings();
+    });
+  }
+
+  Future<void> saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('localSettings', jsonEncode(settings.value));
+  }
+
+  Future<void> loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    settings.value = prefs.getString('localSettings') != null
+        ? Map<String, dynamic>.from(
+            jsonDecode(prefs.getString('localSettings')!))
+        : {};
+    Map<String, dynamic> defaultSettings = {
+      'listOrGrid': true,
+    };
+    defaultSettings.addAll(settings);
+    settings.value = defaultSettings;
   }
 }
