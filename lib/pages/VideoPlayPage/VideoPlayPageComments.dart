@@ -108,12 +108,63 @@ class VideoPlayPageComments extends StatelessWidget {
                                 itemCount:
                                     commentController.commentDataList.length,
                                 itemBuilder: (context, index) {
-                                  return Column(
-                                    children: [
-                                      SizedBox(),
-                                      DividerWithPaddingHorizontal(padding: 8)
-                                    ],
-                                  );
+                                  return Column(children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Column(children: [
+                                          SizedBox(height: 12),
+                                          Avatar(
+                                            avatarValue: commentController
+                                                .commentDataList[index].avatar,
+                                          )
+                                        ]),
+                                        SizedBox(width: 16),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            SizedBox(height: 8),
+                                            Text(
+                                              commentController
+                                                      .commentDataList[index]
+                                                      .nickName ??
+                                                  '',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(
+                                              toShowDatetext(commentController
+                                                  .commentDataList[index]
+                                                  .postTime!),
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .tertiary),
+                                            ),
+                                            SizedBox(height: 8),
+                                            Text(
+                                              commentController
+                                                      .commentDataList[index]
+                                                      .content ??
+                                                  '',
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    DividerWithPaddingHorizontal(padding: 8)
+                                  ]);
                                 },
                               ))),
                       // 可扩展评论列表

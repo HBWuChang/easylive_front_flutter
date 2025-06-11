@@ -247,21 +247,26 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                         ),
                                       ),
                                       // 视频时长，右下角
-                                      // Positioned(
-                                      //   right: 8,
-                                      //   bottom: 8,
-                                      //   child: Container(
-                                      //     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      //     decoration: BoxDecoration(
-                                      //       color: Colors.black54,
-                                      //       borderRadius: BorderRadius.circular(6),
-                                      //     ),
-                                      //     child: Text(
-                                      //       toShowdurationText(video.duration ?? 0),
-                                      //       style: TextStyle(color: Colors.white, fontSize: 12),
-                                      //     ),
-                                      //   ),
-                                      // ),
+                                      Positioned(
+                                        right: 8,
+                                        bottom: 8,
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black54,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            toShowdurationText(
+                                                widget.video.duration ?? 0),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),

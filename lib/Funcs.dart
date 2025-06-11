@@ -105,12 +105,36 @@ String toShowdurationText(int duration) {
   int seconds = duration % 60;
   if (hours > 0) {
     // showText = '$hours:$minutes:$seconds'
-    showText = '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    showText =
+        '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   } else if (minutes > 0) {
     // showText = '$minutes:$seconds';
     showText = '$minutes:${seconds.toString().padLeft(2, '0')}';
   } else {
-    showText = '$seconds';
+    // showText = '$seconds';
+    showText = '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+  return showText;
+}
+
+String toShowDatetext(DateTime datetime) {
+  String showText;
+  DateTime now = DateTime.now();
+  Duration difference = now.difference(datetime);
+  if (datetime.year != now.year) {
+    showText = datetime.toString().substring(2, 10);
+  } else if (difference.inDays > 7) {
+    showText = datetime.toString().substring(5, 10);
+  } else if (difference.inDays > 1) {
+    showText = '${difference.inDays}天前';
+  } else if (difference.inDays == 1) {
+    showText = '昨天';
+  } else if (difference.inHours > 0) {
+    showText = '${difference.inHours}小时前';
+  } else if (difference.inMinutes > 0) {
+    showText = '${difference.inMinutes}分钟前';
+  } else {
+    showText = '刚刚';
   }
   return showText;
 }
