@@ -69,9 +69,9 @@ Widget DividerWithPaddingVertical({
   final Color effectiveColor = color ?? Colors.grey[300]!;
   return Padding(
     padding: EdgeInsets.symmetric(vertical: padding),
-    child: Divider(
+    child: VerticalDivider(
       color: effectiveColor,
-      height: 1,
+      width: 1,
     ),
   );
 }

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/enums.dart';
+import 'package:easylive/pages/MainPage/VideoInfoWidget.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
@@ -35,12 +36,23 @@ class VideoPlayPageInfo extends StatelessWidget {
     VideoLoadVideoPListController videoLoadVideoPListController =
         Get.find<VideoLoadVideoPListController>(
             tag: '${videoId}VideoLoadVideoPListController');
+    VideoGetVideoRecommendController videoGetVideoRecommendController;
+    if (Get.isRegistered<VideoGetVideoRecommendController>(
+        tag: '${videoId}VideoGetVideoRecommendController')) {
+      videoGetVideoRecommendController =
+          Get.find<VideoGetVideoRecommendController>(
+              tag: '${videoId}VideoGetVideoRecommendController');
+    } else {
+      videoGetVideoRecommendController = Get.put(
+          VideoGetVideoRecommendController(),
+          tag: '${videoId}VideoGetVideoRecommendController');
+    }
     final infoColor1 = Theme.of(context).colorScheme.secondary;
     final infoColor2 = Theme.of(context).colorScheme.tertiary;
     final ScrollController scrollController = ScrollController(); // 用于监听滚动事件
     // 监听滚动
     scrollController.addListener(() {
-      showFab.value = scrollController.offset > 100;
+      showFab.value = scrollController.offset > 50;
     });
     // 直接使用已在 VideoPlayPage put 的 controller
     return Scaffold(
@@ -575,6 +587,19 @@ class VideoPlayPageInfo extends StatelessWidget {
                                 ))),
                           DividerWithPaddingHorizontal(),
 
+                          Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Obx(() => ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: videoGetVideoRecommendController
+                                        .videoRecommendList.length,
+                                    itemBuilder: (context, index) {
+                                      return VideoInfoWidgetHorizon(
+                                          video:
+                                              videoGetVideoRecommendController
+                                                  .videoRecommendList[index]);
+                                    },
+                                  ))),
                           // 可扩展更多分P信息
                         ],
                       ));

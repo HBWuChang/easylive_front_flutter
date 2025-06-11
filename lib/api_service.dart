@@ -97,7 +97,8 @@ class ApiService {
   }
 
   static Map<String, dynamic> toJson(HttpTextResponse httpTextResponse) {
-    return jsonDecode(httpTextResponse.body) as Map<String, dynamic>;
+    // return jsonDecode(httpTextResponse.body) as Map<String, dynamic>;
+    return httpTextResponse.bodyToJson;
   }
 
   static Future<Map<String, dynamic>> accountCheckCode() async {

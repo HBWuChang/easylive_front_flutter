@@ -1017,6 +1017,22 @@ class VideoGetVideoInfoController extends GetxController {
         userActionList.value = (res['data']['userActionList'] as List)
             .map((item) => UserAction(item as Map<String, dynamic>))
             .toList();
+        VideoGetVideoRecommendController videoGetVideoRecommendController;
+        if (Get.isRegistered<VideoGetVideoRecommendController>(
+            tag: '${videoId}VideoGetVideoRecommendController')) {
+          videoGetVideoRecommendController =
+              Get.find<VideoGetVideoRecommendController>(
+                  tag: '${videoId}VideoGetVideoRecommendController');
+        } else {
+          videoGetVideoRecommendController = Get.put(
+              VideoGetVideoRecommendController(),
+              tag: '${videoId}VideoGetVideoRecommendController');
+        }
+        videoGetVideoRecommendController.loadVideoRecommend(
+            (videoInfo.value.videoName ?? '') +
+                ' ' +
+                (videoInfo.value.tags ?? ''),
+            videoInfo.value.videoId ?? '');
       } else {
         throw Exception('加载视频信息失败: ${res['info']}');
       }
@@ -1096,11 +1112,17 @@ class CommentController extends GetxController {
 
   var isLoading = false.obs;
   String videoId = '';
+  var orderType = 0.obs; // 0:最热, 1:最新
   bool isLoadingMore = false;
-  Future<void> loadComments(String videoId) async {
+  void setVideoId(String videoId) {
+    this.videoId = videoId;
+  }
+
+  Future<void> loadComments() async {
     isLoading.value = true;
     try {
-      var res = await ApiService.commentLoadComment(videoId: videoId);
+      var res = await ApiService.commentLoadComment(
+          videoId: videoId, orderType: orderType.value);
       if (res['code'] == 200) {
         commentDataList.value = (res['data']['commentData']['list'] as List)
             .map((item) => VideoComment(item as Map<String, dynamic>))
@@ -1117,7 +1139,7 @@ class CommentController extends GetxController {
         throw Exception('加载评论失败: ${res['info']}');
       }
     } catch (e) {
-      showErrorSnackbar(e.toString());
+      // showErrorSnackbar(e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -1279,5 +1301,34 @@ class LocalSettingsController extends GetxController {
     };
     defaultSettings.addAll(settings);
     settings.value = defaultSettings;
+  }
+}
+
+class VideoGetVideoRecommendController extends GetxController {
+  var videoRecommendList = <VideoInfo>[].obs;
+  var isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+  }
+
+  Future<void> loadVideoRecommend(String keyword, String videoId) async {
+    isLoading.value = true;
+    try {
+      var res = await ApiService.videoGetVideoRecommend(
+          keyword: keyword, videoId: videoId);
+      if (res['code'] == 200) {
+        videoRecommendList.value = (res['data'] as List)
+            .map((item) => VideoInfo(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('加载推荐视频失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

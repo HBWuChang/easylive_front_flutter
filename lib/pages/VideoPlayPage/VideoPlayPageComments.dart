@@ -31,20 +31,96 @@ class VideoPlayPageComments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder(
-        init: VideoLoadVideoPListController(videoId),
-        builder: (controller) => Obx(() {
-              if (controller.isLoading.value) {
-                return CircularProgressIndicator();
-              } else {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('评论区', style: TextStyle(fontSize: 20)),
-                    // 可扩展评论列表
-                  ],
-                );
-              }
-            }));
+    return Scaffold(
+        body: GetBuilder<CommentController>(
+            tag: '${videoId}CommentController',
+            builder: (commentController) => Obx(() {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 最新/最热 按钮
+                      SizedBox(
+                        width: 128,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextButton(
+                                onPressed: () {
+                                  if (commentController.orderType.value ==
+                                      CommentOrderTypeEnum.HOT.type) {
+                                    return;
+                                  }
+                                  commentController.orderType.value =
+                                      CommentOrderTypeEnum.HOT.type;
+                                  commentController.loadComments();
+                                },
+                                child: Obx(() => Text('最热',
+                                    style: TextStyle(
+                                        color: commentController
+                                                    .orderType.value ==
+                                                CommentOrderTypeEnum.HOT.type
+                                            ? null
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .tertiary,
+                                        fontWeight: commentController
+                                                    .orderType.value ==
+                                                CommentOrderTypeEnum.HOT.type
+                                            ? FontWeight.bold
+                                            : FontWeight.normal)))),
+                            SizedBox(
+                              height: 32,
+                              width: 2,
+                              child: DividerWithPaddingVertical(padding: 8),
+                            ), // 间隔
+
+                            TextButton(
+                                onPressed: () {
+                                  if (commentController.orderType.value ==
+                                      CommentOrderTypeEnum.NEW.type) {
+                                    return;
+                                  }
+                                  commentController.orderType.value =
+                                      CommentOrderTypeEnum.NEW.type;
+                                  commentController.loadComments();
+                                },
+                                child: Obx(() => Text('最新',
+                                    style: TextStyle(
+                                        color: commentController
+                                                    .orderType.value ==
+                                                CommentOrderTypeEnum.NEW.type
+                                            ? null
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .tertiary,
+                                        fontWeight: commentController
+                                                    .orderType.value ==
+                                                CommentOrderTypeEnum.NEW.type
+                                            ? FontWeight.bold
+                                            : FontWeight.normal)))),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Obx(() => ListView.builder(
+                                shrinkWrap: true,
+                                itemCount:
+                                    commentController.commentDataList.length,
+                                itemBuilder: (context, index) {
+                                  return Column(
+                                    children: [
+                                      SizedBox(),
+                                      DividerWithPaddingHorizontal(padding: 8)
+                                    ],
+                                  );
+                                },
+                              ))),
+                      // 可扩展评论列表
+                      if (commentController.isLoading.value)
+                        CircularProgressIndicator()
+                    ],
+                  );
+                })));
   }
 }

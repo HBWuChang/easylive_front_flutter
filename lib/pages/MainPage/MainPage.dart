@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/enums.dart';
+import 'package:easylive/pages/MainPage/VideoInfoWidget.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -447,131 +448,6 @@ class _CategoryButtonState extends State<_CategoryButton>
         ),
       ),
     );
-  }
-}
-
-// 视频信息展示组件
-class VideoInfoWidget extends StatefulWidget {
-  final VideoInfo video;
-  const VideoInfoWidget({required this.video, Key? key}) : super(key: key);
-  @override
-  State<VideoInfoWidget> createState() => _VideoInfoWidgetState();
-}
-
-class _VideoInfoWidgetState extends State<VideoInfoWidget> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        MouseRegion(
-          onEnter: (_) => setState(() => _hovered = true),
-          onExit: (_) => setState(() => _hovered = false),
-          child: AnimatedScale(
-            scale: _hovered ? 1.05 : 1.0,
-            duration: Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            child: Stack(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    final videoId = widget.video.videoId;
-                    if (videoId != null) {
-                      Get.find<AppBarController>().extendBodyBehindAppBar.value = false;
-                      Get.toNamed('${Routes.videoPlayPage}?videoId=$videoId', id: Routes.mainGetId);
-                    }
-                  },
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: widget.video.videoCover != null && widget.video.videoCover!.isNotEmpty
-                          ? ExtendedImage.network(
-                              Constants.baseUrl + ApiAddr.fileGetResourcet + widget.video.videoCover!,
-                              fit: BoxFit.cover,
-                            )
-                          : Container(color: Colors.grey[200]),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    height: 38,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 8,
-                  bottom: 8,
-                  child: Row(
-                    children: [
-                      Icon(Icons.play_arrow, color: Colors.white, size: 16),
-                      SizedBox(width: 2),
-                      Text(
-                        (widget.video.playCount ?? 0).toString(),
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            shadows: [Shadow(color: Colors.black, blurRadius: 2)]),
-                      ),
-                      SizedBox(width: 10),
-                      Icon(Icons.subtitles, color: Colors.white, size: 16),
-                      SizedBox(width: 2),
-                      Text(
-                        (widget.video.danmuCount ?? 0).toString(),
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            shadows: [Shadow(color: Colors.black, blurRadius: 2)]),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: 6),
-        Text(
-          widget.video.videoName ?? '',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-        ),
-        SizedBox(height: 2),
-        Row(
-          children: [
-            Icon(Icons.person, size: 14, color: Colors.grey),
-            SizedBox(width: 3),
-            Text(widget.video.nickName ?? '',
-                style: TextStyle(fontSize: 13, color: Colors.grey[700])),
-            SizedBox(width: 10),
-            Icon(Icons.access_time, size: 14, color: Colors.grey),
-            SizedBox(width: 3),
-            Text(
-              widget.video.createTime != null ? _formatDate(widget.video.createTime!) : '',
-              style: TextStyle(fontSize: 13, color: Colors.grey[700]),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 }
 

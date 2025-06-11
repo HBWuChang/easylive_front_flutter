@@ -267,3 +267,22 @@ enum AspectRatioEnum {
   final double ratio;
   const AspectRatioEnum(this.type, this.ratio);
 }
+
+enum CommentOrderTypeEnum {
+  HOT(0,  "最热"),
+  NEW(1,  "最新");
+
+  final int type;
+  final String desc;
+
+  const CommentOrderTypeEnum(this.type, this.desc);
+
+  static CommentOrderTypeEnum? getByType(int type) {
+    for (var orderType in CommentOrderTypeEnum.values) {
+      if (orderType.type == type) {
+        return orderType;
+      }
+    }
+    return null;
+  }
+}

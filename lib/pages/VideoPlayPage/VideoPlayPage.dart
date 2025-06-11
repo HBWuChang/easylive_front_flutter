@@ -54,17 +54,15 @@ class VideoPlayPage extends StatelessWidget {
           tag: '${videoId}VideoGetVideoInfoController');
     }
     videoGetVideoInfoController.loadVideoInfo(videoId);
-    commentController.loadComments(videoId);
-    VideoLoadVideoPListController videoLoadVideoPListController;
+    commentController.setVideoId(videoId);
+    commentController.loadComments();
     if (Get.isRegistered<VideoLoadVideoPListController>(
         tag: '${videoId}VideoLoadVideoPListController')) {
-      videoLoadVideoPListController = Get.find<VideoLoadVideoPListController>(
-          tag: '${videoId}VideoLoadVideoPListController');
     } else {
-      videoLoadVideoPListController = Get.put(
-          VideoLoadVideoPListController(videoId),
+      Get.put(VideoLoadVideoPListController(videoId),
           tag: '${videoId}VideoLoadVideoPListController');
     }
+
     return GetBuilder<VideoLoadVideoPListController>(
         tag: '${videoId}VideoLoadVideoPListController',
         builder: (videoLoadVideoPListController) {
@@ -220,6 +218,7 @@ class VideoPlayPage extends StatelessWidget {
                                       onPressed: () {},
                                     ))
                               ])),
+                      DividerWithPaddingHorizontal(padding: 0),
                       // 内容区 PreloadPageView
                       Expanded(
                         child: PreloadPageView.builder(
