@@ -1103,6 +1103,17 @@ class VideoInfoFile {
   }
 }
 
+class PostComment {
+  String? content;
+  String? imgPath;
+  int? replyCommentId;
+  PostComment({
+    this.content,
+    this.imgPath,
+    this.replyCommentId,
+  });
+}
+
 class CommentController extends GetxController {
   var commentDataList = <VideoComment>[].obs;
   var commentDataTotalCount = 0.obs;
@@ -1111,11 +1122,218 @@ class CommentController extends GetxController {
   var userActionList = <UserAction>[].obs;
 
   var isLoading = false.obs;
+  var sendingComment = false.obs;
   String videoId = '';
   var orderType = 0.obs; // 0:最热, 1:最新
   bool isLoadingMore = false;
   void setVideoId(String videoId) {
     this.videoId = videoId;
+  }
+
+  var nowSelectCommentId = 0.obs;
+  int lastSelectCommentId = 0;
+  Map<int, PostComment> postCommentMap = {};
+  var mainImgPath = ''.obs;
+  TextEditingController mainCommentController = TextEditingController();
+  var outterImgPath = ''.obs;
+  TextEditingController outterCommentController = TextEditingController();
+  var innerOutterImgPath = ''.obs;
+  TextEditingController innerOutterCommentController = TextEditingController();
+  @override
+  void onInit() {
+    super.onInit();
+    ever(nowSelectCommentId, (value) {
+      if (value != lastSelectCommentId) {
+        postCommentMap[lastSelectCommentId] = PostComment(
+            content: mainCommentController.text.trim(),
+            imgPath: mainImgPath.value,
+            replyCommentId:
+                lastSelectCommentId == 0 ? null : lastSelectCommentId);
+        mainCommentController.clear();
+        mainImgPath.value = '';
+        lastSelectCommentId = value;
+        mainCommentController.text = postCommentMap[value]?.content ?? '';
+        mainImgPath.value = postCommentMap[value]?.imgPath ?? '';
+      }
+    });
+  }
+
+  Future<void> postCommentMain() async {
+    sendingComment.value = true;
+    try {
+      if (mainCommentController.text.trim().isEmpty) {
+        throw Exception('评论内容不能为空');
+      }
+      var res = await ApiService.commentPostComment(
+          videoId: videoId,
+          content: mainCommentController.text.trim(),
+          imgPath: mainImgPath.value == '' ? null : mainImgPath.value,
+          replyCommentId:
+              nowSelectCommentId.value == 0 ? null : nowSelectCommentId.value);
+      if (res['code'] == 200) {
+        // 清空输入框
+        mainCommentController.clear();
+        mainImgPath.value = '';
+        nowSelectCommentId.value = 0;
+        // 刷新评论列表
+        await loadComments();
+      } else {
+        throw Exception('发布评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      sendingComment.value = false;
+    }
+  }
+
+  Future<void> postCommentOutter() async {
+    sendingComment.value = true;
+    try {
+      if (outterCommentController.text.trim().isEmpty) {
+        throw Exception('评论内容不能为空');
+      }
+      if (outterCommentController.text.trim().length > 500) {
+        throw Exception('评论内容不能超过500个字符');
+      }
+      var res = await ApiService.commentPostComment(
+          videoId: videoId,
+          content: outterCommentController.text.trim(),
+          imgPath: outterImgPath.value == '' ? null : outterImgPath.value);
+      if (res['code'] == 200) {
+        // 清空输入框
+        outterCommentController.clear();
+        outterImgPath.value = '';
+        // 刷新评论列表
+        await loadComments();
+      } else {
+        throw Exception('发布评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      sendingComment.value = false;
+    }
+  }
+
+  bool isLike(int commentId) {
+    return userActionList.any((action) =>
+        action.actionType == UserActionEnum.COMMENT_LIKE.type &&
+        action.commentId == commentId &&
+        action.userId == Get.find<AccountController>().userId);
+  }
+
+  bool isHate(int commentId) {
+    return userActionList.any((action) =>
+        action.actionType == UserActionEnum.COMMENT_HATE.type &&
+        action.commentId == commentId &&
+        action.userId == Get.find<AccountController>().userId);
+  }
+
+  Future<void> likeComment(int commentId) async {
+    try {
+      var res = await ApiService.userActionDoAction(
+          videoId: videoId,
+          commentId: commentId,
+          actionType: UserActionEnum.COMMENT_LIKE.type);
+      if (res['code'] == 200) {
+        // 更新本地数据
+        if (isLike(commentId)) {
+          // 已经点赞，取消点赞
+          removeLike(commentId);
+        } else {
+          addLike(commentId);
+          if (isHate(commentId)) {
+            // 如果已经讨厌，取消讨厌
+            removeHate(commentId);
+          }
+        }
+        update();
+      } else {
+        throw Exception('点赞评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
+
+  Future<void> hateComment(int commentId) async {
+    try {
+      var res = await ApiService.userActionDoAction(
+          videoId: videoId,
+          commentId: commentId,
+          actionType: UserActionEnum.COMMENT_HATE.type);
+      if (res['code'] == 200) {
+        // 更新本地数据
+        if (isHate(commentId)) {
+          // 已经讨厌，取消讨厌
+          removeHate(commentId);
+        } else {
+          addHate(commentId);
+          if (isLike(commentId)) {
+            // 如果已经点赞，取消点赞
+            removeLike(commentId);
+          }
+        }
+        update();
+      } else {
+        throw Exception('讨厌评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
+
+  void addLike(int commentId) {
+    var action = UserAction({
+      'actionType': UserActionEnum.COMMENT_LIKE.type,
+      'commentId': commentId,
+      'userId': Get.find<AccountController>().userId,
+    });
+    userActionList.add(action);
+    var comment = commentDataList.firstWhere((c) => c.commentId == commentId,
+        orElse: () => VideoComment({}));
+    if (comment.commentId != null) {
+      comment.likeCount = (comment.likeCount ?? 0) + 1;
+    }
+  }
+
+  void addHate(int commentId) {
+    var action = UserAction({
+      'actionType': UserActionEnum.COMMENT_HATE.type,
+      'commentId': commentId,
+      'userId': Get.find<AccountController>().userId,
+    });
+    userActionList.add(action);
+    var comment = commentDataList.firstWhere((c) => c.commentId == commentId,
+        orElse: () => VideoComment({}));
+    if (comment.commentId != null) {
+      comment.hateCount = (comment.hateCount ?? 0) + 1;
+    }
+  }
+
+  void removeLike(int commentId) {
+    userActionList.removeWhere((action) =>
+        action.actionType == UserActionEnum.COMMENT_LIKE.type &&
+        action.commentId == commentId &&
+        action.userId == Get.find<AccountController>().userId);
+    var comment = commentDataList.firstWhere((c) => c.commentId == commentId,
+        orElse: () => VideoComment({}));
+    if (comment.commentId != null && comment.likeCount != null) {
+      comment.likeCount = (comment.likeCount ?? 0) - 1;
+    }
+  }
+
+  void removeHate(int commentId) {
+    userActionList.removeWhere((action) =>
+        action.actionType == UserActionEnum.COMMENT_HATE.type &&
+        action.commentId == commentId &&
+        action.userId == Get.find<AccountController>().userId);
+    var comment = commentDataList.firstWhere((c) => c.commentId == commentId,
+        orElse: () => VideoComment({}));
+    if (comment.commentId != null && comment.hateCount != null) {
+      comment.hateCount = (comment.hateCount ?? 0) - 1;
+    }
   }
 
   Future<void> loadComments() async {
@@ -1142,6 +1360,7 @@ class CommentController extends GetxController {
       // showErrorSnackbar(e.toString());
     } finally {
       isLoading.value = false;
+      update();
     }
   }
 

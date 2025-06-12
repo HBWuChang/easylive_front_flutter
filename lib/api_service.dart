@@ -573,6 +573,7 @@ class ApiService {
         'pageNo': pageNo?.toString() ?? '',
         'orderType': orderType?.toString() ?? '',
       },
+      useToken: true,
     ));
   }
 
