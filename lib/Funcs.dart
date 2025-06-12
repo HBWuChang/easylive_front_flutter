@@ -8,9 +8,10 @@ import 'package:get/get.dart';
 import 'cards1.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'dart:typed_data';
-// import 'dart:io';
+import 'dart:io';
 // import 'package:image/image.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 void openLoginDialog() {
   Get.dialog(
@@ -202,4 +203,18 @@ Map<String, String>? toParameters(String name) {
     }
   }
   return parameters.isNotEmpty ? parameters : null;
+}
+Future<String> getDownloadDirectory() async {
+  if (GetPlatform.isDesktop) {
+    final downloads = await getDownloadsDirectory();
+    return downloads?.path ?? Directory.current.path;
+  }
+  return Directory.current.path;
+}
+
+Future<File> saveBytesToFile(
+    Uint8List bytes, String dir, String fileName) async {
+  final file = File('$dir/$fileName');
+  await file.writeAsBytes(bytes);
+  return file;
 }

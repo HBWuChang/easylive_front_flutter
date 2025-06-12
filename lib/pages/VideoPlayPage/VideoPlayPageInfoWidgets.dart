@@ -23,8 +23,8 @@ import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // 投币弹窗
-Future<Map<String,dynamic>?> showCoinDialog() async {
-  return await Get.dialog<Map<String,dynamic>>(
+Future<Map<String, dynamic>?> showCoinDialog() async {
+  return await Get.dialog<Map<String, dynamic>>(
     _CoinDialogWidget(),
     barrierDismissible: true,
   );
@@ -339,6 +339,282 @@ class _ParticleIconButtonState extends State<ParticleIconButton>
             ),
           ),
       ],
+    );
+  }
+}
+
+// 图片预览弹窗
+class _ImagePreviewDialog extends StatefulWidget {
+  final String imgUrl;
+  const _ImagePreviewDialog({required this.imgUrl});
+
+  @override
+  State<_ImagePreviewDialog> createState() => _ImagePreviewDialogState();
+}
+
+class _ImagePreviewDialogState extends State<_ImagePreviewDialog> {
+  double rotation = 0;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.back(), // 点击图片外关闭
+      child: Material(
+        color: Colors.black54, // 半透明背景
+        type: MaterialType.transparency,
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return Transform.rotate(
+                      angle: rotation,
+                      child: ExtendedImage.network(
+                        widget.imgUrl,
+                        fit: BoxFit.contain,
+                        width: constraints.maxWidth * 0.95,
+                        height: constraints.maxHeight * 0.95,
+                        mode: ExtendedImageMode.gesture,
+                        initGestureConfigHandler: (_) => GestureConfig(
+                          minScale: 0.5,
+                          maxScale: 5.0,
+                          animationMinScale: 0.5,
+                          animationMaxScale: 5.0,
+                          speed: 1.0,
+                          inertialSpeed: 100.0,
+                          initialScale: 1.0,
+                          inPageView: false,
+                          initialAlignment: InitialAlignment.center,
+                        ),
+                      ));
+                },
+              ),
+              Positioned(
+                top: 24,
+                right: 24,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: Colors.white, size: 28),
+                  onPressed: () => Get.back(),
+                ),
+              ),
+              Positioned(
+                bottom: 32,
+                right: 32,
+                child: Row(
+                  children: [
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black54,
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: Icon(Icons.rotate_right),
+                      label: Text('旋转'),
+                      onPressed: () {
+                        setState(() {
+                          rotation += 0.5 * 3.1415926; // 90度
+                        });
+                      },
+                    ),
+                    SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black54,
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: Icon(Icons.download),
+                      label: Text('保存到本地'),
+                      onPressed: () async {
+                        try {
+                          final response =
+                              await ExtendedNetworkImageProvider(widget.imgUrl)
+                                  .getNetworkImageData();
+                          final bytes = response;
+                          final downloadsDir = await getDownloadDirectory();
+                          final fileName = widget.imgUrl.split('/').last;
+                          final file = await saveBytesToFile(
+                              bytes!, downloadsDir, fileName);
+                          Get.back();
+                          Get.snackbar('提示', '图片已保存到: ${file.path}');
+                        } catch (e) {
+                          Get.snackbar('错误', '保存失败: $e');
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// 图片预览弹窗
+class ImagePreviewDialog extends StatefulWidget {
+  final String imgUrl;
+  const ImagePreviewDialog({required this.imgUrl});
+
+  @override
+  State<ImagePreviewDialog> createState() => ImagePreviewDialogState();
+}
+
+class ImagePreviewDialogState extends State<ImagePreviewDialog> {
+  double rotation = 0;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.back(), // 点击图片外关闭
+      child: Material(
+        color: Colors.black54, // 半透明背景
+        type: MaterialType.transparency,
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return Transform.rotate(
+                      angle: rotation,
+                      child: ExtendedImage.network(
+                        widget.imgUrl,
+                        fit: BoxFit.contain,
+                        width: constraints.maxWidth * 0.95,
+                        height: constraints.maxHeight * 0.95,
+                        mode: ExtendedImageMode.gesture,
+                        initGestureConfigHandler: (_) => GestureConfig(
+                          minScale: 0.5,
+                          maxScale: 5.0,
+                          animationMinScale: 0.5,
+                          animationMaxScale: 5.0,
+                          speed: 1.0,
+                          inertialSpeed: 100.0,
+                          initialScale: 1.0,
+                          inPageView: false,
+                          initialAlignment: InitialAlignment.center,
+                        ),
+                      ));
+                },
+              ),
+              Positioned(
+                top: 24,
+                right: 24,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: Colors.white, size: 28),
+                  onPressed: () => Get.back(),
+                ),
+              ),
+              Positioned(
+                bottom: 32,
+                right: 32,
+                child: Row(
+                  children: [
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black54,
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: Icon(Icons.rotate_right),
+                      label: Text('旋转'),
+                      onPressed: () {
+                        setState(() {
+                          rotation += 0.5 * 3.1415926; // 90度
+                        });
+                      },
+                    ),
+                    SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black54,
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: Icon(Icons.download),
+                      label: Text('保存到本地'),
+                      onPressed: () async {
+                        try {
+                          final response =
+                              await ExtendedNetworkImageProvider(widget.imgUrl)
+                                  .getNetworkImageData();
+                          final bytes = response;
+                          final downloadsDir = await getDownloadDirectory();
+                          final fileName = widget.imgUrl.split('/').last;
+                          final file = await saveBytesToFile(
+                              bytes!, downloadsDir, fileName);
+                          Get.back();
+                          Get.snackbar('提示', '图片已保存到: ${file.path}');
+                        } catch (e) {
+                          Get.snackbar('错误', '保存失败: $e');
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// 新增可展开/收起的评论内容组件
+class ExpandableCommentContent extends StatefulWidget {
+  final String content;
+  const ExpandableCommentContent({required this.content, Key? key})
+      : super(key: key);
+
+  @override
+  State<ExpandableCommentContent> createState() =>
+      ExpandableCommentContentState();
+}
+
+class ExpandableCommentContentState extends State<ExpandableCommentContent> {
+  bool expanded = false;
+  bool needExpand = false;
+  final int maxLines = 5;
+  @override
+  Widget build(BuildContext context) {
+    final text = widget.content;
+    final textStyle =
+        TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double realMaxWidth = 300;
+        // 先用TextPainter判断是否超出maxLines
+        final span = TextSpan(text: text, style: textStyle);
+        final tp = TextPainter(
+          text: span,
+          maxLines: maxLines,
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: realMaxWidth);
+        needExpand = tp.didExceedMaxLines;
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: realMaxWidth),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                text,
+                maxLines: expanded ? null : maxLines,
+                overflow:
+                    expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                style: textStyle,
+                softWrap: true,
+              ),
+              if (needExpand)
+                TextButton(
+                  style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero, minimumSize: Size(40, 24)),
+                  onPressed: () => setState(() => expanded = !expanded),
+                  child: Text(expanded ? '收起' : '展开',
+                      style: TextStyle(fontSize: 14)),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

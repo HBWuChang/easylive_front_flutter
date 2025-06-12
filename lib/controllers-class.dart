@@ -1125,6 +1125,7 @@ class CommentController extends GetxController {
   var sendingComment = false.obs;
   String videoId = '';
   var orderType = 0.obs; // 0:最热, 1:最新
+  var inInnerPage = false.obs; // 是否在内页
   bool isLoadingMore = false;
   void setVideoId(String videoId) {
     this.videoId = videoId;
@@ -1132,6 +1133,8 @@ class CommentController extends GetxController {
 
   var nowSelectCommentId = 0.obs;
   int lastSelectCommentId = 0;
+  var innerNowSelectCommentId = 0.obs;
+  int innerLastSelectCommentId = 0;
   Map<int, PostComment> postCommentMap = {};
   var mainImgPath = ''.obs;
   TextEditingController mainCommentController = TextEditingController();
@@ -1149,6 +1152,39 @@ class CommentController extends GetxController {
             imgPath: mainImgPath.value,
             replyCommentId:
                 lastSelectCommentId == 0 ? null : lastSelectCommentId);
+        mainCommentController.clear();
+        mainImgPath.value = '';
+        lastSelectCommentId = value;
+        mainCommentController.text = postCommentMap[value]?.content ?? '';
+        mainImgPath.value = postCommentMap[value]?.imgPath ?? '';
+      }
+    });
+    ever(inInnerPage, (value) {
+      if (value == true) {
+        var innerComment = postCommentMap[nowSelectCommentId.value];
+        if (innerComment != null) {
+          innerOutterCommentController.text = innerComment.content ?? '';
+          innerOutterImgPath.value = innerComment.imgPath ?? '';
+        }
+      } else {
+        postCommentMap[nowSelectCommentId.value] = PostComment(
+            content: innerOutterCommentController.text.trim(),
+            imgPath: innerOutterImgPath.value,
+            replyCommentId: nowSelectCommentId.value == 0
+                ? null
+                : nowSelectCommentId.value);
+        innerOutterCommentController.clear();
+        innerOutterImgPath.value = '';
+      }
+    });
+    ever(innerNowSelectCommentId, (value) {
+      if (value != innerLastSelectCommentId) {
+        postCommentMap[innerLastSelectCommentId] = PostComment(
+            content: mainCommentController.text.trim(),
+            imgPath: mainImgPath.value,
+            replyCommentId: innerLastSelectCommentId == 0
+                ? null
+                : innerLastSelectCommentId);
         mainCommentController.clear();
         mainImgPath.value = '';
         lastSelectCommentId = value;

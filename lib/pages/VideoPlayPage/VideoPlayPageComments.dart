@@ -7,6 +7,7 @@ import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import '../../controllers-class.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
@@ -25,6 +26,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'VideoPlayPageInfoWidgets.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'VideoPlayPageCommentsInner.dart';
 
 class VideoPlayPageComments extends StatefulWidget {
   final String videoId;
@@ -49,14 +51,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
 
   void _scrollListener() {
     if (outterScrollController.offset > 100 && !showFAB.value) {
-      // setState(() {
-      //   showFAB = true;
-      // });
       showFAB.value = true;
     } else if (outterScrollController.offset <= 100 && showFAB.value) {
-      // setState(() {
-      //   showFAB = false;
-      // });
       showFAB.value = false;
     }
   }
@@ -71,450 +67,542 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: GetBuilder<CommentController>(
-            tag: '${widget.videoId}CommentController',
-            builder: (commentController) => Obx(() {
-                  return SingleChildScrollView(
-                      controller: outterScrollController,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 最新/最热 按钮
-                          SizedBox(
-                            width: 128,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                TextButton(
-                                    onPressed: () {
-                                      if (commentController.orderType.value ==
-                                          CommentOrderTypeEnum.HOT.type) {
-                                        return;
-                                      }
-                                      commentController.orderType.value =
-                                          CommentOrderTypeEnum.HOT.type;
-                                      commentController.loadComments();
-                                    },
-                                    child: Obx(() => Text('最热',
-                                        style: TextStyle(
-                                            color: commentController
+        body: HeroControllerScope(
+            controller: MaterialApp.createMaterialHeroController(),
+            child: Navigator(
+              key: Get.nestedKey(Routes.videoPlayPageCommentsInnerNavId),
+              onGenerateRoute: (settings) {
+                return MaterialPageRoute(
+                  builder: (context) => GetBuilder<CommentController>(
+                      tag: '${widget.videoId}CommentController',
+                      builder: (commentController) => Obx(() {
+                            return SingleChildScrollView(
+                                controller: outterScrollController,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // 最新/最热 按钮
+                                    SizedBox(
+                                      width: 128,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          TextButton(
+                                              onPressed: () {
+                                                if (commentController
                                                         .orderType.value ==
                                                     CommentOrderTypeEnum
-                                                        .HOT.type
-                                                ? null
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .tertiary,
-                                            fontWeight: commentController
-                                                        .orderType.value ==
+                                                        .HOT.type) {
+                                                  return;
+                                                }
+                                                commentController
+                                                        .orderType.value =
                                                     CommentOrderTypeEnum
-                                                        .HOT.type
-                                                ? FontWeight.bold
-                                                : FontWeight.normal)))),
-                                SizedBox(
-                                  height: 32,
-                                  width: 2,
-                                  child: DividerWithPaddingVertical(padding: 8),
-                                ), // 间隔
+                                                        .HOT.type;
+                                                commentController
+                                                    .loadComments();
+                                              },
+                                              child: Obx(() => Text('最热',
+                                                  style: TextStyle(
+                                                      color: commentController
+                                                                  .orderType
+                                                                  .value ==
+                                                              CommentOrderTypeEnum
+                                                                  .HOT.type
+                                                          ? null
+                                                          : Theme.of(context)
+                                                              .colorScheme
+                                                              .tertiary,
+                                                      fontWeight: commentController
+                                                                  .orderType
+                                                                  .value ==
+                                                              CommentOrderTypeEnum
+                                                                  .HOT.type
+                                                          ? FontWeight.bold
+                                                          : FontWeight
+                                                              .normal)))),
+                                          SizedBox(
+                                            height: 32,
+                                            width: 2,
+                                            child: DividerWithPaddingVertical(
+                                                padding: 8),
+                                          ), // 间隔
 
-                                TextButton(
-                                    onPressed: () {
-                                      if (commentController.orderType.value ==
-                                          CommentOrderTypeEnum.NEW.type) {
-                                        return;
-                                      }
-                                      commentController.orderType.value =
-                                          CommentOrderTypeEnum.NEW.type;
-                                      commentController.loadComments();
-                                    },
-                                    child: Obx(() => Text('最新',
-                                        style: TextStyle(
-                                            color: commentController
+                                          TextButton(
+                                              onPressed: () {
+                                                if (commentController
                                                         .orderType.value ==
                                                     CommentOrderTypeEnum
-                                                        .NEW.type
-                                                ? null
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .tertiary,
-                                            fontWeight: commentController
-                                                        .orderType.value ==
+                                                        .NEW.type) {
+                                                  return;
+                                                }
+                                                commentController
+                                                        .orderType.value =
                                                     CommentOrderTypeEnum
-                                                        .NEW.type
-                                                ? FontWeight.bold
-                                                : FontWeight.normal)))),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Obx(() => ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: commentController
-                                        .commentDataList.length,
-                                    itemBuilder: (context, index) {
-                                      return Column(children: [
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Column(children: [
-                                              SizedBox(height: 12),
-                                              Avatar(
-                                                avatarValue: commentController
-                                                    .commentDataList[index]
-                                                    .avatar,
-                                              )
-                                            ]),
-                                            SizedBox(width: 16),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                SizedBox(height: 8),
-                                                Text(
-                                                  commentController
-                                                          .commentDataList[
-                                                              index]
-                                                          .nickName ??
-                                                      '',
+                                                        .NEW.type;
+                                                commentController
+                                                    .loadComments();
+                                              },
+                                              child: Obx(() => Text('最新',
                                                   style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                Text(
-                                                  toShowDatetext(
-                                                      commentController
-                                                          .commentDataList[
-                                                              index]
-                                                          .postTime!),
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .tertiary),
-                                                ),
-                                                SizedBox(height: 8),
-                                                // 评论内容可展开/收起
-                                                _ExpandableCommentContent(
-                                                  content: commentController
-                                                          .commentDataList[
-                                                              index]
-                                                          .content ??
-                                                      '',
-                                                ),
-                                                if (!(commentController
-                                                            .commentDataList[
-                                                                index]
-                                                            .imgPath ==
-                                                        null ||
-                                                    commentController
-                                                            .commentDataList[
-                                                                index]
-                                                            .imgPath ==
-                                                        ''))
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      final imgUrl = ApiService
-                                                              .baseUrl +
-                                                          ApiAddr
-                                                              .fileGetResourcet +
-                                                          commentController
-                                                              .commentDataList[
-                                                                  index]
-                                                              .imgPath!;
-                                                      Get.dialog(
-                                                          _ImagePreviewDialog(
-                                                              imgUrl: imgUrl));
-                                                    },
-                                                    child:
-                                                        ExtendedImage.network(
-                                                      ApiService.baseUrl +
-                                                          ApiAddr
-                                                              .fileGetResourcet +
-                                                          commentController
-                                                              .commentDataList[
-                                                                  index]
-                                                              .imgPath!,
-                                                      width: 300,
-                                                      height: 200,
-                                                      fit: BoxFit
-                                                          .contain, // 保证图片完整显示且有圆角
-                                                      cache: true,
-                                                      alignment:
-                                                          Alignment.centerLeft,
-                                                      enableLoadState: false,
-                                                    ),
-                                                  ),
-                                                SizedBox(height: 8),
-                                                // 点赞，点踩，评论
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: [
-                                                    Obx(() => IconButton(
-                                                          icon: Icon(
-                                                            commentController.isLike(
-                                                                    commentController
-                                                                        .commentDataList[
-                                                                            index]
-                                                                        .commentId!)
-                                                                ? Icons.thumb_up
-                                                                : Icons
-                                                                    .thumb_up_outlined,
-                                                            color: commentController.isLike(
-                                                                    commentController
-                                                                        .commentDataList[
-                                                                            index]
-                                                                        .commentId!)
-                                                                ? Theme.of(
-                                                                        context)
-                                                                    .colorScheme
-                                                                    .primary
-                                                                : null,
-                                                          ),
-                                                          iconSize: 16,
-                                                          onPressed: () {
-                                                            commentController.likeComment(
-                                                                commentController
-                                                                    .commentDataList[
-                                                                        index]
-                                                                    .commentId!);
-                                                          },
-                                                        )),
-                                                    Obx(() => Text(
-                                                        commentController
-                                                                .commentDataList[
-                                                                    index]
-                                                                .likeCount
-                                                                .toString() ??
-                                                            '0')),
-                                                    SizedBox(width: 16),
-                                                    Transform.flip(
-                                                        flipX: true,
-                                                        child:
-                                                            Obx(
-                                                                () =>
-                                                                    IconButton(
-                                                                      icon:
-                                                                          Icon(
-                                                                        commentController.isHate(commentController.commentDataList[index].commentId!)
-                                                                            ? Icons.thumb_down
-                                                                            : Icons.thumb_down_outlined,
-                                                                        color: commentController.isHate(commentController.commentDataList[index].commentId!)
-                                                                            ? Theme.of(context).colorScheme.primary
-                                                                            : null,
-                                                                      ),
-                                                                      iconSize:
-                                                                          16,
-                                                                      onPressed:
-                                                                          () {
-                                                                        commentController.hateComment(commentController
-                                                                            .commentDataList[index]
-                                                                            .commentId!);
-                                                                      },
-                                                                    ))),
-                                                    // Obx(() => Text(commentController
-                                                    //         .commentDataList[index]
-                                                    //         .hateCount
-                                                    //         .toString() ??
-                                                    //     '0')),
-                                                    SizedBox(width: 16),
-                                                    IconButton(
-                                                      icon: Icon(
-                                                          Icons
-                                                              .messenger_outline_rounded,
-                                                          size: 16),
-                                                      onPressed: () {
-                                                        // 回复评论逻辑
-                                                        commentController
-                                                            .nowSelectCommentId
-                                                            .value = commentController
-                                                                    .commentDataList[
-                                                                        index]
-                                                                    .commentId !=
-                                                                commentController
-                                                                    .nowSelectCommentId
-                                                                    .value
-                                                            ? commentController
-                                                                .commentDataList[
-                                                                    index]
-                                                                .commentId!
-                                                            : 0;
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                                Obx(() {
-                                                  if (commentController
-                                                          .nowSelectCommentId
-                                                          .value !=
-                                                      commentController
-                                                          .commentDataList[
-                                                              index]
-                                                          .commentId!) {
-                                                    return SizedBox.shrink();
-                                                  }
-                                                  return Column(children: [
-                                                    AnimatedSize(
-                                                      duration: Duration(
-                                                          milliseconds: 120),
-                                                      curve: Curves.easeInOut,
-                                                      child: ConstrainedBox(
-                                                        constraints:
-                                                            BoxConstraints(
-                                                          minWidth: 300,
-                                                          maxWidth: 300,
-                                                          minHeight: 40,
-                                                          maxHeight: 200,
-                                                        ),
-                                                        child: TextField(
-                                                          controller:
-                                                              commentController
-                                                                  .mainCommentController,
-                                                          minLines: 1,
-                                                          maxLines:
-                                                              null, // 支持多行自适应
-                                                          keyboardType:
-                                                              TextInputType
-                                                                  .multiline,
-                                                          maxLength:
-                                                              500, // 限制最大字数为500
-                                                          decoration:
-                                                              InputDecoration(
-                                                            labelText:
-                                                                '发表评论...',
-                                                            border:
-                                                                OutlineInputBorder(),
-                                                            isDense: true,
-                                                            contentPadding:
-                                                                EdgeInsets
-                                                                    .symmetric(
-                                                                        vertical:
-                                                                            10,
-                                                                        horizontal:
-                                                                            12),
-                                                          ),
-                                                          style: TextStyle(
-                                                              fontSize: 15),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 300,
-                                                      child: Row(
+                                                      color: commentController
+                                                                  .orderType
+                                                                  .value ==
+                                                              CommentOrderTypeEnum
+                                                                  .NEW.type
+                                                          ? null
+                                                          : Theme.of(context)
+                                                              .colorScheme
+                                                              .tertiary,
+                                                      fontWeight: commentController
+                                                                  .orderType
+                                                                  .value ==
+                                                              CommentOrderTypeEnum
+                                                                  .NEW.type
+                                                          ? FontWeight.bold
+                                                          : FontWeight
+                                                              .normal)))),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Obx(() => ListView.builder(
+                                              shrinkWrap: true,
+                                              itemCount: commentController
+                                                  .commentDataList.length,
+                                              itemBuilder: (context, index) {
+                                                return Column(children: [
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    children: [
+                                                      Column(children: [
+                                                        SizedBox(height: 12),
+                                                        Hero(
+                                                            tag:
+                                                                'commentAvatar${commentController.commentDataList[index].commentId}',
+                                                            child: Avatar(
+                                                              avatarValue:
+                                                                  commentController
+                                                                      .commentDataList[
+                                                                          index]
+                                                                      .avatar,
+                                                            ))
+                                                      ]),
+                                                      SizedBox(width: 16),
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         mainAxisAlignment:
                                                             MainAxisAlignment
-                                                                .spaceBetween,
+                                                                .center,
                                                         children: [
-                                                          Obx(() => Tooltip(
-                                                              message: commentController
-                                                                      .mainImgPath
-                                                                      .value
-                                                                      .isEmpty
-                                                                  ? "添加图片"
-                                                                  : '单击以修改,长按以删除',
-                                                              child: GestureDetector(
-                                                                  onTap: () async {
-                                                                    commentController
-                                                                        .mainImgPath
-                                                                        .value = (await showUploadImageCard(
-                                                                            imagePath: commentController
-                                                                                .mainImgPath.value,
-                                                                            shadow:
-                                                                                true)) ??
-                                                                        commentController
-                                                                            .mainImgPath
-                                                                            .value;
-                                                                  },
-                                                                  onLongPress: () {
-                                                                    commentController
-                                                                        .mainImgPath
-                                                                        .value = '';
-                                                                  },
-                                                                  child: commentController.mainImgPath.value != ''
-                                                                      ? ExtendedImage.network(
-                                                                          ApiService.baseUrl +
-                                                                              ApiAddr.fileGetResourcet +
-                                                                              commentController.mainImgPath.value,
-                                                                          width:
-                                                                              100,
-                                                                          height:
-                                                                              100,
-                                                                          fit: BoxFit
-                                                                              .contain, // 保证图片完整显示且有圆角
-                                                                          cache:
-                                                                              true,
-                                                                          alignment:
-                                                                              Alignment.centerLeft,
-                                                                          enableLoadState:
-                                                                              false,
-                                                                        )
-                                                                      : Icon(
-                                                                          Icons
-                                                                              .add_a_photo,
-                                                                          color: Theme.of(context)
-                                                                              .colorScheme
-                                                                              .tertiary,
-                                                                          size:
-                                                                              24,
-                                                                        )))),
-                                                          Obx(() => IconButton(
-                                                                tooltip: '发表评论',
-                                                                icon: Icon(
-                                                                    Icons.send),
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .colorScheme
-                                                                    .primary,
-                                                                onPressed: commentController
-                                                                        .sendingComment
-                                                                        .value
-                                                                    ? null
-                                                                    : () async {
-                                                                        await commentController
-                                                                            .postCommentMain();
-                                                                      },
+                                                          SizedBox(height: 8),
+                                                          Hero(
+                                                              tag:
+                                                                  'commentNickName${commentController.commentDataList[index].commentId}',
+                                                              child: Text(
+                                                                commentController
+                                                                        .commentDataList[
+                                                                            index]
+                                                                        .nickName ??
+                                                                    '',
+                                                                style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
                                                               )),
+                                                          Hero(
+                                                              tag:
+                                                                  'commentPostTime${commentController.commentDataList[index].commentId}',
+                                                              child: Text(
+                                                                toShowDatetext(
+                                                                    commentController
+                                                                        .commentDataList[
+                                                                            index]
+                                                                        .postTime!),
+                                                                style: TextStyle(
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .tertiary),
+                                                              )),
+                                                          SizedBox(height: 8),
+                                                          // 评论内容可展开/收起
+                                                          Hero(
+                                                              tag:
+                                                                  'commentContent${commentController.commentDataList[index].commentId}',
+                                                              child:
+                                                                  ExpandableCommentContent(
+                                                                content: commentController
+                                                                        .commentDataList[
+                                                                            index]
+                                                                        .content ??
+                                                                    '',
+                                                              )),
+                                                          if (!(commentController
+                                                                      .commentDataList[
+                                                                          index]
+                                                                      .imgPath ==
+                                                                  null ||
+                                                              commentController
+                                                                      .commentDataList[
+                                                                          index]
+                                                                      .imgPath ==
+                                                                  ''))
+                                                            Hero(
+                                                                tag:
+                                                                    'commentImgPath${commentController.commentDataList[index].commentId}',
+                                                                child:
+                                                                    GestureDetector(
+                                                                  onTap: () {
+                                                                    final imgUrl = ApiService
+                                                                            .baseUrl +
+                                                                        ApiAddr
+                                                                            .fileGetResourcet +
+                                                                        commentController
+                                                                            .commentDataList[index]
+                                                                            .imgPath!;
+                                                                    Get.dialog(ImagePreviewDialog(
+                                                                        imgUrl:
+                                                                            imgUrl));
+                                                                  },
+                                                                  child: ExtendedImage
+                                                                      .network(
+                                                                    ApiService
+                                                                            .baseUrl +
+                                                                        ApiAddr
+                                                                            .fileGetResourcet +
+                                                                        commentController
+                                                                            .commentDataList[index]
+                                                                            .imgPath!,
+                                                                    width: 300,
+                                                                    height: 200,
+                                                                    fit: BoxFit
+                                                                        .contain, // 保证图片完整显示且有圆角
+                                                                    cache: true,
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .centerLeft,
+                                                                    enableLoadState:
+                                                                        false,
+                                                                  ),
+                                                                )),
+                                                          SizedBox(height: 8),
+                                                          // 点赞，点踩，评论
+                                                          Hero(
+                                                              tag:
+                                                                  'commentBtns${commentController.commentDataList[index].commentId}',
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Obx(() =>
+                                                                      IconButton(
+                                                                        icon:
+                                                                            Icon(
+                                                                          commentController.isLike(commentController.commentDataList[index].commentId!)
+                                                                              ? Icons.thumb_up
+                                                                              : Icons.thumb_up_outlined,
+                                                                          color: commentController.isLike(commentController.commentDataList[index].commentId!)
+                                                                              ? Theme.of(context).colorScheme.primary
+                                                                              : null,
+                                                                        ),
+                                                                        iconSize:
+                                                                            16,
+                                                                        onPressed:
+                                                                            () {
+                                                                          commentController.likeComment(commentController
+                                                                              .commentDataList[index]
+                                                                              .commentId!);
+                                                                        },
+                                                                      )),
+                                                                  Obx(() => Text(commentController
+                                                                          .commentDataList[
+                                                                              index]
+                                                                          .likeCount
+                                                                          .toString() ??
+                                                                      '0')),
+                                                                  SizedBox(
+                                                                      width:
+                                                                          16),
+                                                                  Transform.flip(
+                                                                      flipX: true,
+                                                                      child: Obx(() => IconButton(
+                                                                            icon:
+                                                                                Icon(
+                                                                              commentController.isHate(commentController.commentDataList[index].commentId!) ? Icons.thumb_down : Icons.thumb_down_outlined,
+                                                                              color: commentController.isHate(commentController.commentDataList[index].commentId!) ? Theme.of(context).colorScheme.primary : null,
+                                                                            ),
+                                                                            iconSize:
+                                                                                16,
+                                                                            onPressed:
+                                                                                () {
+                                                                              commentController.hateComment(commentController.commentDataList[index].commentId!);
+                                                                            },
+                                                                          ))),
+                                                                  // Obx(() => Text(commentController
+                                                                  //         .commentDataList[index]
+                                                                  //         .hateCount
+                                                                  //         .toString() ??
+                                                                  //     '0')),
+                                                                  SizedBox(
+                                                                      width:
+                                                                          16),
+                                                                  IconButton(
+                                                                    icon: Icon(
+                                                                        Icons
+                                                                            .messenger_outline_rounded,
+                                                                        size:
+                                                                            16),
+                                                                    onPressed:
+                                                                        () {
+                                                                      // 回复评论逻辑
+                                                                      commentController
+                                                                          .nowSelectCommentId
+                                                                          .value = commentController.commentDataList[index].commentId !=
+                                                                              commentController
+                                                                                  .nowSelectCommentId.value
+                                                                          ? commentController
+                                                                              .commentDataList[index]
+                                                                              .commentId!
+                                                                          : 0;
+                                                                    },
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                          Obx(() {
+                                                            if (commentController
+                                                                    .nowSelectCommentId
+                                                                    .value !=
+                                                                commentController
+                                                                    .commentDataList[
+                                                                        index]
+                                                                    .commentId!) {
+                                                              return SizedBox
+                                                                  .shrink();
+                                                            }
+                                                            return Column(
+                                                                children: [
+                                                                  AnimatedSize(
+                                                                    duration: Duration(
+                                                                        milliseconds:
+                                                                            120),
+                                                                    curve: Curves
+                                                                        .easeInOut,
+                                                                    child:
+                                                                        ConstrainedBox(
+                                                                      constraints:
+                                                                          BoxConstraints(
+                                                                        minWidth:
+                                                                            300,
+                                                                        maxWidth:
+                                                                            300,
+                                                                        minHeight:
+                                                                            40,
+                                                                        maxHeight:
+                                                                            200,
+                                                                      ),
+                                                                      child:
+                                                                          TextField(
+                                                                        controller:
+                                                                            commentController.mainCommentController,
+                                                                        autofocus:
+                                                                            true,
+                                                                        minLines:
+                                                                            1,
+                                                                        maxLines:
+                                                                            null, // 支持多行自适应
+                                                                        keyboardType:
+                                                                            TextInputType.multiline,
+                                                                        maxLength:
+                                                                            500, // 限制最大字数为500
+                                                                        decoration:
+                                                                            InputDecoration(
+                                                                          labelText:
+                                                                              '发表评论...',
+                                                                          border:
+                                                                              OutlineInputBorder(),
+                                                                          isDense:
+                                                                              true,
+                                                                          contentPadding: EdgeInsets.symmetric(
+                                                                              vertical: 10,
+                                                                              horizontal: 12),
+                                                                        ),
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                15),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: 300,
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceBetween,
+                                                                      children: [
+                                                                        Obx(() => Tooltip(
+                                                                            message: commentController.mainImgPath.value.isEmpty ? "添加图片" : '单击以修改,长按以删除',
+                                                                            child: GestureDetector(
+                                                                                onTap: () async {
+                                                                                  commentController.mainImgPath.value = (await showUploadImageCard(imagePath: commentController.mainImgPath.value, shadow: true)) ?? commentController.mainImgPath.value;
+                                                                                },
+                                                                                onLongPress: () {
+                                                                                  commentController.mainImgPath.value = '';
+                                                                                },
+                                                                                child: commentController.mainImgPath.value != ''
+                                                                                    ? ExtendedImage.network(
+                                                                                        ApiService.baseUrl + ApiAddr.fileGetResourcet + commentController.mainImgPath.value,
+                                                                                        width: 100,
+                                                                                        height: 100,
+                                                                                        fit: BoxFit.contain, // 保证图片完整显示且有圆角
+                                                                                        cache: true,
+                                                                                        alignment: Alignment.centerLeft,
+                                                                                        enableLoadState: false,
+                                                                                      )
+                                                                                    : Icon(
+                                                                                        Icons.add_a_photo,
+                                                                                        color: Theme.of(context).colorScheme.tertiary,
+                                                                                        size: 24,
+                                                                                      )))),
+                                                                        Obx(() =>
+                                                                            IconButton(
+                                                                              tooltip: '发表评论',
+                                                                              icon: Icon(Icons.send),
+                                                                              color: Theme.of(context).colorScheme.primary,
+                                                                              onPressed: commentController.sendingComment.value
+                                                                                  ? null
+                                                                                  : () async {
+                                                                                      await commentController.postCommentMain();
+                                                                                    },
+                                                                            )),
+                                                                      ],
+                                                                    ),
+                                                                  )
+                                                                ]);
+                                                          }),
+                                                          Obx(() {
+                                                            if (commentController
+                                                                .commentDataList[
+                                                                    index]
+                                                                .children
+                                                                .isEmpty) {
+                                                              return SizedBox
+                                                                  .shrink();
+                                                            }
+                                                            return GestureDetector(
+                                                              onTap: () async {
+                                                                bool t = showFAB
+                                                                    .value;
+                                                                showFAB.value =
+                                                                    false;
+                                                                commentController
+                                                                    .nowSelectCommentId
+                                                                    .value = commentController
+                                                                        .commentDataList[
+                                                                            index]
+                                                                        .commentId ??
+                                                                    0;
+                                                                commentController
+                                                                    .inInnerPage
+                                                                    .value = true;
+                                                                await Get.to(
+                                                                    () =>
+                                                                        VideoPlayPageCommentsInner(
+                                                                          parentCommentId: commentController
+                                                                              .commentDataList[index]
+                                                                              .commentId!,
+                                                                          videoId:
+                                                                              widget.videoId,
+                                                                        ),
+                                                                    // 从右至左
+                                                                    transition:
+                                                                        Transition
+                                                                            .rightToLeft,
+                                                                    id: Routes
+                                                                        .videoPlayPageCommentsInnerNavId);
+                                                                commentController
+                                                                    .inInnerPage
+                                                                    .value = false;
+                                                                commentController
+                                                                    .nowSelectCommentId
+                                                                    .value = 0;
+                                                                showFAB.value =
+                                                                    t;
+                                                              },
+                                                              child: Card(
+                                                                child: SizedBox(
+                                                                  width: 280,
+                                                                  child: Column(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        ListView.builder(
+                                                                            itemCount: math.min(commentController.commentDataList[index].children.length, 2),
+                                                                            shrinkWrap: true,
+                                                                            physics: NeverScrollableScrollPhysics(),
+                                                                            itemBuilder: (context, childIndex) {
+                                                                              final child = commentController.commentDataList[index].children[childIndex];
+                                                                              return Hero(
+                                                                                  tag: 'commentChild${child.commentId}',
+                                                                                  child: _ChildCommentItemWidget(
+                                                                                    userName: child.nickName ?? '',
+                                                                                    content: child.content ?? '',
+                                                                                  ));
+                                                                            }),
+                                                                        Obx(
+                                                                          () {
+                                                                            if (commentController.commentDataList[index].children.length <=
+                                                                                2) {
+                                                                              return SizedBox.shrink();
+                                                                            }
+                                                                            return Hero(
+                                                                                tag: 'commentTotal${commentController.commentDataList[index].commentId}',
+                                                                                child: Padding(
+                                                                                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+                                                                                    child: Text(
+                                                                                      '共 ${commentController.commentDataList[index].children.length} 条回复',
+                                                                                      textAlign: TextAlign.start,
+                                                                                      style: TextStyle(
+                                                                                        color: Theme.of(context).colorScheme.tertiary,
+                                                                                        fontSize: 14,
+                                                                                      ),
+                                                                                    )));
+                                                                          },
+                                                                        )
+                                                                      ]),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }),
                                                         ],
                                                       ),
-                                                    )
-                                                  ]);
-                                                }),
-                                                if (commentController
-                                                    .commentDataList[index]
-                                                    .children
-                                                    .isNotEmpty)
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 16.0),
-                                                    child: Text(
-                                                      '回复(${commentController.commentDataList[index].children.length})',
-                                                      style: TextStyle(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .tertiary),
-                                                    ),
+                                                    ],
                                                   ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        DividerWithPaddingHorizontal(padding: 8)
-                                      ]);
-                                    },
-                                  ))),
-                          // 可扩展评论列表
-                          if (commentController.isLoading.value)
-                            CircularProgressIndicator()
-                        ],
-                      ));
-                })),
+                                                  DividerWithPaddingHorizontal(
+                                                      padding: 8)
+                                                ]);
+                                              },
+                                            ))),
+                                    // 可扩展评论列表
+                                    if (commentController.isLoading.value)
+                                      CircularProgressIndicator()
+                                  ],
+                                ));
+                          })),
+                  settings: settings,
+                );
+              },
+            )),
         floatingActionButton: Obx(() => showFAB.value
             ? FloatingActionButton(
                 mini: true,
@@ -534,41 +622,82 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
             child: Row(
               children: [
                 Obx(() => Tooltip(
-                      message: commentController.outterImgPath.value.isEmpty
-                          ? "添加图片"
-                          : '单击以修改,长按以删除',
+                      message: commentController.inInnerPage.value
+                          ? (commentController.innerOutterImgPath.value.isEmpty
+                              ? "添加图片"
+                              : '单击以修改,长按以删除')
+                          : (commentController.outterImgPath.value.isEmpty
+                              ? "添加图片"
+                              : '单击以修改,长按以删除'),
                       child: GestureDetector(
                         onTap: () async {
-                          commentController.outterImgPath.value =
-                              (await showUploadImageCard(
-                                    imagePath:
-                                        commentController.outterImgPath.value,
-                                    shadow: true,
-                                  )) ??
-                                  commentController.outterImgPath.value;
+                          if (commentController.inInnerPage.value) {
+                            commentController.innerOutterImgPath.value =
+                                (await showUploadImageCard(
+                                      imagePath: commentController
+                                          .innerOutterImgPath.value,
+                                      shadow: true,
+                                    )) ??
+                                    commentController.innerOutterImgPath.value;
+                          } else {
+                            commentController.outterImgPath.value =
+                                (await showUploadImageCard(
+                                      imagePath:
+                                          commentController.outterImgPath.value,
+                                      shadow: true,
+                                    )) ??
+                                    commentController.outterImgPath.value;
+                          }
                         },
                         onLongPress: () {
-                          commentController.outterImgPath.value = '';
+                          if (commentController.inInnerPage.value) {
+                            commentController.innerOutterImgPath.value = '';
+                          } else {
+                            commentController.outterImgPath.value = '';
+                          }
                         },
-                        child: commentController.outterImgPath.value != ''
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: ExtendedImage.network(
-                                  ApiService.baseUrl +
-                                      ApiAddr.fileGetResourcet +
-                                      commentController.outterImgPath.value,
-                                  width: 48,
-                                  height: 48,
-                                  fit: BoxFit.cover,
-                                  cache: true,
-                                  enableLoadState: false,
-                                ),
-                              )
-                            : Icon(
-                                Icons.add_a_photo,
-                                color: Theme.of(context).colorScheme.tertiary,
-                                size: 28,
-                              ),
+                        child: commentController.inInnerPage.value
+                            ? (commentController.innerOutterImgPath.value != ''
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: ExtendedImage.network(
+                                      ApiService.baseUrl +
+                                          ApiAddr.fileGetResourcet +
+                                          commentController
+                                              .innerOutterImgPath.value,
+                                      width: 48,
+                                      height: 48,
+                                      fit: BoxFit.cover,
+                                      cache: true,
+                                      enableLoadState: false,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.add_a_photo,
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary,
+                                    size: 28,
+                                  ))
+                            : (commentController.outterImgPath.value != ''
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: ExtendedImage.network(
+                                      ApiService.baseUrl +
+                                          ApiAddr.fileGetResourcet +
+                                          commentController.outterImgPath.value,
+                                      width: 48,
+                                      height: 48,
+                                      fit: BoxFit.cover,
+                                      cache: true,
+                                      enableLoadState: false,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.add_a_photo,
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary,
+                                    size: 28,
+                                  )),
                       ),
                     )),
                 SizedBox(width: 12),
@@ -581,21 +710,23 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                         minHeight: 40,
                         maxHeight: 200,
                       ),
-                      child: TextField(
-                        controller: commentController.outterCommentController,
-                        minLines: 1,
-                        maxLines: null, // 支持多行自适应
-                        keyboardType: TextInputType.multiline,
-                        // maxLength: 500, // 限制最大字数为500
-                        decoration: InputDecoration(
-                          hintText: '发表评论...',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 12),
-                        ),
-                        style: TextStyle(fontSize: 15),
-                      ),
+                      child: Obx(() => TextField(
+                            controller: commentController.inInnerPage.value
+                                ? commentController.innerOutterCommentController
+                                : commentController.outterCommentController,
+                            minLines: 1,
+                            maxLines: null, // 支持多行自适应
+                            keyboardType: TextInputType.multiline,
+                            // maxLength: 500, // 限制最大字数为500
+                            decoration: InputDecoration(
+                              hintText: '发表评论...',
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 12),
+                            ),
+                            style: TextStyle(fontSize: 15),
+                          )),
                     ),
                   ),
                 ),
@@ -616,185 +747,41 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
   }
 }
 
-// 新增可展开/收起的评论内容组件
-class _ExpandableCommentContent extends StatefulWidget {
+// 子评论展示组件
+class _ChildCommentItemWidget extends StatelessWidget {
+  final String userName;
   final String content;
-  const _ExpandableCommentContent({required this.content, Key? key})
+  const _ChildCommentItemWidget(
+      {required this.userName, required this.content, Key? key})
       : super(key: key);
 
   @override
-  State<_ExpandableCommentContent> createState() =>
-      _ExpandableCommentContentState();
-}
-
-class _ExpandableCommentContentState extends State<_ExpandableCommentContent> {
-  bool expanded = false;
-  bool needExpand = false;
-  final int maxLines = 5;
-  @override
   Widget build(BuildContext context) {
-    final text = widget.content;
-    final textStyle =
-        TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double realMaxWidth = 300;
-        // 先用TextPainter判断是否超出maxLines
-        final span = TextSpan(text: text, style: textStyle);
-        final tp = TextPainter(
-          text: span,
-          maxLines: maxLines,
-          textDirection: TextDirection.ltr,
-        )..layout(maxWidth: realMaxWidth);
-        needExpand = tp.didExceedMaxLines;
-        return ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: realMaxWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                text,
-                maxLines: expanded ? null : maxLines,
-                overflow:
-                    expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                style: textStyle,
-                softWrap: true,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: "$userName：",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
               ),
-              if (needExpand)
-                TextButton(
-                  style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero, minimumSize: Size(40, 24)),
-                  onPressed: () => setState(() => expanded = !expanded),
-                  child: Text(expanded ? '收起' : '展开',
-                      style: TextStyle(fontSize: 14)),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-// 图片预览弹窗
-class _ImagePreviewDialog extends StatefulWidget {
-  final String imgUrl;
-  const _ImagePreviewDialog({required this.imgUrl});
-
-  @override
-  State<_ImagePreviewDialog> createState() => _ImagePreviewDialogState();
-}
-
-class _ImagePreviewDialogState extends State<_ImagePreviewDialog> {
-  double rotation = 0;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Get.back(), // 点击图片外关闭
-      child: Material(
-        color: Colors.black54, // 半透明背景
-        type: MaterialType.transparency,
-        child: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  return Transform.rotate(
-                      angle: rotation,
-                      child: ExtendedImage.network(
-                        widget.imgUrl,
-                        fit: BoxFit.contain,
-                        width: constraints.maxWidth * 0.95,
-                        height: constraints.maxHeight * 0.95,
-                        mode: ExtendedImageMode.gesture,
-                        initGestureConfigHandler: (_) => GestureConfig(
-                          minScale: 0.5,
-                          maxScale: 5.0,
-                          animationMinScale: 0.5,
-                          animationMaxScale: 5.0,
-                          speed: 1.0,
-                          inertialSpeed: 100.0,
-                          initialScale: 1.0,
-                          inPageView: false,
-                          initialAlignment: InitialAlignment.center,
-                        ),
-                      ));
-                },
-              ),
-              Positioned(
-                top: 24,
-                right: 24,
-                child: IconButton(
-                  icon: Icon(Icons.close, color: Colors.white, size: 28),
-                  onPressed: () => Get.back(),
-                ),
-              ),
-              Positioned(
-                bottom: 32,
-                right: 32,
-                child: Row(
-                  children: [
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black54,
-                        foregroundColor: Colors.white,
-                      ),
-                      icon: Icon(Icons.rotate_right),
-                      label: Text('旋转'),
-                      onPressed: () {
-                        setState(() {
-                          rotation += 0.5 * 3.1415926; // 90度
-                        });
-                      },
-                    ),
-                    SizedBox(width: 16),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black54,
-                        foregroundColor: Colors.white,
-                      ),
-                      icon: Icon(Icons.download),
-                      label: Text('保存到本地'),
-                      onPressed: () async {
-                        try {
-                          final response =
-                              await ExtendedNetworkImageProvider(widget.imgUrl)
-                                  .getNetworkImageData();
-                          final bytes = response;
-                          final downloadsDir = await _getDownloadDirectory();
-                          final fileName = widget.imgUrl.split('/').last;
-                          final file = await _saveBytesToFile(
-                              bytes!, downloadsDir, fileName);
-                          Get.back();
-                          Get.snackbar('提示', '图片已保存到: ${file.path}');
-                        } catch (e) {
-                          Get.snackbar('错误', '保存失败: $e');
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+            TextSpan(
+              text: content,
+              style: TextStyle(
+                  fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
+            ),
+          ],
         ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.start,
+        softWrap: true,
       ),
     );
   }
-}
-
-Future<String> _getDownloadDirectory() async {
-  if (GetPlatform.isDesktop) {
-    final downloads = await getDownloadsDirectory();
-    return downloads?.path ?? Directory.current.path;
-  }
-  return Directory.current.path;
-}
-
-Future<File> _saveBytesToFile(
-    Uint8List bytes, String dir, String fileName) async {
-  final file = File('$dir/$fileName');
-  await file.writeAsBytes(bytes);
-  return file;
 }

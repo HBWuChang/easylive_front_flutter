@@ -607,6 +607,7 @@ class VideoPlayPageInfo extends StatelessWidget {
               })),
       floatingActionButton: Obx(() => showFab.value
           ? FloatingActionButton(
+              mini: true,
               onPressed: () {
                 scrollController.animateTo(
                   0,
