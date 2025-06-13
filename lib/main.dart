@@ -132,10 +132,10 @@ class _HomeState extends State<Home> {
             top: kToolbarHeight,
             child: Navigator(
               key: Get.nestedKey(Routes.mainGetId),
-              initialRoute: '/main',
+              initialRoute: Routes.mainPage,
               clipBehavior: Clip.none,
               onGenerateRoute: (settings) {
-                if (settings.name == '/main') {
+                if (settings.name == Routes.mainPage) {
                   var route = GetPageRoute(
                       settings: settings,
                       page: () => MainPage(),

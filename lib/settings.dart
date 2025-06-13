@@ -34,6 +34,7 @@ class Routes {
   static const String loginPageLoginRouteName = '/loginPageLogin';
   static const String loginPageRegisterRouteName = '/loginPageRegister';
   static const String homePage = '/home';
+  static const String mainPage = '/main';
   static const String loginPage = '/login';
   static const String platformPage = '/platform';
   static const String videoPlayPage = '/videoPlayPage';

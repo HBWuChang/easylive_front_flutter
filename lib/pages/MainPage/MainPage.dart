@@ -340,7 +340,10 @@ class _CategoryButtonState extends State<_CategoryButton>
       builder: (context) {
         return Positioned(
           left: rect.left,
-          bottom: MediaQuery.of(context).size.height - rect.top + 4,
+          bottom: MediaQuery.of(context).size.height -
+              kToolbarHeight -
+              rect.top +
+              4,
           child: MouseRegion(
             onEnter: (_) => _cancelFadeTimer(),
             onExit: (_) => _startFadeTimer(),

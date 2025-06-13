@@ -178,7 +178,7 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
           onTap: () {
             final videoId = widget.video.videoId;
             if (videoId != null) {
-              Get.find<AppBarController>().extendBodyBehindAppBar.value = false;
+              Get.find<AppBarController>().needRemove++;
               Get.toNamed('${Routes.videoPlayPage}?videoId=$videoId',
                   id: Routes.mainGetId);
             }

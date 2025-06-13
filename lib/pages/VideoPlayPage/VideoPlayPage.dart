@@ -267,6 +267,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   void initState() {
     super.initState();
     player = Player();
+    Get.find<AppBarController>().playerList.add(player);
     controller = VideoController(player);
     _openVideo();
   }

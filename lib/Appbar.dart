@@ -39,12 +39,13 @@ class AppBarContent extends StatelessWidget {
         children: [
           IconButton(
               onPressed: () {
-                Get.find<AppBarController>().extendBodyBehindAppBar.value =
-                    true;
-                Get.back(id: Routes.mainGetId);
+                Get.toNamed(
+                  Routes.mainPage,
+                  id: Routes.mainGetId,
+                );
               },
               icon: Icon(
-                Icons.arrow_back_ios_new,
+                Icons.home_rounded,
                 size: 13,
               )),
           Expanded(
@@ -69,7 +70,7 @@ class AppBarContent extends StatelessWidget {
                 }
               });
               final routes = appBarController.top_routeWithName;
-              final selectedName = appBarController.selectedRouteName;
+              final selectedName = appBarController.selectedRouteName.value;
               return Container(
                 height: kToolbarHeight,
                 child: Listener(
@@ -106,8 +107,6 @@ class AppBarContent extends StatelessWidget {
                                 onTap: () {
                                   // TODO: 标签点击动作
                                   if (routes[index].name != selectedName) {
-                                    appBarController.selectedRouteName =
-                                        routes[index].name;
                                     Get.toNamed(
                                       routes[index].name,
                                       id: Routes.mainGetId,
@@ -181,6 +180,8 @@ class AppBarContent extends StatelessWidget {
                                                             overflow:
                                                                 TextOverflow
                                                                     .ellipsis,
+                                                            textAlign: TextAlign
+                                                                .center,
                                                             style: TextStyle(
                                                               fontWeight: routes[
                                                                               index]
@@ -206,11 +207,9 @@ class AppBarContent extends StatelessWidget {
                                                 )),
                                           )),
                                       InkWell(
-                                        onTap: () {
-                                          appBarController.top_routeWithName
-                                              .removeAt(index);
-                                          appBarController.update();
-                                        },
+                                        onTap: () =>
+                                            appBarController.removeRouteByName(
+                                                routes[index].name),
                                         child: Padding(
                                           padding: const EdgeInsets.only(
                                               right: 6, left: 2),

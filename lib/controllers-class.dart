@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 import 'Funcs.dart';
+import 'package:media_kit/media_kit.dart';
 
 class ControllersInitController extends GetxController {
   var isLoginControllerInitialized = false.obs;
@@ -788,11 +789,14 @@ class AppBarController extends GetxController {
   double imgHeight = 180.0;
   var extendBodyBehindAppBar = true.obs;
   var top_routeWithName = List.empty(growable: true).obs;
+  List<String> logRoutes = List.empty(growable: true);
   ListenPopMiddleware listenPopMiddleware = ListenPopMiddleware();
   int disposedByClean = 0;
-  String? selectedRouteName = '/main';
+  var selectedRouteName = Routes.mainPage.obs;
   ScrollController tabScrollController = ScrollController();
   var tabWidth = 180.0.obs;
+  int needRemove = 0;
+  List<Player> playerList = [];
   @override
   void onInit() {
     super.onInit();
@@ -807,29 +811,94 @@ class AppBarController extends GetxController {
     }
   }
 
+  Future<void> stopAllVideo() async {
+    for (int index = playerList.length - 1; index >= 0; index--) {
+      bool flag = false;
+      try {
+        await playerList[index].pause();
+      } catch (e) {
+        flag = true;
+      }
+      if (flag) {
+        playerList.removeAt(index);
+      }
+    }
+  }
+
   void addAndCleanReapeatRoute(Route route, String name, {String? title}) {
+    if (needRemove > 0) {
+      needRemove--;
+      removeRouteByName(selectedRouteName.value);
+    }
+    if (name.startsWith(Routes.videoPlayPage)) {
+      stopAllVideo();
+    }
+    logRoutes.remove(name);
+    logRoutes.add(name);
+    int index = top_routeWithName.indexWhere((r) => r.name == name);
+    String? tTitle;
     if (top_routeWithName.isNotEmpty) {
       // 清除重复的路由
       top_routeWithName.removeWhere((r) {
         if (r.route.settings.name == route.settings.name) {
           disposedByClean++;
+          tTitle = r.title.value;
           Get.removeRoute(r.route, id: Routes.mainGetId);
           return true;
         }
         return false;
       });
     }
-    top_routeWithName.add(RouteWithName(route, name, title: title));
+    selectedRouteName.value = name;
+    // top_routeWithName.add(RouteWithName(route, name, title: title));
+    if (index == -1) {
+      // 如果没有重复的路由，则添加新的路由
+      top_routeWithName.add(RouteWithName(route, name, title: title));
+    } else {
+      // 如果有重复的路由，则更新现有路由的title
+      top_routeWithName.insert(
+          index, RouteWithName(route, name, title: title ?? tTitle));
+    }
   }
 
-  void onPageDispose() {
-    print("onPageDispose: ${Get.currentRoute}");
+  void removeRouteByName(String name) {
+    if (top_routeWithName.length < 2) {
+      // 如果只剩下一个路由，则不允许删除
+      return;
+    }
+    top_routeWithName.removeWhere((r) {
+      if (r.name == name) {
+        disposedByClean++;
+        Get.removeRoute(r.route, id: Routes.mainGetId);
+        return true;
+      }
+      return false;
+    });
+  }
+
+  void onPageDispose(String name) {
+    print("onPageDispose: ${name}");
     if (disposedByClean > 0) {
       disposedByClean--;
     } else {
       top_routeWithName.removeLast();
     }
-    
+
+    logRoutes.removeWhere((r) {
+      bool flag = true;
+      for (var route in top_routeWithName) {
+        if (route.name == r) {
+          flag = false;
+          break;
+        }
+      }
+      return flag;
+    });
+
+    if (logRoutes.indexOf(selectedRouteName.value) == -1) {
+      selectedRouteName.value =
+          top_routeWithName.isNotEmpty ? top_routeWithName.last.name : Routes.mainPage;
+    }
   }
 }
 
@@ -837,7 +906,8 @@ class ListenPopMiddleware extends GetMiddleware {
   @override
   void onPageDispose() {
     // 当页面被销毁时，调用AppBarController的onPageDispose方法
-    Get.find<AppBarController>().onPageDispose();
+    Get.find<AppBarController>()
+        .onPageDispose(Get.currentRoute); // 获取当前路由名称并传递给onPageDispose
   }
 }
 
