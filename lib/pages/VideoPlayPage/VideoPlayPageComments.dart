@@ -70,7 +70,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
         body: HeroControllerScope(
             controller: MaterialApp.createMaterialHeroController(),
             child: Navigator(
-              key: Get.nestedKey(Routes.videoPlayPageCommentsInnerNavId),
+              key: Get.nestedKey(Routes.videoPlayPageCommentsInnerNavId+widget.videoId.hashCode),
               onGenerateRoute: (settings) {
                 return MaterialPageRoute(
                   builder: (context) => GetBuilder<CommentController>(
@@ -528,7 +528,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                         Transition
                                                                             .rightToLeft,
                                                                     id: Routes
-                                                                        .videoPlayPageCommentsInnerNavId);
+                                                                        .videoPlayPageCommentsInnerNavId+widget.videoId.hashCode);
                                                                 commentController
                                                                     .inInnerPage
                                                                     .value = false;

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' show PointerScrollEvent;
 
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/pages/MainPage/MainPage.dart';
@@ -20,6 +21,8 @@ import 'dart:io';
 import 'pages/PlatformPage/PlatformPage.dart';
 
 import 'package:media_kit/media_kit.dart';
+import 'package:flutter/gestures.dart';
+import 'Appbar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -93,9 +96,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final Controller c = Get.put(Controller());
   final AccountController accountController = Get.find<AccountController>();
-  final GlobalKey _avatarKey = GlobalKey();
-  OverlayEntry? _overlayInfoEntry;
   final AppBarController appBarController = Get.find<AppBarController>();
+  final AppBarContent appBarContent = AppBarContent();
 
   @override
   void initState() {
@@ -122,161 +124,73 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    Widget appBarContent = Obx(
-      () => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Scaffold(
+      body: Stack(
         children: [
-          IconButton(
-              tooltip: "${c.count}",
-              onPressed: () {
-                Get.find<AppBarController>().extendBodyBehindAppBar.value =
-                    true;
-                Get.back(id: Routes.mainGetId);
+          // 页面内容
+          Positioned.fill(
+            top: kToolbarHeight,
+            child: Navigator(
+              key: Get.nestedKey(Routes.mainGetId),
+              initialRoute: '/main',
+              clipBehavior: Clip.none,
+              onGenerateRoute: (settings) {
+                if (settings.name == '/main') {
+                  var route = GetPageRoute(
+                      settings: settings,
+                      page: () => MainPage(),
+                      transition: Transition.noTransition,
+                      middlewares: [appBarController.listenPopMiddleware]);
+                  appBarController.addAndCleanReapeatRoute(
+                      route, settings.name!,
+                      title: "狩叶");
+                  return route;
+                }
+                if (settings.name == Routes.platformPage) {
+                  var route = GetPageRoute(
+                      settings: settings,
+                      page: () => PlatformPage(),
+                      transition: Transition.fadeIn,
+                      middlewares: [appBarController.listenPopMiddleware]);
+                  appBarController.addAndCleanReapeatRoute(
+                      route, settings.name!,
+                      title: "创作中心");
+                  return route;
+                }
+                if (settings.name!.startsWith(Routes.videoPlayPage)) {
+                  var route = GetPageRoute(
+                      settings: settings,
+                      routeName: settings.name,
+                      page: () => VideoPlayPage(),
+                      transition: Transition.fadeIn,
+                      middlewares: [appBarController.listenPopMiddleware]);
+                  appBarController.addAndCleanReapeatRoute(
+                      route, settings.name!);
+                  return route;
+                }
+                // 可扩展更多页面
+                return null;
               },
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                size: 13,
-              )),
-          Container(
-            width: 200,
-            child: Row(
-              children: [
-                MouseRegion(
-                    onEnter: (_) {
-                      if (accountController.userId == null) return;
-                      final overlay = Overlay.of(context);
-                      final renderBox = _avatarKey.currentContext
-                          ?.findRenderObject() as RenderBox?;
-                      final offset =
-                          renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-                      final size = renderBox?.size ?? Size.zero;
-                      if (_overlayInfoEntry != null) return;
-                      _overlayInfoEntry = OverlayEntry(
-                        builder: (context) => Positioned(
-                          left: offset.dx + size.width / 2 - 150, // 300宽度一半
-                          top: offset.dy,
-                          child: AccountInfoDialog(
-                            avatarKey: _avatarKey,
-                            onClose: () {
-                              _overlayInfoEntry?.remove();
-                              _overlayInfoEntry = null;
-                            },
-                          ),
-                        ),
-                      );
-                      overlay.insert(_overlayInfoEntry!);
-                    },
-                    child: accountController.userId == null
-                        ? SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: IconButton(
-                              tooltip: Texts.login,
-                              iconSize: 40,
-                              onPressed: () {
-                                openLoginDialog();
-                              },
-                              icon: Obx(() {
-                                return Avatar(
-                                  key: _avatarKey,
-                                  avatarValue: accountController.avatar,
-                                );
-                              }),
-                            ))
-                        : Obx(() {
-                            return Avatar(
-                              key: _avatarKey,
-                              avatarValue: accountController.avatar,
-                            );
-                          })),
-                IconButton(
-                  tooltip: Texts.minimize,
-                  icon: Icon(Icons.minimize, size: 13),
-                  onPressed: () {
-                    windowManager.minimize();
-                    windowManager.setSkipTaskbar(false);
-                  },
-                ),
-                IconButton(
-                  tooltip: Texts.minimize,
-                  icon: Icon(Icons.minimize, size: 13),
-                  onPressed: () {
-                    windowManager.minimize();
-                    windowManager.setSkipTaskbar(false);
-                  },
-                ),
-                IconButton(
-                  tooltip: '创作中心',
-                  icon: Icon(Icons.create, size: 13),
-                  onPressed: () {
-                    Get.find<AppBarController>().extendBodyBehindAppBar.value =
-                        false;
-                    Get.toNamed(Routes.platformPage, id: Routes.mainGetId);
-                  },
-                ),
-                IconButton(
-                  tooltip: Texts.close,
-                  icon: Icon(
-                    Icons.close,
-                    size: 13,
-                  ),
-                  onPressed: () {
-                    if (!kDebugMode) exit(0);
-                  },
-                ),
-              ],
             ),
-          )
+          ),
+          // 顶部悬浮AppBar
+          Obx(() => Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: kToolbarHeight,
+                child: Material(
+                  color: appBarController.appBarOpaque.value
+                      ? Colors.white
+                      : Colors.transparent,
+                  elevation: 0,
+                  child: GetPlatform.isDesktop
+                      ? DragToMoveArea(child: appBarContent)
+                      : appBarContent,
+                ),
+              )),
         ],
       ),
     );
-    return Obx(() => Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: Obx(() => AppBar(
-                backgroundColor: appBarController.appBarOpaque.value
-                    ? Colors.white
-                    : Colors.transparent,
-                elevation: 0,
-                title: GetPlatform.isDesktop
-                    ? DragToMoveArea(child: appBarContent)
-                    : appBarContent,
-                toolbarHeight: kToolbarHeight,
-                automaticallyImplyLeading: false,
-                titleSpacing: 0,
-              )),
-        ),
-        extendBodyBehindAppBar: appBarController.extendBodyBehindAppBar.value,
-        body: Navigator(
-          key: Get.nestedKey(Routes.mainGetId),
-          initialRoute: '/main',
-          onGenerateRoute: (settings) {
-            if (settings.name == '/main') {
-              // 不要在build期间修改observable
-              return GetPageRoute(
-                settings: settings,
-                page: () => MainPage(),
-                transition: Transition.noTransition,
-              );
-            }
-            if (settings.name == Routes.platformPage) {
-              return GetPageRoute(
-                settings: settings,
-                page: () => PlatformPage(),
-                transition: Transition.fadeIn,
-              );
-            }
-            if (settings.name!.startsWith(Routes.videoPlayPage)) {
-              return GetPageRoute(
-                settings: settings,
-                routeName: settings.name,
-                page: () => VideoPlayPage(),
-                transition: Transition.fadeIn,
-              );
-            }
-            // 可扩展更多页面
-            return null;
-          },
-        )));
   }
 }

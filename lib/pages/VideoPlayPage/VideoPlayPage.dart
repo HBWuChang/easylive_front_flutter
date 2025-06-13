@@ -43,6 +43,8 @@ class VideoPlayPage extends StatelessWidget {
     } else {
       commentController =
           Get.put(CommentController(), tag: '${videoId}CommentController');
+      commentController.setVideoId(videoId);
+      commentController.loadComments();
     }
     VideoGetVideoInfoController videoGetVideoInfoController;
     if (Get.isRegistered<VideoGetVideoInfoController>(
@@ -52,10 +54,9 @@ class VideoPlayPage extends StatelessWidget {
     } else {
       videoGetVideoInfoController = Get.put(VideoGetVideoInfoController(),
           tag: '${videoId}VideoGetVideoInfoController');
+      videoGetVideoInfoController.loadVideoInfo(videoId, routeName: routeName);
     }
-    videoGetVideoInfoController.loadVideoInfo(videoId);
-    commentController.setVideoId(videoId);
-    commentController.loadComments();
+
     if (Get.isRegistered<VideoLoadVideoPListController>(
         tag: '${videoId}VideoLoadVideoPListController')) {
     } else {
@@ -71,6 +72,7 @@ class VideoPlayPage extends StatelessWidget {
           } else {
             final RxInt nowTabIndex = 0.obs;
             final pageController = PreloadPageController(initialPage: 0);
+
             return Row(children: [
               // 左侧：视频播放器
               Expanded(

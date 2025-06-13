@@ -16,8 +16,13 @@ import 'package:cross_file/cross_file.dart';
 import 'package:dotted_decoration/dotted_decoration.dart';
 import 'dart:ui' as ui;
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   MainPage({Key? key}) : super(key: key);
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
   final AppBarController appBarController = Get.find<AppBarController>();
   final CategoryLoadAllCategoryController categoryLoadAllCategoryController =
       Get.find<CategoryLoadAllCategoryController>();
@@ -25,9 +30,35 @@ class MainPage extends StatelessWidget {
       Get.put(CategoryViewStateController());
   final VideoLoadRecommendVideoController videoLoadRecommendVideoController =
       Get.find<VideoLoadRecommendVideoController>();
+
+  void _minScrollListener() {
+    if (appBarController.scrollController.offset < kToolbarHeight) {
+      appBarController.scrollController.jumpTo(kToolbarHeight);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    appBarController.scrollController.addListener(_minScrollListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (appBarController.scrollController.hasClients &&
+          appBarController.scrollController.offset < kToolbarHeight) {
+        appBarController.scrollController.jumpTo(kToolbarHeight);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    appBarController.scrollController.removeListener(_minScrollListener);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      clipBehavior: Clip.none,
       controller: appBarController.scrollController,
       slivers: [
         SliverToBoxAdapter(
@@ -485,7 +516,6 @@ class CategoryOverlayBar extends StatefulWidget {
 
 class _CategoryOverlayBarState extends State<CategoryOverlayBar> {
   OverlayEntry? _overlayEntry;
-  bool _showAll = false;
 
   @override
   void initState() {
@@ -494,10 +524,13 @@ class _CategoryOverlayBarState extends State<CategoryOverlayBar> {
     ever(widget.categoryViewStateController.selectedCategoryName,
         (_) => _updateOverlay());
     ever(Get.find<AppBarController>().appBarOpaque, (v) => _updateOverlay());
-    WidgetsBinding.instance.addPostFrameCallback((_) => _updateOverlay());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _updateOverlay();
+    });
   }
 
   void _updateOverlay() {
+    if (!mounted) return;
     final appBarOpaque = Get.find<AppBarController>().appBarOpaque.value;
     if (!appBarOpaque) {
       _removeOverlay();
@@ -511,14 +544,15 @@ class _CategoryOverlayBarState extends State<CategoryOverlayBar> {
           top: kToolbarHeight,
           right: 0,
           child: Material(
-            // color: Colors.white,
             elevation: 0, // 无阴影
             child: MouseRegion(
               onEnter: (_) {
+                if (!mounted) return;
                 widget.categoryViewStateController.showAll.value = true;
                 _rebuildOverlay();
               },
               onExit: (_) {
+                if (!mounted) return;
                 widget.categoryViewStateController.showAll.value = false;
                 _rebuildOverlay();
               },
@@ -546,16 +580,21 @@ class _CategoryOverlayBarState extends State<CategoryOverlayBar> {
         );
       },
     );
-    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
+    if (mounted) {
+      Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
+    }
   }
 
   void _rebuildOverlay() {
+    if (!mounted) return;
     _overlayEntry?.markNeedsBuild();
   }
 
   void _removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
+    if (_overlayEntry != null) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    }
   }
 
   @override

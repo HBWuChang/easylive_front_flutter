@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:easylive/controllers-class2.dart';
 import 'package:easylive/enums.dart';
+import 'package:easylive/settings.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -786,6 +787,66 @@ class AppBarController extends GetxController {
   ScrollController scrollController = ScrollController();
   double imgHeight = 180.0;
   var extendBodyBehindAppBar = true.obs;
+  var top_routeWithName = List.empty(growable: true).obs;
+  ListenPopMiddleware listenPopMiddleware = ListenPopMiddleware();
+  int disposedByClean = 0;
+  String? selectedRouteName = '/main';
+  ScrollController tabScrollController = ScrollController();
+  var tabWidth = 180.0.obs;
+  @override
+  void onInit() {
+    super.onInit();
+    extendBodyBehindAppBar.firstRebuild = false;
+  }
+
+  void updateTitleByRouteName({required String name, required String title}) {
+    for (var r in top_routeWithName) {
+      if (r.name == name) {
+        r.title.value = title;
+      }
+    }
+  }
+
+  void addAndCleanReapeatRoute(Route route, String name, {String? title}) {
+    if (top_routeWithName.isNotEmpty) {
+      // 清除重复的路由
+      top_routeWithName.removeWhere((r) {
+        if (r.route.settings.name == route.settings.name) {
+          disposedByClean++;
+          Get.removeRoute(r.route, id: Routes.mainGetId);
+          return true;
+        }
+        return false;
+      });
+    }
+    top_routeWithName.add(RouteWithName(route, name, title: title));
+  }
+
+  void onPageDispose() {
+    print("onPageDispose: ${Get.currentRoute}");
+    if (disposedByClean > 0) {
+      disposedByClean--;
+    } else {
+      top_routeWithName.removeLast();
+    }
+    
+  }
+}
+
+class ListenPopMiddleware extends GetMiddleware {
+  @override
+  void onPageDispose() {
+    // 当页面被销毁时，调用AppBarController的onPageDispose方法
+    Get.find<AppBarController>().onPageDispose();
+  }
+}
+
+class RouteWithName {
+  final Route route;
+  final String name;
+  RxString title;
+  RouteWithName(this.route, this.name, {String? title})
+      : title = (title ?? '').obs;
 }
 
 // 新增：窗口宽度响应式控制器
@@ -1009,7 +1070,7 @@ class VideoGetVideoInfoController extends GetxController {
   bool get hasCoin => userActionList.any((action) =>
       action.actionType == UserActionEnum.VIDEO_COIN.type &&
       action.userId == Get.find<AccountController>().userId);
-  Future<void> loadVideoInfo(String videoId) async {
+  Future<void> loadVideoInfo(String videoId, {String? routeName}) async {
     try {
       var res = await ApiService.videoGetVideoInfo(videoId);
       if (res['code'] == 200) {
@@ -1017,6 +1078,10 @@ class VideoGetVideoInfoController extends GetxController {
         userActionList.value = (res['data']['userActionList'] as List)
             .map((item) => UserAction(item as Map<String, dynamic>))
             .toList();
+        if (routeName != null) {
+          Get.find<AppBarController>().updateTitleByRouteName(
+              name: routeName, title: videoInfo.value.videoName ?? '');
+        }
         VideoGetVideoRecommendController videoGetVideoRecommendController;
         if (Get.isRegistered<VideoGetVideoRecommendController>(
             tag: '${videoId}VideoGetVideoRecommendController')) {
