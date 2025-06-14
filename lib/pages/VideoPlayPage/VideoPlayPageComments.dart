@@ -70,7 +70,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
         body: HeroControllerScope(
             controller: MaterialApp.createMaterialHeroController(),
             child: Navigator(
-              key: Get.nestedKey(Routes.videoPlayPageCommentsInnerNavId+widget.videoId.hashCode),
+              key: Get.nestedKey(Routes.videoPlayPageCommentsInnerNavId +
+                  widget.videoId.hashCode),
               onGenerateRoute: (settings) {
                 return MaterialPageRoute(
                   builder: (context) => GetBuilder<CommentController>(
@@ -528,7 +529,10 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                         Transition
                                                                             .rightToLeft,
                                                                     id: Routes
-                                                                        .videoPlayPageCommentsInnerNavId+widget.videoId.hashCode);
+                                                                            .videoPlayPageCommentsInnerNavId +
+                                                                        widget
+                                                                            .videoId
+                                                                            .hashCode);
                                                                 commentController
                                                                     .inInnerPage
                                                                     .value = false;
@@ -553,10 +557,11 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                             itemBuilder: (context, childIndex) {
                                                                               final child = commentController.commentDataList[index].children[childIndex];
                                                                               return Hero(
-                                                                                  tag: 'commentChild${child.commentId}',
-                                                                                  child: _ChildCommentItemWidget(
+                                                                                  tag: 'commentContent${child.commentId}',
+                                                                                  child: ChildCommentItemWidget(
                                                                                     userName: child.nickName ?? '',
                                                                                     content: child.content ?? '',
+                                                                                    replyNickName: child.replyNickName,
                                                                                   ));
                                                                             }),
                                                                         Obx(
@@ -744,44 +749,5 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
             ),
           ),
         ));
-  }
-}
-
-// 子评论展示组件
-class _ChildCommentItemWidget extends StatelessWidget {
-  final String userName;
-  final String content;
-  const _ChildCommentItemWidget(
-      {required this.userName, required this.content, Key? key})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-      child: Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: "$userName：",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-            ),
-            TextSpan(
-              text: content,
-              style: TextStyle(
-                  fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
-            ),
-          ],
-        ),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.start,
-        softWrap: true,
-      ),
-    );
   }
 }

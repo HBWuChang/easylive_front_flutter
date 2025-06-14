@@ -562,7 +562,9 @@ class ImagePreviewDialogState extends State<ImagePreviewDialog> {
 // 新增可展开/收起的评论内容组件
 class ExpandableCommentContent extends StatefulWidget {
   final String content;
-  const ExpandableCommentContent({required this.content, Key? key})
+  final String? replyNickName;
+  const ExpandableCommentContent(
+      {required this.content, this.replyNickName, Key? key})
       : super(key: key);
 
   @override
@@ -595,12 +597,36 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                text,
+              Text.rich(
+                TextSpan(
+                  children: [
+                    if (widget.replyNickName != null)
+                      TextSpan(
+                        text: '回复 ',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.tertiary,
+                          fontSize: 16,
+                        ),
+                      ),
+                    if (widget.replyNickName != null)
+                      TextSpan(
+                        text: '${widget.replyNickName}：',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    TextSpan(
+                      text: text,
+                      style: textStyle,
+                    ),
+                  ],
+                ),
                 maxLines: expanded ? null : maxLines,
                 overflow:
                     expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                style: textStyle,
+                textAlign: TextAlign.start,
                 softWrap: true,
               ),
               if (needExpand)
@@ -615,6 +641,66 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
           ),
         );
       },
+    );
+  }
+}
+
+// 子评论展示组件
+class ChildCommentItemWidget extends StatelessWidget {
+  final String userName;
+  final String? replyNickName;
+  final String content;
+  const ChildCommentItemWidget(
+      {required this.userName,
+      this.replyNickName,
+      required this.content,
+      Key? key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: "$userName：",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            if (replyNickName != null)
+              TextSpan(
+                text: '回复 ',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.tertiary,
+                  fontSize: 15,
+                ),
+              ),
+            if (replyNickName != null)
+              TextSpan(
+                text: '${replyNickName}：',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            TextSpan(
+              text: content,
+              style: TextStyle(
+                  fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
+            ),
+          ],
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.start,
+        softWrap: true,
+      ),
     );
   }
 }

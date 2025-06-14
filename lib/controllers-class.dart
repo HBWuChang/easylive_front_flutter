@@ -896,8 +896,9 @@ class AppBarController extends GetxController {
     });
 
     if (logRoutes.indexOf(selectedRouteName.value) == -1) {
-      selectedRouteName.value =
-          top_routeWithName.isNotEmpty ? top_routeWithName.last.name : Routes.mainPage;
+      selectedRouteName.value = top_routeWithName.isNotEmpty
+          ? top_routeWithName.last.name
+          : Routes.mainPage;
     }
   }
 }
@@ -1339,8 +1340,11 @@ class CommentController extends GetxController {
           videoId: videoId,
           content: mainCommentController.text.trim(),
           imgPath: mainImgPath.value == '' ? null : mainImgPath.value,
-          replyCommentId:
-              nowSelectCommentId.value == 0 ? null : nowSelectCommentId.value);
+          replyCommentId: inInnerPage.value
+              ? innerNowSelectCommentId.value
+              : nowSelectCommentId.value == 0
+                  ? null
+                  : nowSelectCommentId.value);
       if (res['code'] == 200) {
         // 清空输入框
         mainCommentController.clear();
@@ -1361,20 +1365,41 @@ class CommentController extends GetxController {
   Future<void> postCommentOutter() async {
     sendingComment.value = true;
     try {
-      if (outterCommentController.text.trim().isEmpty) {
-        throw Exception('评论内容不能为空');
-      }
-      if (outterCommentController.text.trim().length > 500) {
-        throw Exception('评论内容不能超过500个字符');
+      if (inInnerPage.value) {
+        if (innerOutterCommentController.text.trim().isEmpty) {
+          throw Exception('评论内容不能为空');
+        }
+        if (innerOutterCommentController.text.trim().length > 500) {
+          throw Exception('评论内容不能超过500个字符');
+        }
+      } else {
+        if (outterCommentController.text.trim().isEmpty) {
+          throw Exception('评论内容不能为空');
+        }
+        if (outterCommentController.text.trim().length > 500) {
+          throw Exception('评论内容不能超过500个字符');
+        }
       }
       var res = await ApiService.commentPostComment(
           videoId: videoId,
-          content: outterCommentController.text.trim(),
-          imgPath: outterImgPath.value == '' ? null : outterImgPath.value);
+          content: inInnerPage.value
+              ? innerOutterCommentController.text.trim()
+              : outterCommentController.text.trim(),
+          imgPath: inInnerPage.value
+              ? (innerOutterImgPath.value == ''
+                  ? null
+                  : innerOutterImgPath.value)
+              : (outterImgPath.value == '' ? null : outterImgPath.value),
+          replyCommentId: inInnerPage.value ? nowSelectCommentId.value : 0);
       if (res['code'] == 200) {
         // 清空输入框
-        outterCommentController.clear();
-        outterImgPath.value = '';
+        if (inInnerPage.value) {
+          innerOutterCommentController.clear();
+          innerOutterImgPath.value = '';
+        } else {
+          outterCommentController.clear();
+          outterImgPath.value = '';
+        }
         // 刷新评论列表
         await loadComments();
       } else {
@@ -1466,6 +1491,19 @@ class CommentController extends GetxController {
         orElse: () => VideoComment({}));
     if (comment.commentId != null) {
       comment.likeCount = (comment.likeCount ?? 0) + 1;
+    } else {
+      // 子评论
+      var parentComment = commentDataList.firstWhere(
+          (c) => c.commentId == nowSelectCommentId.value,
+          orElse: () => VideoComment({}));
+      if (parentComment.commentId != null) {
+        var comment = parentComment.children.firstWhere(
+            (c) => c.commentId == commentId,
+            orElse: () => VideoComment({}));
+        if (comment.commentId != null) {
+          comment.likeCount = (comment.likeCount ?? 0) + 1;
+        }
+      }
     }
   }
 
@@ -1480,6 +1518,19 @@ class CommentController extends GetxController {
         orElse: () => VideoComment({}));
     if (comment.commentId != null) {
       comment.hateCount = (comment.hateCount ?? 0) + 1;
+    } else {
+      // 子评论
+      var parentComment = commentDataList.firstWhere(
+          (c) => c.commentId == nowSelectCommentId.value,
+          orElse: () => VideoComment({}));
+      if (parentComment.commentId != null) {
+        var comment = parentComment.children.firstWhere(
+            (c) => c.commentId == commentId,
+            orElse: () => VideoComment({}));
+        if (comment.commentId != null) {
+          comment.hateCount = (comment.hateCount ?? 0) + 1;
+        }
+      }
     }
   }
 
@@ -1492,6 +1543,19 @@ class CommentController extends GetxController {
         orElse: () => VideoComment({}));
     if (comment.commentId != null && comment.likeCount != null) {
       comment.likeCount = (comment.likeCount ?? 0) - 1;
+    } else {
+      // 子评论
+      var parentComment = commentDataList.firstWhere(
+          (c) => c.commentId == nowSelectCommentId.value,
+          orElse: () => VideoComment({}));
+      if (parentComment.commentId != null) {
+        var comment = parentComment.children.firstWhere(
+            (c) => c.commentId == commentId,
+            orElse: () => VideoComment({}));
+        if (comment.commentId != null && comment.likeCount != null) {
+          comment.likeCount = (comment.likeCount ?? 0) - 1;
+        }
+      }
     }
   }
 
@@ -1504,6 +1568,19 @@ class CommentController extends GetxController {
         orElse: () => VideoComment({}));
     if (comment.commentId != null && comment.hateCount != null) {
       comment.hateCount = (comment.hateCount ?? 0) - 1;
+    } else {
+      // 子评论
+      var parentComment = commentDataList.firstWhere(
+          (c) => c.commentId == nowSelectCommentId.value,
+          orElse: () => VideoComment({}));
+      if (parentComment.commentId != null) {
+        var comment = parentComment.children.firstWhere(
+            (c) => c.commentId == commentId,
+            orElse: () => VideoComment({}));
+        if (comment.commentId != null && comment.hateCount != null) {
+          comment.hateCount = (comment.hateCount ?? 0) - 1;
+        }
+      }
     }
   }
 
