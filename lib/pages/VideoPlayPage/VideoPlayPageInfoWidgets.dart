@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
+import 'package:easylive/controllers/VideoCommentController.dart';
 import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
@@ -561,10 +562,8 @@ class ImagePreviewDialogState extends State<ImagePreviewDialog> {
 
 // 新增可展开/收起的评论内容组件
 class ExpandableCommentContent extends StatefulWidget {
-  final String content;
-  final String? replyNickName;
-  const ExpandableCommentContent(
-      {required this.content, this.replyNickName, Key? key})
+  final VideoComment comment;
+  const ExpandableCommentContent({required this.comment, Key? key})
       : super(key: key);
 
   @override
@@ -578,7 +577,7 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
   final int maxLines = 5;
   @override
   Widget build(BuildContext context) {
-    final text = widget.content;
+    final text = widget.comment.content;
     final textStyle =
         TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface);
     return LayoutBuilder(
@@ -600,7 +599,36 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
               Text.rich(
                 TextSpan(
                   children: [
-                    if (widget.replyNickName != null)
+                    if (widget.comment.topType == CommentTopTypeEnum.TOP.type)
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '置顶',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (widget.comment.topType == CommentTopTypeEnum.TOP.type)
+                      TextSpan(
+                        text: '  ',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    if (widget.comment.replyNickName != null)
                       TextSpan(
                         text: '回复 ',
                         style: TextStyle(
@@ -608,9 +636,9 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
                           fontSize: 16,
                         ),
                       ),
-                    if (widget.replyNickName != null)
+                    if (widget.comment.replyNickName != null)
                       TextSpan(
-                        text: '${widget.replyNickName}：',
+                        text: '${widget.comment.replyNickName}：',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,

@@ -107,7 +107,7 @@ class _VideoPlayPageCommentsInnerState
                           Hero(
                               tag: 'commentContent${widget.parentCommentId}',
                               child: ExpandableCommentContent(
-                                content: parent.content ?? '',
+                                comment: parent,
                               )),
                           if (!(parent.imgPath == null || parent.imgPath == ''))
                             Hero(
@@ -181,25 +181,6 @@ class _VideoPlayPageCommentsInnerState
                                                   parent.commentId!);
                                             },
                                           ))),
-                                  // Obx(() => Text(commentController
-                                  //         .commentDataList[index]
-                                  //         .hateCount
-                                  //         .toString() ??
-                                  //     '0')),
-                                  SizedBox(width: 16),
-                                  IconButton(
-                                    icon: Icon(Icons.messenger_outline_rounded,
-                                        size: 16),
-                                    onPressed: () {
-                                      // 回复评论逻辑
-                                      commentController.nowSelectCommentId
-                                          .value = parent.commentId !=
-                                              commentController
-                                                  .nowSelectCommentId.value
-                                          ? parent.commentId!
-                                          : 0;
-                                    },
-                                  ),
                                 ],
                               )),
                         ],
@@ -259,8 +240,7 @@ class _VideoPlayPageCommentsInnerState
                                 Hero(
                                     tag: 'commentContent${child.commentId}',
                                     child: ExpandableCommentContent(
-                                      content: child.content ?? '',
-                                      replyNickName: child.replyNickName,
+                                      comment: child,
                                     )),
                                 if (!(child.imgPath == null ||
                                     child.imgPath == ''))
@@ -313,8 +293,7 @@ class _VideoPlayPageCommentsInnerState
                                                     child.commentId!);
                                               },
                                             )),
-                                        Text(
-                                            child.likeCount.toString() ?? '0'),
+                                        Text(child.likeCount.toString() ?? '0'),
                                         SizedBox(width: 16),
                                         Transform.flip(
                                             flipX: true,
@@ -362,6 +341,62 @@ class _VideoPlayPageCommentsInnerState
                                                 : 0;
                                           },
                                         ),
+                                        SizedBox(width: 64),
+                                        Builder(
+                                            builder: (buttonContext) =>
+                                                IconButton(
+                                                    onPressed: () async {
+                                                      final RenderBox button =
+                                                          buttonContext
+                                                                  .findRenderObject()
+                                                              as RenderBox;
+                                                      final RenderBox overlay =
+                                                          Overlay.of(buttonContext)
+                                                                  .context
+                                                                  .findRenderObject()
+                                                              as RenderBox;
+                                                      final Offset position =
+                                                          button.localToGlobal(
+                                                              Offset.zero,
+                                                              ancestor:
+                                                                  overlay);
+                                                      final result =
+                                                          await showMenu(
+                                                        context: buttonContext,
+                                                        position: RelativeRect
+                                                            .fromLTRB(
+                                                          position.dx,
+                                                          position.dy +
+                                                              button
+                                                                  .size.height,
+                                                          position.dx +
+                                                              button.size.width,
+                                                          position.dy,
+                                                        ),
+                                                        items: [
+                                                          PopupMenuItem(
+                                                            value: 'del',
+                                                            child: Text('删除'),
+                                                          ),
+                                                        ],
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .surface,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                        ),
+                                                      );
+                                                      if (result == 'del') {
+                                                        await commentController
+                                                            .delComment(child
+                                                                .commentId!);
+                                                      }
+                                                    },
+                                                    icon: Icon(Icons
+                                                        .more_vert_rounded))),
                                       ],
                                     )),
                                 Obx(() {
@@ -468,7 +503,7 @@ class _VideoPlayPageCommentsInnerState
                                                     .colorScheme
                                                     .primary,
                                                 onPressed: commentController
-                                                        .sendingComment.value
+                                                        .operating.value
                                                     ? null
                                                     : () async {
                                                         await commentController

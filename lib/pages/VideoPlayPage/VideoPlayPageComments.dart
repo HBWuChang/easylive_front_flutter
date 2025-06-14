@@ -170,7 +170,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                         MainAxisAlignment.start,
                                                     children: [
                                                       Column(children: [
-                                                        SizedBox(height: 12),
+                                                        SizedBox(height: 16),
                                                         Hero(
                                                             tag:
                                                                 'commentAvatar${commentController.commentDataList[index].commentId}',
@@ -191,35 +191,37 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                             MainAxisAlignment
                                                                 .center,
                                                         children: [
-                                                          SizedBox(height: 8),
-                                                          Hero(
-                                                              tag:
-                                                                  'commentNickName${commentController.commentDataList[index].commentId}',
-                                                              child: Text(
-                                                                commentController
-                                                                        .commentDataList[
-                                                                            index]
-                                                                        .nickName ??
-                                                                    '',
-                                                                style: TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold),
-                                                              )),
-                                                          Hero(
-                                                              tag:
-                                                                  'commentPostTime${commentController.commentDataList[index].commentId}',
-                                                              child: Text(
-                                                                toShowDatetext(
-                                                                    commentController
-                                                                        .commentDataList[
-                                                                            index]
-                                                                        .postTime!),
-                                                                style: TextStyle(
-                                                                    color: Theme.of(
-                                                                            context)
-                                                                        .colorScheme
-                                                                        .tertiary),
+                                                          SizedBox(
+                                                              width: 320,
+                                                              child: ListTile(
+                                                                contentPadding:
+                                                                    EdgeInsets
+                                                                        .zero,
+                                                                title: Hero(
+                                                                    tag:
+                                                                        'commentNickName${commentController.commentDataList[index].commentId}',
+                                                                    child: Text(
+                                                                      commentController
+                                                                              .commentDataList[index]
+                                                                              .nickName ??
+                                                                          '',
+                                                                      style: TextStyle(
+                                                                          fontWeight:
+                                                                              FontWeight.bold),
+                                                                    )),
+                                                                subtitle: Hero(
+                                                                    tag:
+                                                                        'commentPostTime${commentController.commentDataList[index].commentId}',
+                                                                    child: Text(
+                                                                      toShowDatetext(commentController
+                                                                          .commentDataList[
+                                                                              index]
+                                                                          .postTime!),
+                                                                      style: TextStyle(
+                                                                          color: Theme.of(context)
+                                                                              .colorScheme
+                                                                              .tertiary),
+                                                                    )),
                                                               )),
                                                           SizedBox(height: 8),
                                                           // 评论内容可展开/收起
@@ -228,11 +230,10 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                   'commentContent${commentController.commentDataList[index].commentId}',
                                                               child:
                                                                   ExpandableCommentContent(
-                                                                content: commentController
-                                                                        .commentDataList[
-                                                                            index]
-                                                                        .content ??
-                                                                    '',
+                                                                comment:
+                                                                    commentController
+                                                                            .commentDataList[
+                                                                        index],
                                                               )),
                                                           if (!(commentController
                                                                       .commentDataList[
@@ -364,6 +365,64 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                           : 0;
                                                                     },
                                                                   ),
+                                                                  SizedBox(
+                                                                      width:
+                                                                          64),
+                                                                  Builder(
+                                                                      builder: (buttonContext) => IconButton(
+                                                                          onPressed: () async {
+                                                                            final RenderBox
+                                                                                button =
+                                                                                buttonContext.findRenderObject() as RenderBox;
+                                                                            final RenderBox
+                                                                                overlay =
+                                                                                Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
+                                                                            final Offset
+                                                                                position =
+                                                                                button.localToGlobal(Offset.zero, ancestor: overlay);
+                                                                            final result =
+                                                                                await showMenu(
+                                                                              context: buttonContext,
+                                                                              position: RelativeRect.fromLTRB(
+                                                                                position.dx,
+                                                                                position.dy + button.size.height,
+                                                                                position.dx + button.size.width,
+                                                                                position.dy,
+                                                                              ),
+                                                                              items: [
+                                                                                commentController.commentDataList[index].topType == CommentTopTypeEnum.TOP.type
+                                                                                    ? PopupMenuItem(
+                                                                                        value: 'cancelTop',
+                                                                                        child: Text('取消置顶'),
+                                                                                      )
+                                                                                    : PopupMenuItem(
+                                                                                        value: 'top',
+                                                                                        child: Text('置顶'),
+                                                                                      ),
+                                                                                PopupMenuItem(
+                                                                                  value: 'del',
+                                                                                  child: Text('删除'),
+                                                                                ),
+                                                                              ],
+                                                                              color: Theme.of(context).colorScheme.surface,
+                                                                              shape: RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius.circular(12),
+                                                                              ),
+                                                                            );
+                                                                            if (result ==
+                                                                                'top') {
+                                                                              await commentController.topComment(commentController.commentDataList[index].commentId!);
+                                                                            }
+                                                                            if (result ==
+                                                                                'cancelTop') {
+                                                                              await commentController.cancelTopComment(commentController.commentDataList[index].commentId!);
+                                                                            }
+                                                                            if (result ==
+                                                                                'del') {
+                                                                              await commentController.delComment(commentController.commentDataList[index].commentId!);
+                                                                            }
+                                                                          },
+                                                                          icon: Icon(Icons.more_vert_rounded))),
                                                                 ],
                                                               )),
                                                           Obx(() {
@@ -466,7 +525,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                               tooltip: '发表评论',
                                                                               icon: Icon(Icons.send),
                                                                               color: Theme.of(context).colorScheme.primary,
-                                                                              onPressed: commentController.sendingComment.value
+                                                                              onPressed: commentController.operating.value
                                                                                   ? null
                                                                                   : () async {
                                                                                       await commentController.postCommentMain();
@@ -737,7 +796,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                   icon: Icon(Icons.send),
                   color: Theme.of(context).colorScheme.primary,
                   tooltip: '发表评论',
-                  onPressed: commentController.sendingComment.value
+                  onPressed: commentController.operating.value
                       ? null
                       : () async {
                           await commentController.postCommentOutter();

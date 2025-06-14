@@ -20,7 +20,7 @@ class CommentController extends GetxController {
   var userActionList = <UserAction>[].obs;
 
   var isLoading = false.obs;
-  var sendingComment = false.obs;
+  var operating = false.obs;
   String videoId = '';
   var orderType = 0.obs; // 0:最热, 1:最新
   var inInnerPage = false.obs; // 是否在内页
@@ -109,39 +109,91 @@ class CommentController extends GetxController {
   }
 
   Future<void> postCommentMain() async {
-    sendingComment.value = true;
+    operating.value = true;
     try {
       if (mainCommentController.text.trim().isEmpty) {
         throw Exception('评论内容不能为空');
       }
+      if (mainCommentController.text.trim().length > 500) {
+        throw Exception('评论内容不能超过500个字符');
+      }
+      if (this.inInnerPage.value) {
+        if (this.innerNowSelectCommentId.value == 0) {
+          throw Exception('请选择要回复的评论');
+        }
+      } else {
+        if (this.nowSelectCommentId.value == 0) {
+          throw Exception('请选择要回复的评论');
+        }
+      }
+      final content = mainCommentController.text.trim();
+      final imgPath = mainImgPath.value == '' ? null : mainImgPath.value;
+      final replyCommentId = this.inInnerPage.value
+          ? this.innerNowSelectCommentId.value
+          : this.nowSelectCommentId.value == 0
+              ? null
+              : this.nowSelectCommentId.value;
+      final inInnerPage = this.inInnerPage.value;
+      final nowSelectCommentId = this.nowSelectCommentId.value;
       var res = await ApiService.commentPostComment(
           videoId: videoId,
-          content: mainCommentController.text.trim(),
-          imgPath: mainImgPath.value == '' ? null : mainImgPath.value,
-          replyCommentId: inInnerPage.value
-              ? innerNowSelectCommentId.value
-              : nowSelectCommentId.value == 0
-                  ? null
-                  : nowSelectCommentId.value);
+          content: content,
+          imgPath: imgPath,
+          replyCommentId: replyCommentId);
       if (res['code'] == 200) {
+        VideoComment newComment = VideoComment(res['data']);
+        // 刷新评论列表
+        // await loadComments();
+        if (!inInnerPage) {
+          if (replyCommentId != null) {
+            // 如果是回复评论，插入到对应的父评论下
+            newComment.replyNickName = null;
+            var parentComment = commentDataList.firstWhere(
+                (c) => c.commentId == replyCommentId,
+                orElse: () => VideoComment({}));
+            if (parentComment.commentId != null) {
+              parentComment.children.insert(0, newComment);
+            } else {
+              throw Exception('雑鱼怎么能触发这个错误。。');
+            }
+          } else {
+            throw Exception('雑鱼怎么能触发这个错误。。');
+          }
+        } else {
+          // 在内页回复
+          var parentComment = commentDataList.firstWhere(
+              (c) => c.commentId == nowSelectCommentId,
+              orElse: () => VideoComment({}));
+          if (parentComment.commentId != null) {
+            int replyIndex = parentComment.children
+                .indexWhere((c) => c.commentId == replyCommentId);
+            if (replyIndex != -1) {
+              parentComment.children.insert(replyIndex + 1, newComment);
+            } else {
+              // 如果回复的评论不存在，直接插入到子评论列表开头
+              parentComment.children.insert(0, newComment);
+            }
+          } else {
+            throw Exception('回复的评论不存在');
+          }
+        }
+        update();
         // 清空输入框
         mainCommentController.clear();
         mainImgPath.value = '';
-        nowSelectCommentId.value = 0;
-        // 刷新评论列表
-        await loadComments();
+        this.nowSelectCommentId.value = 0;
       } else {
         throw Exception('发布评论失败: ${res['info']}');
       }
     } catch (e) {
       showErrorSnackbar(e.toString());
     } finally {
-      sendingComment.value = false;
+      operating.value = false;
     }
   }
 
   Future<void> postCommentOutter() async {
-    sendingComment.value = true;
+    operating.value = true;
     try {
       if (inInnerPage.value) {
         if (innerOutterCommentController.text.trim().isEmpty) {
@@ -158,18 +210,41 @@ class CommentController extends GetxController {
           throw Exception('评论内容不能超过500个字符');
         }
       }
+      final content = inInnerPage.value
+          ? innerOutterCommentController.text.trim()
+          : outterCommentController.text.trim();
+      final imgPath = inInnerPage.value
+          ? (innerOutterImgPath.value == '' ? null : innerOutterImgPath.value)
+          : (outterImgPath.value == '' ? null : outterImgPath.value);
+      final replyCommentId =
+          inInnerPage.value ? nowSelectCommentId.value : null;
       var res = await ApiService.commentPostComment(
           videoId: videoId,
-          content: inInnerPage.value
-              ? innerOutterCommentController.text.trim()
-              : outterCommentController.text.trim(),
-          imgPath: inInnerPage.value
-              ? (innerOutterImgPath.value == ''
-                  ? null
-                  : innerOutterImgPath.value)
-              : (outterImgPath.value == '' ? null : outterImgPath.value),
-          replyCommentId: inInnerPage.value ? nowSelectCommentId.value : 0);
+          content: content,
+          imgPath: imgPath,
+          replyCommentId: replyCommentId);
       if (res['code'] == 200) {
+        // 刷新评论列表
+        // await loadComments();
+        VideoComment newComment = VideoComment(res['data']);
+        newComment.replyNickName = null;
+        if (replyCommentId != null) {
+          // 如果是回复评论，插入到对应的父评论下
+          var parentComment = commentDataList.firstWhere(
+              (c) => c.commentId == replyCommentId,
+              orElse: () => VideoComment({}));
+          if (parentComment.commentId != null) {
+            parentComment.children.insert(0, newComment);
+          } else {
+            throw Exception('回复的评论不存在');
+          }
+        } else {
+          if (commentDataList[0].topType == CommentTopTypeEnum.TOP.type) {
+            commentDataList.insert(1, newComment);
+          } else {
+            commentDataList.insert(0, newComment);
+          }
+        }
         // 清空输入框
         if (inInnerPage.value) {
           innerOutterCommentController.clear();
@@ -178,15 +253,14 @@ class CommentController extends GetxController {
           outterCommentController.clear();
           outterImgPath.value = '';
         }
-        // 刷新评论列表
-        await loadComments();
+        update();
       } else {
         throw Exception('发布评论失败: ${res['info']}');
       }
     } catch (e) {
       showErrorSnackbar(e.toString());
     } finally {
-      sendingComment.value = false;
+      operating.value = false;
     }
   }
 
@@ -362,6 +436,65 @@ class CommentController extends GetxController {
     }
   }
 
+  Future<void> topComment(int commentId) async {
+    if (operating.value) return; // 防止重复操作
+    operating.value = true;
+    try {
+      var res = await ApiService.commentTopComment(commentId);
+      if (res['code'] == 200) {
+        // 刷新评论列表
+        await loadComments();
+      } else {
+        throw Exception('置顶评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      operating.value = false;
+    }
+  }
+
+  Future<void> cancelTopComment(int commentId) async {
+    if (operating.value) return; // 防止重复操作
+    operating.value = true;
+    try {
+      var res = await ApiService.commentCancelTopComment(commentId);
+      if (res['code'] == 200) {
+        // 刷新评论列表
+        await loadComments();
+      } else {
+        throw Exception('取消置顶评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      operating.value = false;
+    }
+  }
+
+  Future<void> delComment(int commentId) async {
+    if (operating.value) return; // 防止重复操作
+    operating.value = true;
+    try {
+      var res = await ApiService.commentUserDelComment(commentId);
+      if (res['code'] == 200) {
+        // 刷新评论列表
+        // await loadComments();
+        commentDataList.removeWhere((c) => c.commentId == commentId);
+        for (var comment in commentDataList) {
+          comment.children.removeWhere((c) => c.commentId == commentId);
+        }
+        update();
+      } else {
+        throw Exception('删除评论失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    } finally {
+      operating.value = false;
+    }
+  }
+
   Future<void> loadComments() async {
     isLoading.value = true;
     try {
@@ -459,8 +592,8 @@ class VideoComment {
     replyUserId = json['replyUserId'];
     topType = json['topType'];
     postTime = DateTime.tryParse(json['postTime'] ?? '');
-    likeCount = json['likeCount'];
-    hateCount = json['hateCount'];
+    likeCount = json['likeCount']?? 0;
+    hateCount = json['hateCount'] ?? 0;
     avatar = json['avatar'];
     nickName = json['nickName'];
     replyAvatar = json['replyAvatar'];
