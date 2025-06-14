@@ -4,7 +4,7 @@ import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
-import 'controllers-class.dart';
+import 'controllers/controllers-class.dart';
 import 'api_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:permission_handler/permission_handler.dart';

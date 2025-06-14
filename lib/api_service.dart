@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:easylive/Funcs.dart';
-import 'package:easylive/controllers-class.dart';
+import 'package:easylive/controllers/controllers-class.dart';
 import 'package:get/get.dart';
 import 'package:crypto/crypto.dart';
 import 'package:rhttp/rhttp.dart';

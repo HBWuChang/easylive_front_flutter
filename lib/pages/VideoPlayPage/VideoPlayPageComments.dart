@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
+import 'package:easylive/controllers/VideoCommentController.dart';
 import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
-import '../../controllers-class.dart';
+import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:preload_page_view/preload_page_view.dart';
@@ -39,29 +40,15 @@ class VideoPlayPageComments extends StatefulWidget {
 
 class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
   late ScrollController outterScrollController;
+
   // bool showFAB = false;
-  var showFAB = false.obs;
 
   @override
   void initState() {
     super.initState();
-    outterScrollController = ScrollController();
-    outterScrollController.addListener(_scrollListener);
-  }
-
-  void _scrollListener() {
-    if (outterScrollController.offset > 100 && !showFAB.value) {
-      showFAB.value = true;
-    } else if (outterScrollController.offset <= 100 && showFAB.value) {
-      showFAB.value = false;
-    }
-  }
-
-  @override
-  void dispose() {
-    outterScrollController.removeListener(_scrollListener);
-    outterScrollController.dispose();
-    super.dispose();
+    outterScrollController =
+        Get.find<CommentController>(tag: '${widget.videoId}CommentController')
+            .outterScrollController;
   }
 
   @override
@@ -501,9 +488,13 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                             }
                                                             return GestureDetector(
                                                               onTap: () async {
-                                                                bool t = showFAB
-                                                                    .value;
-                                                                showFAB.value =
+                                                                bool t =
+                                                                    commentController
+                                                                        .showFAB
+                                                                        .value;
+                                                                commentController
+                                                                        .showFAB
+                                                                        .value =
                                                                     false;
                                                                 commentController
                                                                     .nowSelectCommentId
@@ -539,8 +530,9 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                 commentController
                                                                     .nowSelectCommentId
                                                                     .value = 0;
-                                                                showFAB.value =
-                                                                    t;
+                                                                commentController
+                                                                    .showFAB
+                                                                    .value = t;
                                                               },
                                                               child: Card(
                                                                 child: SizedBox(
@@ -608,17 +600,23 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                 );
               },
             )),
-        floatingActionButton: Obx(() => showFAB.value
-            ? FloatingActionButton(
-                mini: true,
-                onPressed: () {
-                  outterScrollController.animateTo(0,
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut);
-                },
-                child: Icon(Icons.arrow_upward),
-              )
-            : SizedBox.shrink()),
+        floatingActionButton: GetBuilder<CommentController>(
+            tag: '${widget.videoId}CommentController',
+            builder: (commentController) {
+              if (commentController.showFAB.value) {
+                return FloatingActionButton(
+                  mini: true,
+                  onPressed: () {
+                    outterScrollController.animateTo(0,
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut);
+                  },
+                  child: Icon(Icons.arrow_upward),
+                );
+              } else {
+                return SizedBox.shrink();
+              }
+            }),
         bottomNavigationBar: GetBuilder<CommentController>(
           tag: '${widget.videoId}CommentController',
           builder: (commentController) => Container(

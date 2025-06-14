@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'api_service.dart';
-import 'Funcs.dart';
+import '../api_service.dart';
+import '../Funcs.dart';
 
 class UserInfo {
   String? userId;
