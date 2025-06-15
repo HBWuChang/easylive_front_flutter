@@ -310,6 +310,25 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   FocusNode focusNode = FocusNode();
   DateTime? lastSendTime;
   final RxBool isSending = false.obs;
+  // 新增：弹幕样式选择
+  int danmuMode = DanmuModeEnum.NORMAL.type;
+  String danmuColor = 'FFFFFF';
+  final TextEditingController colorController =
+      TextEditingController(text: 'FFFFFF');
+  final List<Color> presetColors = [
+    Colors.white,
+    Colors.black,
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+    Colors.purple,
+    Colors.pink,
+    Colors.cyan,
+    Colors.brown,
+    Colors.grey,
+  ];
   @override
   void initState() {
     super.initState();
@@ -368,21 +387,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       Get.snackbar('どうやら壊れたようです。', '发送失败，请稍后再试');
       return;
     }
-    try {
-      String text = textEditingController.text.trim();
-      int time =
-          (controller.player.state.position.inMilliseconds / 1000).round();
-      if (text.isEmpty) {
-        throw Exception('弹幕内容不能为空');
-      }
+    String text = textEditingController.text.trim();
+    int time = (controller.player.state.position.inMilliseconds / 1000).round();
+    if (text.isNotEmpty) {
       isSending.value = true;
-      videoDamnuController.postDanmu(
-          text, DanmuModeEnum.NORMAL.type, 'FFFFFF', time);
+      videoDamnuController.postDanmu(text, danmuMode, danmuColor, time);
       textEditingController.clear();
       await Future.delayed(Duration(seconds: 5));
-    } catch (e) {
-      Get.snackbar('发送弹幕失败', e.toString());
-    } finally {
       isSending.value = false;
     }
   }
@@ -427,12 +438,17 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           .colorScheme
                           .surface
                           .withOpacity(0.3),
-                      prefixIcon: IconButton(
-                        icon: Text('A',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary)),
-                        onPressed: () {},
+                      prefixIcon: Builder(
+                        builder: (iconContext) => IconButton(
+                          icon: Text('A',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(context).colorScheme.primary)),
+                          onPressed: () {
+                            showDanmuStyleMenu(iconContext);
+                          },
+                        ),
                       ),
                       suffixIcon: Obx(() => IconButton(
                             icon: Icon(
@@ -506,5 +522,191 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         normal: t(),
         fullscreen: t(fullscreen: true),
         child: Video(controller: controller));
+  }
+
+  // 新增：弹幕样式选择弹窗（锚定按钮位置）
+  void showDanmuStyleMenu(BuildContext anchorContext) {
+    final RenderBox button = anchorContext.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final Offset position =
+        button.localToGlobal(Offset.zero, ancestor: overlay);
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy + button.size.height,
+        position.dx + button.size.width,
+        position.dy,
+      ),
+      items: [
+        PopupMenuItem(
+          enabled: false,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              final theme = Theme.of(context);
+              // 模式选择
+              final List<Map<String, dynamic>> modes = [
+                {'label': '滚动', 'value': DanmuModeEnum.NORMAL.type},
+                {'label': '顶部', 'value': DanmuModeEnum.TOP.type},
+                {'label': '底部', 'value': DanmuModeEnum.BOTTOM.type},
+              ];
+              // 默认颜色两排
+              final List<List<Color>> colorRows = [
+                presetColors.sublist(0, 6),
+                presetColors.sublist(6),
+              ];
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 模式选择
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: modes.map((m) {
+                      final selected = danmuMode == m['value'];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              danmuMode = m['value'];
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? theme.colorScheme.primary.withOpacity(0.08)
+                                  : null,
+                              border: Border.all(
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : theme.dividerColor,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              m['label'],
+                              style: TextStyle(
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : theme.textTheme.bodyMedium?.color,
+                                fontWeight: selected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 12),
+                  // 自定义颜色输入和预览
+                  Row(
+                    children: [
+                      Text('颜色:',
+                          style: TextStyle(color: theme.colorScheme.primary)),
+                      SizedBox(width: 8),
+                      SizedBox(
+                        width: 70,
+                        child: TextField(
+                          controller: colorController,
+                          maxLength: 6,
+                          style: TextStyle(
+                              fontSize: 14, color: theme.colorScheme.primary),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            hintText: 'HEX',
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 6, horizontal: 8),
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: theme.colorScheme.primary),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onChanged: (v) {
+                            setState(() {
+                              danmuColor = v.toUpperCase();
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: _parseColor(danmuColor),
+                          border: Border.all(
+                              color: theme.colorScheme.primary, width: 2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  // 默认颜色两排
+                  ...colorRows.map((row) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: row.map((c) {
+                            String hex = c.value
+                                .toRadixString(16)
+                                .padLeft(8, '0')
+                                .substring(2)
+                                .toUpperCase();
+                            final selected = danmuColor == hex;
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 2.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    danmuColor = hex;
+                                    colorController.text = hex;
+                                  });
+                                },
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: c,
+                                    border: Border.all(
+                                      color: selected
+                                          ? theme.colorScheme.primary
+                                          : theme.dividerColor,
+                                      width: 2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      )),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _parseColor(String hex) {
+    try {
+      if (hex.length == 6) {
+        return Color(int.parse('0xFF$hex'));
+      }
+    } catch (_) {}
+    return Colors.white;
   }
 }
