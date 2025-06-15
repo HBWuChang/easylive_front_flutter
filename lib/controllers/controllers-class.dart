@@ -1,16 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 import 'package:easylive/controllers/controllers-class2.dart';
 import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../api_service.dart';
 import '../Funcs.dart';
 import 'package:media_kit/media_kit.dart';
 import 'VideoCommentController.dart';
+import 'dart:async';
+
 class ControllersInitController extends GetxController {
   var isLoginControllerInitialized = false.obs;
   var isAccountControllerInitialized = false.obs;
@@ -30,6 +34,7 @@ class ControllersInitController extends GetxController {
     initWindowSizeController();
     initVideoLoadRecommendVideoController();
     initLocalSettingsControllerController();
+    initVideoNowWatchingCountController();
   }
 
   void initLoginController() {
@@ -91,6 +96,12 @@ class ControllersInitController extends GetxController {
     if (!isLocalSettingsControllerInitialized.value) {
       Get.put(LocalSettingsController());
       isLocalSettingsControllerInitialized.value = true;
+    }
+  }
+
+  void initVideoNowWatchingCountController() {
+    if (!Get.isRegistered<VideoNowWatchingCountController>()) {
+      Get.put(VideoNowWatchingCountController());
     }
   }
 }
@@ -1180,10 +1191,16 @@ class VideoGetVideoInfoController extends GetxController {
   }
 }
 
+class VideoNowWatchingCountController extends GetxController {
+  Map<String, int> nowWatchingCountMap = <String, int>{}.obs;
+}
+
 class VideoLoadVideoPListController extends GetxController {
   var videoPList = <VideoInfoFile>[].obs;
   var isLoading = false.obs;
   var selectFileId = ''.obs;
+  Timer? _reportTimer;
+
   int get selectFileIndex {
     return videoPList.indexWhere((file) => file.fileId == selectFileId.value);
   }
@@ -1191,6 +1208,36 @@ class VideoLoadVideoPListController extends GetxController {
   bool get multi => videoPList.length > 1;
   VideoLoadVideoPListController(String videoId) {
     loadVideoPList(videoId);
+    ever(selectFileId, (id) {
+      _reportTimer?.cancel();
+      if (id != null && id.toString().isNotEmpty) {
+        _reportTimer = Timer.periodic(Duration(seconds: 5), (_) {
+          reportPlayInfo();
+        });
+      }
+    });
+  }
+
+  @override
+  void onClose() {
+    _reportTimer?.cancel();
+    super.onClose();
+  }
+
+  void reportPlayInfo() async {
+    String deviceId = Get.find<LocalSettingsController>().deviceId;
+    try {
+      var res = await ApiService.videoReportVideoPlayOnline(
+        fileId: selectFileId.value,
+        deviceId: deviceId,
+      );
+      if (res['code'] == 200) {
+        Get.find<VideoNowWatchingCountController>()
+            .nowWatchingCountMap[selectFileId.value] = res['data'] ?? 1;
+      }
+    } catch (e) {
+      showErrorSnackbar('上报播放信息失败: ${e.toString()}');
+    }
   }
 
   Future<void> loadVideoPList(String videoId) async {
@@ -1239,8 +1286,6 @@ class VideoInfoFile {
   }
 }
 
-
-
 class UhomeGetUserInfoController extends GetxController {
   var userInfo = UserInfo({}).obs;
 
@@ -1262,6 +1307,22 @@ class LocalSettingsController extends GetxController {
   var settings = <String, dynamic>{}.obs;
   void setSetting(String key, dynamic value) {
     settings[key] = value;
+  }
+
+  String get deviceId {
+    return settings['deviceId'] ?? creatDeviceId();
+  }
+
+  String creatDeviceId() {
+    // 生成两个uuid
+    var uuid = Uuid();
+    String uuid1 = uuid.v4();
+    String uuid2 = uuid.v4();
+    // 拼接后取md5
+    String raw = uuid1 + uuid2;
+    String newDeviceId = md5.convert(raw.codeUnits).toString();
+    settings['deviceId'] = newDeviceId;
+    return newDeviceId;
   }
 
   @override

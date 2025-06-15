@@ -269,8 +269,8 @@ enum AspectRatioEnum {
 }
 
 enum CommentOrderTypeEnum {
-  HOT(0,  "最热"),
-  NEW(1,  "最新");
+  HOT(0, "最热"),
+  NEW(1, "最新");
 
   final int type;
   final String desc;
@@ -281,6 +281,24 @@ enum CommentOrderTypeEnum {
     for (var orderType in CommentOrderTypeEnum.values) {
       if (orderType.type == type) {
         return orderType;
+      }
+    }
+    return null;
+  }
+}
+
+enum DanmuModeEnum {
+  NORMAL(0, "滚动"),
+  TOP(1, "顶部"),
+  BOTTOM(2, "底部");
+
+  final int type;
+  final String desc;
+  const DanmuModeEnum(this.type, this.desc);
+  static DanmuModeEnum? getByType(int type) {
+    for (var mode in DanmuModeEnum.values) {
+      if (mode.type == type) {
+        return mode;
       }
     }
     return null;

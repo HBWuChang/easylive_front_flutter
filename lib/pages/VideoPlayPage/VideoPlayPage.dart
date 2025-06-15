@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/controllers/VideoCommentController.dart';
+import 'package:easylive/controllers/VideoDamnuController.dart';
 import 'package:easylive/enums.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPageComments.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPageInfo.dart';
@@ -26,6 +27,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'VideoPlayPageInfoWidgets.dart';
+import 'package:flutter_barrage_craft/flutter_barrage_craft.dart';
 
 class VideoPlayPage extends StatelessWidget {
   const VideoPlayPage({Key? key}) : super(key: key);
@@ -73,179 +75,212 @@ class VideoPlayPage extends StatelessWidget {
           } else {
             final RxInt nowTabIndex = 0.obs;
             final pageController = PreloadPageController(initialPage: 0);
-
-            return Row(children: [
-              // 左侧：视频播放器
-              Expanded(
-                  child: Obx(() => VideoPlayerWidget(
-                      fileId:
-                          videoLoadVideoPListController.selectFileId.value))),
-              // 右侧：分P信息
-              SizedBox(
-                  width: 400,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 顶部按钮栏和横条
-                      SizedBox(
-                          height: 38,
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                    width: 200,
-                                    child: Column(
+            // 新增：侧边栏显示控制
+            final RxBool showSidebar = true.obs;
+            return Obx(() => Row(children: [
+                  // 左侧：视频播放器
+                  Expanded(
+                      child: VideoPlayerWidget(
+                          videoId: videoId,
+                          fileId:
+                              videoLoadVideoPListController.selectFileId.value,
+                          showSidebar: showSidebar)),
+                  // 右侧：分P信息（简介/评论）
+                  AnimatedContainer(
+                    duration: Duration(milliseconds: 150),
+                    width: showSidebar.value ? 400 : 0,
+                    child: showSidebar.value
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 顶部按钮栏和横条
+                              SizedBox(
+                                  height: 38,
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         SizedBox(
-                                          height: 30,
-                                          child: Row(children: [
-                                            Expanded(
-                                              child: TextButton(
-                                                onPressed: () {
-                                                  pageController.animateToPage(
-                                                    0,
-                                                    duration: Duration(
-                                                        milliseconds: 300),
-                                                    curve: Curves.ease,
-                                                  );
-                                                },
-                                                child: Text(
-                                                  '简介',
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: TextButton(
-                                                onPressed: () {
-                                                  pageController.animateToPage(
-                                                    1,
-                                                    duration: Duration(
-                                                        milliseconds: 300),
-                                                    curve: Curves.ease,
-                                                  );
-                                                },
-                                                child: Obx(() => Text(
-                                                      '评论${(commentController.commentDataTotalCount.value).toString()}',
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .primary,
-                                                      ),
-                                                    )),
-                                              ),
-                                            )
-                                          ]),
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                          child: LayoutBuilder(
-                                            builder: (context, constraints) {
-                                              return AnimatedBuilder(
-                                                animation: pageController,
-                                                builder: (context, child) {
-                                                  double page = 0.0;
-                                                  try {
-                                                    page = pageController
-                                                                .hasClients &&
-                                                            pageController
-                                                                    .page !=
-                                                                null
-                                                        ? pageController.page!
-                                                        : pageController
-                                                            .initialPage
-                                                            .toDouble();
-                                                  } catch (_) {}
-                                                  double width =
-                                                      constraints.maxWidth / 2;
-                                                  double minLine = width * 0.7;
-                                                  double maxLine = width * 1.4;
-                                                  double progress =
-                                                      (page - page.floor())
-                                                          .abs();
-                                                  double dist = (progress > 0.5)
-                                                      ? 1 - progress
-                                                      : progress;
-                                                  double lineWidth = minLine +
-                                                      (maxLine - minLine) *
-                                                          (dist * 2);
-                                                  double left = page * width +
-                                                      (width - lineWidth) / 2;
-                                                  return Stack(
-                                                    children: [
-                                                      Positioned(
-                                                        left: left,
-                                                        width: lineWidth,
-                                                        top: 0,
-                                                        bottom: 0,
-                                                        child: Container(
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        2),
+                                            width: 200,
+                                            child: Column(
+                                              children: [
+                                                SizedBox(
+                                                  height: 30,
+                                                  child: Row(children: [
+                                                    Expanded(
+                                                      child: TextButton(
+                                                        onPressed: () {
+                                                          pageController
+                                                              .animateToPage(
+                                                            0,
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    300),
+                                                            curve: Curves.ease,
+                                                          );
+                                                        },
+                                                        child: Text(
+                                                          '简介',
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.bold,
                                                             color: Theme.of(
                                                                     context)
                                                                 .colorScheme
                                                                 .primary,
                                                           ),
-                                                          height: 4,
                                                         ),
                                                       ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-                                SizedBox(
-                                    width: 50,
-                                    child: IconButton(
-                                      icon: Icon(
-                                        Icons.more_vert,
-                                        size: 20,
-                                      ),
-                                      onPressed: () {},
-                                    ))
-                              ])),
-                      DividerWithPaddingHorizontal(padding: 0),
-                      // 内容区 PreloadPageView
-                      Expanded(
-                        child: PreloadPageView.builder(
-                          controller: pageController,
-                          itemCount: 2,
-                          preloadPagesCount: 2,
-                          physics: BouncingScrollPhysics(),
-                          onPageChanged: (tabIndex) {
-                            nowTabIndex.value = tabIndex;
-                          },
-                          itemBuilder: (context, tabIndex) {
-                            if (tabIndex == 0) {
-                              return VideoPlayPageInfo(
-                                videoId: videoId,
-                              );
-                            } else {
-                              return VideoPlayPageComments(videoId: videoId);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ))
-            ]);
+                                                    ),
+                                                    Expanded(
+                                                      child: TextButton(
+                                                        onPressed: () {
+                                                          pageController
+                                                              .animateToPage(
+                                                            1,
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    300),
+                                                            curve: Curves.ease,
+                                                          );
+                                                        },
+                                                        child: Obx(() => Text(
+                                                              '评论 ${commentController.commentDataTotalCount.value}',
+                                                              style: TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .primary,
+                                                              ),
+                                                            )),
+                                                      ),
+                                                    )
+                                                  ]),
+                                                ),
+                                                SizedBox(
+                                                  height: 4,
+                                                  child: LayoutBuilder(
+                                                    builder:
+                                                        (context, constraints) {
+                                                      return AnimatedBuilder(
+                                                        animation:
+                                                            pageController,
+                                                        builder:
+                                                            (context, child) {
+                                                          double page = 0.0;
+                                                          try {
+                                                            page = pageController
+                                                                        .hasClients &&
+                                                                    pageController
+                                                                            .page !=
+                                                                        null
+                                                                ? pageController
+                                                                    .page!
+                                                                : pageController
+                                                                    .initialPage
+                                                                    .toDouble();
+                                                          } catch (_) {}
+                                                          double width =
+                                                              constraints
+                                                                      .maxWidth /
+                                                                  2;
+                                                          double minLine =
+                                                              width * 0.7;
+                                                          double maxLine =
+                                                              width * 1.4;
+                                                          double progress =
+                                                              (page - page.floor())
+                                                                  .abs();
+                                                          double dist =
+                                                              (progress > 0.5)
+                                                                  ? 1 - progress
+                                                                  : progress;
+                                                          double lineWidth =
+                                                              minLine +
+                                                                  (maxLine -
+                                                                          minLine) *
+                                                                      (dist *
+                                                                          2);
+                                                          double left = page *
+                                                                  width +
+                                                              (width -
+                                                                      lineWidth) /
+                                                                  2;
+                                                          return Stack(
+                                                            children: [
+                                                              Positioned(
+                                                                left: left,
+                                                                width:
+                                                                    lineWidth,
+                                                                top: 0,
+                                                                bottom: 0,
+                                                                child:
+                                                                    Container(
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(2),
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .primary,
+                                                                  ),
+                                                                  height: 4,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            )),
+                                        SizedBox(
+                                            width: 50,
+                                            child: IconButton(
+                                              icon: Icon(
+                                                Icons.more_vert,
+                                                size: 20,
+                                              ),
+                                              onPressed: () {},
+                                            ))
+                                      ])),
+                              DividerWithPaddingHorizontal(padding: 0),
+                              // 内容区 PreloadPageView
+                              Expanded(
+                                child: PreloadPageView.builder(
+                                  controller: pageController,
+                                  itemCount: 2,
+                                  preloadPagesCount: 2,
+                                  physics: BouncingScrollPhysics(),
+                                  onPageChanged: (tabIndex) {
+                                    nowTabIndex.value = tabIndex;
+                                  },
+                                  itemBuilder: (context, tabIndex) {
+                                    if (tabIndex == 0) {
+                                      return VideoPlayPageInfo(
+                                        videoId: videoId,
+                                      );
+                                    } else {
+                                      return VideoPlayPageComments(
+                                          videoId: videoId);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        : null,
+                  ),
+                ]));
           }
         });
   }
@@ -253,8 +288,15 @@ class VideoPlayPage extends StatelessWidget {
 
 // 新增：视频播放器组件
 class VideoPlayerWidget extends StatefulWidget {
+  final String videoId;
   final String fileId;
-  const VideoPlayerWidget({required this.fileId, Key? key}) : super(key: key);
+  final RxBool showSidebar;
+  const VideoPlayerWidget(
+      {required this.videoId,
+      required this.fileId,
+      required this.showSidebar,
+      Key? key})
+      : super(key: key);
 
   @override
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
@@ -263,14 +305,31 @@ class VideoPlayerWidget extends StatefulWidget {
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late final Player player;
   late final VideoController controller;
-
+  late final VideoDamnuController videoDamnuController;
+  final TextEditingController textEditingController = TextEditingController();
+  FocusNode focusNode = FocusNode();
+  DateTime? lastSendTime;
+  final RxBool isSending = false.obs;
   @override
   void initState() {
     super.initState();
-    player = Player();
+    player = Player(
+        configuration: PlayerConfiguration(
+            // 其他配置项
+            ));
     Get.find<AppBarController>().playerList.add(player);
     controller = VideoController(player);
+    // videoDamnuController =
+    //     VideoDamnuController(videoId: widget.videoId, fileId: widget.fileId);
+    videoDamnuController = Get.put(
+        VideoDamnuController(videoId: widget.videoId, fileId: widget.fileId),
+        tag: '${widget.videoId}VideoDamnuController');
     _openVideo();
+    focusNode.addListener(() {
+      if (focusNode.hasFocus && player.state.playing) {
+        player.pause();
+      }
+    });
   }
 
   @override
@@ -278,6 +337,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fileId != widget.fileId) {
       _openVideo();
+      videoDamnuController.videoId = widget.videoId;
+      videoDamnuController.fileId = widget.fileId;
+      videoDamnuController.loadDanmu();
     }
   }
 
@@ -297,11 +359,152 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   void dispose() {
     player.dispose();
+    focusNode.dispose();
     super.dispose();
+  }
+
+  void sendDanmu() async {
+    if (isSending.value) {
+      Get.snackbar('どうやら壊れたようです。', '发送失败，请稍后再试');
+      return;
+    }
+    try {
+      String text = textEditingController.text.trim();
+      int time =
+          (controller.player.state.position.inMilliseconds / 1000).round();
+      if (text.isEmpty) {
+        throw Exception('弹幕内容不能为空');
+      }
+      isSending.value = true;
+      videoDamnuController.postDanmu(
+          text, DanmuModeEnum.NORMAL.type, 'FFFFFF', time);
+      textEditingController.clear();
+      await Future.delayed(Duration(seconds: 5));
+    } catch (e) {
+      Get.snackbar('发送弹幕失败', e.toString());
+    } finally {
+      isSending.value = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Video(controller: controller);
+    MaterialDesktopVideoControlsThemeData t({bool fullscreen = false}) =>
+        MaterialDesktopVideoControlsThemeData(
+            toggleFullscreenOnDoublePress: true,
+            playAndPauseOnTap: true,
+            controlsHoverDuration: Duration(seconds: 2),
+            seekBarColor: Theme.of(context).colorScheme.primary,
+            seekBarThumbColor: Theme.of(context).colorScheme.primary,
+            seekBarPositionColor: Theme.of(context).colorScheme.primary,
+            bottomButtonBar: [
+              // MaterialDesktopSkipPreviousButton(),
+              MaterialDesktopPlayOrPauseButton(),
+              // MaterialDesktopSkipNextButton(),
+              MaterialDesktopVolumeButton(),
+              MaterialDesktopPositionIndicator(),
+              Spacer(),
+              SizedBox(
+                  width: 400,
+                  height: 40,
+                  child: TextField(
+                    controller: textEditingController,
+                    focusNode: focusNode,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: '发送弹幕',
+                      hintStyle: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.7)),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withOpacity(0.3),
+                      prefixIcon: IconButton(
+                        icon: Text('A',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary)),
+                        onPressed: () {},
+                      ),
+                      suffixIcon: Obx(() => IconButton(
+                            icon: Icon(
+                              Icons.send,
+                              color: isSending.value
+                                  ? Theme.of(context).disabledColor
+                                  : Theme.of(context).colorScheme.primary,
+                            ),
+                            onPressed: isSending.value
+                                ? null
+                                : () {
+                                    sendDanmu();
+                                  },
+                          )),
+                    ),
+                    onSubmitted: (text) {
+                      sendDanmu();
+                    },
+                  )),
+              Spacer(),
+              if (!fullscreen)
+                MaterialDesktopCustomButton(
+                    icon: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: SizedBox(
+                            width: 40,
+                            height: 20,
+                            child: Row(
+                              children: [
+                                Obx(() => Icon(
+                                      widget.showSidebar.value
+                                          ? Icons.chevron_left
+                                          : Icons.chevron_right,
+                                      size: 20,
+                                    )),
+                                Obx(() => Icon(
+                                      widget.showSidebar.value
+                                          ? Icons.chevron_right
+                                          : Icons.chevron_left,
+                                      size: 20,
+                                    )),
+                              ],
+                            ))),
+                    onPressed: () {
+                      widget.showSidebar.value = !widget.showSidebar.value;
+                    }),
+              MaterialDesktopFullscreenButton()
+            ],
+            topButtonBar: [
+              Obx(() => Text(
+                  '${(Get.find<VideoNowWatchingCountController>().nowWatchingCountMap[widget.fileId] ?? 1).toString()} 人正在观看',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold))),
+              Obx(() => Text(
+                  videoDamnuController.danmus.length.toString() + ' 条弹幕',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold)))
+            ]);
+
+    return MaterialDesktopVideoControlsTheme(
+        normal: t(),
+        fullscreen: t(fullscreen: true),
+        child: Video(controller: controller));
   }
 }

@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
+  flutter_barrage_craft
   media_kit_libs_linux
   media_kit_video
   screen_retriever_linux
