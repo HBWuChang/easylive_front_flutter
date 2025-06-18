@@ -182,6 +182,11 @@ class MaterialDesktopVideoControlsThemeData {
   /// 额外覆盖层Widget（如弹幕层），会在播放器最顶层渲染
   final Widget? extraOverlay;
 
+  /// 拖动进度条开始时的回调。
+  final VoidCallback? onSeekStart;
+  /// 拖动进度条结束时的回调。
+  final VoidCallback? onSeekEnd;
+
   /// {@macro material_desktop_video_controls_theme_data}
   const MaterialDesktopVideoControlsThemeData({
     this.displaySeekBar = true,
@@ -232,6 +237,8 @@ class MaterialDesktopVideoControlsThemeData {
     this.volumeBarTransitionDuration = const Duration(milliseconds: 150),
     this.shiftSubtitlesOnControlsVisibilityChange = true,
     this.extraOverlay,
+    this.onSeekStart,
+    this.onSeekEnd,
   });
 
   /// Creates a copy of this [MaterialDesktopVideoControlsThemeData] with the given fields replaced by the non-null parameter values.
@@ -274,6 +281,8 @@ class MaterialDesktopVideoControlsThemeData {
     Duration? volumeBarTransitionDuration,
     bool? shiftSubtitlesOnControlsVisibilityChange,
     Widget? extraOverlay,
+    VoidCallback? onSeekStart,
+    VoidCallback? onSeekEnd,
   }) {
     return MaterialDesktopVideoControlsThemeData(
       displaySeekBar: displaySeekBar ?? this.displaySeekBar,
@@ -329,6 +338,8 @@ class MaterialDesktopVideoControlsThemeData {
           shiftSubtitlesOnControlsVisibilityChange ??
               this.shiftSubtitlesOnControlsVisibilityChange,
       extraOverlay: extraOverlay ?? this.extraOverlay,
+      onSeekStart: onSeekStart ?? this.onSeekStart,
+      onSeekEnd: onSeekEnd ?? this.onSeekEnd,
     );
   }
 }
@@ -978,6 +989,8 @@ class MaterialDesktopSeekBarState extends State<MaterialDesktopSeekBar> {
 
   void onPointerDown() {
     widget.onSeekStart?.call();
+    // 新增：全局回调
+    _theme(context).onSeekStart?.call();
     setState(() {
       click = true;
     });
@@ -985,6 +998,8 @@ class MaterialDesktopSeekBarState extends State<MaterialDesktopSeekBar> {
 
   void onPointerUp() {
     widget.onSeekEnd?.call();
+    // 新增：全局回调
+    _theme(context).onSeekEnd?.call();
     setState(() {
       // Explicitly set the position to prevent the slider from jumping.
       click = false;

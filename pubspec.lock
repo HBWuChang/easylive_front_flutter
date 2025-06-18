@@ -65,6 +65,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  canvas_danmaku:
+    dependency: "direct main"
+    description:
+      path: "packages/canvas_danmaku-0.2.7"
+      relative: true
+    source: path
+    version: "0.2.7"
   characters:
     dependency: transitive
     description:
@@ -206,14 +213,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_barrage_craft:
-    dependency: "direct main"
-    description:
-      name: flutter_barrage_craft
-      sha256: "4e6faa76acbd677017f58530981e2c79ce95618e0dbc5497db0dfd6391c1c206"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   flutter_lints:
     dependency: "direct dev"
     description:

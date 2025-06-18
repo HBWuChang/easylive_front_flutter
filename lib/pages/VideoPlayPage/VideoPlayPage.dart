@@ -27,8 +27,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'VideoPlayPageInfoWidgets.dart';
-import 'package:flutter_barrage_craft/flutter_barrage_craft.dart';
-import 'VideoPlayDanmu.dart';
+import 'package:canvas_danmaku/canvas_danmaku.dart';
 
 class VideoPlayPage extends StatelessWidget {
   const VideoPlayPage({Key? key}) : super(key: key);
@@ -338,6 +337,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     Colors.brown,
     Colors.grey,
   ];
+  late RxBool barrageEnabled ;
   @override
   void initState() {
     super.initState();
@@ -347,36 +347,34 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             ));
     Get.find<AppBarController>().playerList.add(player);
     controller = VideoController(player);
-    damnuOverlay = IgnorePointer(
-      child: VideoPlayDanmu(
-        videoId: widget.videoId,
-        fileId: widget.fileId,
-        width: Get.width,
-        height: Get.height,
-      ),
-    );
-    fullscreenDamnuOverlay = IgnorePointer(
-      child: FullscreenVideoPlayDanmu(
-        videoId: widget.videoId,
-        fileId: widget.fileId,
-        width: Get.width,
-        height: Get.height,
-      ),
-    );
+
     // videoDamnuController =
     //     VideoDamnuController(videoId: widget.videoId, fileId: widget.fileId);
     videoDamnuController = Get.put(
         VideoDamnuController(videoId: widget.videoId, fileId: widget.fileId),
         tag: '${widget.videoId}VideoDamnuController');
+        barrageEnabled=videoDamnuController.barrageEnabled;
+    damnuOverlay = DanmakuScreen(
+      createdController: (e) {
+        videoDamnuController.barrageController = e;
+      },
+      option: DanmakuOption(massiveMode: true,)
+    );
+    fullscreenDamnuOverlay = DanmakuScreen(
+      createdController: (e) {
+        videoDamnuController.fullscreenBarrageController = e;
+      },
+      option: DanmakuOption(),
+    );
     videoDamnuController.player = player;
-    videoDamnuController.player!.stream.playing.listen((playing) {
+    player.stream.playing.listen((playing) {
       if (playing) {
         videoDamnuController.resumeDanmu();
       } else {
         videoDamnuController.pauseDanmu();
       }
     });
-
+   
     _openVideo();
     focusNode.addListener(() {
       if (focusNode.hasFocus && player.state.playing) {
@@ -390,6 +388,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fileId != widget.fileId) {
       _openVideo();
+      videoDamnuController.barrageController.clear();
       videoDamnuController.videoId = widget.videoId;
       videoDamnuController.fileId = widget.fileId;
       videoDamnuController.loadDanmu();
@@ -445,6 +444,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             seekBarThumbColor: Theme.of(context).colorScheme.primary,
             seekBarPositionColor: Theme.of(context).colorScheme.primary,
             extraOverlay: fullscreen ? fullscreenDamnuOverlay : damnuOverlay,
+            onSeekEnd: () => videoDamnuController.resumeDanmu(),
+            onSeekStart: () => videoDamnuController.pauseDanmu(),
             bottomButtonBar: [
               // MaterialDesktopSkipPreviousButton(),
               MaterialDesktopPlayOrPauseButton(),
@@ -477,18 +478,37 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                               .colorScheme
                               .surface
                               .withOpacity(0.3),
-                          prefixIcon: Builder(
-                            builder: (iconContext) => IconButton(
-                              icon: Text('A',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary)),
-                              onPressed: () {
-                                showDanmuStyleMenu(iconContext);
-                              },
-                            ),
+                          prefixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Obx(() => IconButton(
+                                    icon: Icon(
+                                      barrageEnabled.value
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                      color: barrageEnabled.value
+                                          ? Theme.of(context).colorScheme.primary
+                                          : Theme.of(context).disabledColor,
+                                    ),
+                                    tooltip: barrageEnabled.value ? '关闭弹幕' : '开启弹幕',
+                                    onPressed: () {
+                                      barrageEnabled.value = !barrageEnabled.value;
+                                    },
+                                  )),
+                              Builder(
+                                builder: (iconContext) => IconButton(
+                                  icon: Text('A',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary)),
+                                  onPressed: () {
+                                    showDanmuStyleMenu(iconContext);
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                           suffixIcon: Obx(() => IconButton(
                                 icon: Icon(

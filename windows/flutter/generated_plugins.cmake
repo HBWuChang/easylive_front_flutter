@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
-  flutter_barrage_craft
   media_kit_libs_windows_video
   media_kit_video
   permission_handler_windows

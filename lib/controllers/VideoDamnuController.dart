@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:math';
 import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/controllers/controllers-class2.dart';
 import 'package:easylive/enums.dart';
@@ -14,8 +15,7 @@ import '../api_service.dart';
 import '../Funcs.dart';
 import 'package:media_kit/media_kit.dart';
 import 'controllers-class.dart';
-import 'package:flutter_barrage_craft/flutter_barrage_craft.dart';
-import 'package:flutter_barrage_craft/src/model/barrage_model.dart';
+import 'package:canvas_danmaku/canvas_danmaku.dart';
 
 class DanmuIdWithHashcode {
   int danmuId;
@@ -35,14 +35,15 @@ class VideoDamnuController extends GetxController {
   String videoId = '';
   String fileId = '';
   RxList<VideoDanmu> danmus = <VideoDanmu>[].obs;
-  BarrageController barrageController = BarrageController();
-  BarrageController? fullscreenBarrageController;
+  late DanmakuController barrageController;
+  DanmakuController? fullscreenBarrageController;
   RxBool loading = true.obs;
   Player? player;
+  var barrageEnabled = true.obs;
   BuildContext? context;
+
   Size? size;
   List<Timer> timers = [];
-  Set<DanmuIdWithHashcode> sentIds = {};
   bool enableSendOnUpdate = false;
   VideoDamnuController({required this.videoId, required this.fileId});
   late final LocalSettingsController localSettingsController;
@@ -50,10 +51,17 @@ class VideoDamnuController extends GetxController {
   void onInit() {
     super.onInit();
     localSettingsController = Get.find<LocalSettingsController>();
+    barrageEnabled.value = localSettingsController.getSetting('开启弹幕') ?? true;
     loadDanmu();
     ever(danmus, (_) {
       if (enableSendOnUpdate) {
         sendToBarrage();
+      }
+    });
+    ever(barrageEnabled, (enabled) {
+      if (!enabled) {
+        barrageController.clear();
+        fullscreenBarrageController?.clear();
       }
     });
     size = Size(300, 20);
@@ -69,102 +77,53 @@ class VideoDamnuController extends GetxController {
     return Colors.white;
   }
 
-  void reset() {
-    debugPrint('_danmuController重置弹幕状态');
-    // try {
-    //   barrageController!.pause();
-    //   barrageController!.clearScreen();
-    //   barrageController!.dispose();
-    // } catch (e) {
-    //   debugPrint('清除弹幕失败: $e');
-    // }
-    sentIds.clear();
-    // timers.forEach((timer) => timer.cancel());
-    // timers.clear();
+  DanmakuItemType toDanmakuItemType(int mode) {
+    switch (DanmuModeEnum.getByType(mode)) {
+      case DanmuModeEnum.NORMAL:
+        return DanmakuItemType.scroll;
+      case DanmuModeEnum.TOP:
+        return DanmakuItemType.top;
+      case DanmuModeEnum.BOTTOM:
+        return DanmakuItemType.bottom;
+      default:
+        return DanmakuItemType.scroll; // 默认滚动弹幕
+    }
   }
 
-  void addToTimer(VideoDanmu danmu, {bool force = false}) {
+  void addToTimer(VideoDanmu danmu, {bool force = false}) async {
+    if (!barrageEnabled.value) {
+      debugPrint('弹幕已暂停，无法添加弹幕: ${danmu.text}');
+      return;
+    }
     Duration nowDuration = player!.state.position;
     Duration danmuDuration = Duration(seconds: danmu.time);
     if (nowDuration.inSeconds > danmuDuration.inSeconds + 1 && !force) {
       return;
     }
-    if (sentIds.contains(danmu.danmuId)) {
-      debugPrint('弹幕已发送: ${danmu.danmuId}  ${danmu.text}');
-      return;
-    }
-    // final timer = Timer(danmuDuration - nowDuration, () {
-    final timer = Timer(
-        danmuDuration < nowDuration
+    final random = Random();
+    // 随机前后延迟（-0.75~+0.75秒）
+    double offset = (random.nextDouble() * 1.5) - 0.75;
+    Duration randomDelay = Duration(milliseconds: (offset * 1000).round());
+    Duration timerDelay = (danmuDuration < nowDuration
             ? Duration.zero
-            : danmuDuration - nowDuration, () async {
-      if (sentIds.any((test) => test.danmuId == danmu.danmuId)) {
-        debugPrint('弹幕已发送: ${danmu.danmuId}  ${danmu.text}');
-        return;
-      }
-      // sentIds.add(danmu.danmuId);
+            : danmuDuration - nowDuration) +
+        randomDelay;
+    if (timerDelay.isNegative) timerDelay = Duration.zero;
+    final timer = Timer(timerDelay, () async {
+      DanmakuContentItem toAddItem = DanmakuContentItem(
+        danmu.text,
+        selfSend: danmu.userId == Get.find<AccountController>().userId,
+        color: _parseColor(danmu.color),
+        type: toDanmakuItemType(danmu.mode),
+      );
       if (fullscreenBarrageController != null) {
-        fullscreenBarrageController!.addBarrage(
-            barrageWidget: Text(
-              danmu.text,
-              style: TextStyle(
-                color: _parseColor(danmu.color),
-                fontSize: localSettingsController.settings['弹幕字体大小'],
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    blurRadius: 2,
-                    color: Colors.black.withOpacity(0.5),
-                    offset: Offset(1, 1),
-                  ),
-                ],
-              ),
-            ),
-            widgetSize: size);
+        fullscreenBarrageController!.addDanmaku(toAddItem);
       }
-      var res = await barrageController!.addBarrage(
-          barrageWidget: Text(
-            danmu.text,
-            style: TextStyle(
-              color: _parseColor(danmu.color),
-              fontSize: localSettingsController.settings['弹幕字体大小'],
-              fontWeight: FontWeight.bold,
-              shadows: [
-                Shadow(
-                  blurRadius: 2,
-                  color: Colors.black.withOpacity(0.5),
-                  offset: Offset(1, 1),
-                ),
-              ],
-            ),
-          ),
-          widgetSize: size);
-
-      debugPrint('发送弹幕: ${danmu.danmuId}  ${danmu.text}  ${res.barrageId}');
-      sentIds.add(
-        DanmuIdWithHashcode(danmu.danmuId, res.barrageId.hashCode),
-      );
-      barrageController!.changeBarrageRate(
-        localSettingsController.settings['弹幕速度'],
-      );
-      debugPrint('弹幕加载完成: ${barrageController!.barrages.length}');
+      barrageController.addDanmaku(toAddItem);
+      debugPrint(
+          '发送弹幕: [33m${danmu.danmuId}  ${danmu.text} (延迟: [36m${timerDelay.inMilliseconds}ms[0m)');
     });
     timers.add(timer);
-  }
-
-  void SingleBarrageRemoveScreenCallBack(BarrageModel value) {
-    debugPrint(
-        '单条弹幕移除屏幕: ${(value.barrageWidget as Text).data} ${value.barrageId}');
-    // 移除已发送的弹幕ID
-    sentIds.removeWhere(
-      (test) => test.hashCode == value.barrageId.hashCode,
-    );
-    barrageController.barrageManager.removeBarrageByKey(value.barrageId);
-  }
-
-  void fullscreenSingleBarrageRemoveScreenCallBack(BarrageModel value) {
-    fullscreenBarrageController!.barrageManager
-        .removeBarrageByKey(value.barrageId);
   }
 
   void cleanTimers() {
@@ -189,7 +148,7 @@ class VideoDamnuController extends GetxController {
     }
     debugPrint('加载弹幕: ${fileId}  ${danmus.length}');
     cleanTimers();
-    barrageController.play();
+    // barrageController.play();
     for (var danmu in danmus) {
       addToTimer(danmu);
     }
@@ -199,11 +158,18 @@ class VideoDamnuController extends GetxController {
   void pauseDanmu() async {
     debugPrint('暂停弹幕');
     barrageController.pause();
+    if (fullscreenBarrageController != null) {
+      fullscreenBarrageController!.pause();
+    }
     cleanTimers();
   }
 
   void resumeDanmu() async {
     debugPrint('恢复弹幕');
+    barrageController.resume();
+    if (fullscreenBarrageController != null) {
+      fullscreenBarrageController!.resume();
+    }
     sendToBarrage();
   }
 

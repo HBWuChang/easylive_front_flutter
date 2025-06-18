@@ -7,7 +7,6 @@ import Foundation
 
 import desktop_drop
 import file_picker
-import flutter_barrage_craft
 import media_kit_libs_macos_video
 import media_kit_video
 import package_info_plus
@@ -22,7 +21,6 @@ import window_manager
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   DesktopDropPlugin.register(with: registry.registrar(forPlugin: "DesktopDropPlugin"))
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
-  FlutterBarrageCraftPlugin.register(with: registry.registrar(forPlugin: "FlutterBarrageCraftPlugin"))
   MediaKitLibsMacosVideoPlugin.register(with: registry.registrar(forPlugin: "MediaKitLibsMacosVideoPlugin"))
   MediaKitVideoPlugin.register(with: registry.registrar(forPlugin: "MediaKitVideoPlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
