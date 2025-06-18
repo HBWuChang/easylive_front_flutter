@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:math' as math;
 import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
@@ -337,7 +338,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     Colors.brown,
     Colors.grey,
   ];
-  late RxBool barrageEnabled ;
+  late RxBool barrageEnabled;
+  final RxBool showDanmuPanel = false.obs;
+  Timer? _danmuPanelTimer;
   @override
   void initState() {
     super.initState();
@@ -353,13 +356,14 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     videoDamnuController = Get.put(
         VideoDamnuController(videoId: widget.videoId, fileId: widget.fileId),
         tag: '${widget.videoId}VideoDamnuController');
-        barrageEnabled=videoDamnuController.barrageEnabled;
+    barrageEnabled = videoDamnuController.barrageEnabled;
     damnuOverlay = DanmakuScreen(
-      createdController: (e) {
-        videoDamnuController.barrageController = e;
-      },
-      option: DanmakuOption(massiveMode: true,)
-    );
+        createdController: (e) {
+          videoDamnuController.barrageController = e;
+        },
+        option: DanmakuOption(
+          massiveMode: true,
+        ));
     fullscreenDamnuOverlay = DanmakuScreen(
       createdController: (e) {
         videoDamnuController.fullscreenBarrageController = e;
@@ -374,7 +378,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         videoDamnuController.pauseDanmu();
       }
     });
-   
+
     _openVideo();
     focusNode.addListener(() {
       if (focusNode.hasFocus && player.state.playing) {
@@ -408,10 +412,27 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     );
   }
 
+  void _showDanmuPanel() {
+    _danmuPanelTimer?.cancel();
+    showDanmuPanel.value = true;
+  }
+
+  void _hideDanmuPanelWithDelay() {
+    _danmuPanelTimer?.cancel();
+    _danmuPanelTimer = Timer(Duration(milliseconds: 200), () {
+      showDanmuPanel.value = false;
+    });
+  }
+
+  void _cancelDanmuPanelTimer() {
+    _danmuPanelTimer?.cancel();
+  }
+
   @override
   void dispose() {
     player.dispose();
     focusNode.dispose();
+    _danmuPanelTimer?.cancel();
     super.dispose();
   }
 
@@ -453,81 +474,104 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               MaterialDesktopVolumeButton(),
               MaterialDesktopPositionIndicator(),
               Spacer(),
-              HoverFollowWidget(
-                  sensitivity: 0.2,
-                  child: SizedBox(
-                      width: 400,
+              // 弹幕输入框和弹幕面板区域
+              MouseRegion(
+                onEnter: (_) => _cancelDanmuPanelTimer(),
+                onExit: (_) => _hideDanmuPanelWithDelay(),
+                child: Obx(() => AnimatedContainer(
+                      duration: Duration(milliseconds: 200),
+                      width: showDanmuPanel.value ? 330 : 0,
                       height: 40,
-                      child: TextField(
-                        controller: textEditingController,
-                        focusNode: focusNode,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: '发送弹幕',
-                          hintStyle: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withOpacity(0.7)),
-                          border: OutlineInputBorder(),
-                          filled: true,
-                          fillColor: Theme.of(context)
-                              .colorScheme
-                              .surface
-                              .withOpacity(0.3),
-                          prefixIcon: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Obx(() => IconButton(
-                                    icon: Icon(
-                                      barrageEnabled.value
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                      color: barrageEnabled.value
-                                          ? Theme.of(context).colorScheme.primary
-                                          : Theme.of(context).disabledColor,
-                                    ),
-                                    tooltip: barrageEnabled.value ? '关闭弹幕' : '开启弹幕',
-                                    onPressed: () {
-                                      barrageEnabled.value = !barrageEnabled.value;
-                                    },
-                                  )),
-                              Builder(
-                                builder: (iconContext) => IconButton(
-                                  icon: Text('A',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary)),
+                      margin: EdgeInsets.only(),
+                      curve: Curves.easeOut,
+                      child: showDanmuPanel.value
+                          ? DanmuControlPanel(
+                              videoDamnuController: videoDamnuController,
+                            )
+                          : null,
+                    )),
+              ),
+
+              SizedBox(
+                width: 400,
+                height: 40,
+                child: TextField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: '发送弹幕',
+                    hintStyle: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.7)),
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor:
+                        Theme.of(context).colorScheme.surface.withOpacity(0.3),
+                    prefixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        MouseRegion(
+                            onEnter: (_) => _showDanmuPanel(),
+                            onExit: (_) => _hideDanmuPanelWithDelay(),
+                            child: Obx(() => IconButton(
+                                  icon: Icon(
+                                    barrageEnabled.value
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    size: 14,
+                                    color: barrageEnabled.value
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).disabledColor,
+                                  ),
+                                  tooltip:
+                                      barrageEnabled.value ? '关闭弹幕' : '开启弹幕',
                                   onPressed: () {
-                                    showDanmuStyleMenu(iconContext);
+                                    barrageEnabled.value =
+                                        !barrageEnabled.value;
                                   },
-                                ),
-                              ),
-                            ],
+                                ))),
+                        Builder(
+                          builder: (iconContext) => IconButton(
+                            icon: Text('A',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.primary)),
+                            onPressed: () {
+                              if (fullscreen) toggleFullscreen(iconContext);
+                              showDanmuStyleMenu(iconContext);
+                            },
                           ),
-                          suffixIcon: Obx(() => IconButton(
-                                icon: Icon(
-                                  Icons.send,
-                                  color: isSending.value
-                                      ? Theme.of(context).disabledColor
-                                      : Theme.of(context).colorScheme.primary,
-                                ),
-                                onPressed: isSending.value
-                                    ? null
-                                    : () {
-                                        sendDanmu();
-                                      },
-                              )),
                         ),
-                        onSubmitted: (text) {
-                          sendDanmu();
-                        },
-                      ))),
+                      ],
+                    ),
+                    suffixIcon: Obx(() => IconButton(
+                          icon: Icon(
+                            Icons.send,
+                            color: isSending.value
+                                ? Theme.of(context).disabledColor
+                                : Theme.of(context).colorScheme.primary,
+                          ),
+                          onPressed: isSending.value
+                              ? null
+                              : () {
+                                  sendDanmu();
+                                },
+                        )),
+                  ),
+                  onSubmitted: (text) {
+                    sendDanmu();
+                  },
+                ),
+              ),
+              // 弹幕控制面板区域
+
               Spacer(),
               if (!fullscreen)
                 MaterialDesktopCustomButton(
@@ -770,5 +814,158 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       }
     } catch (_) {}
     return Colors.white;
+  }
+}
+
+class DanmuControlPanel extends StatefulWidget {
+  final VideoDamnuController videoDamnuController;
+  const DanmuControlPanel({Key? key, required this.videoDamnuController})
+      : super(key: key);
+  @override
+  State<DanmuControlPanel> createState() => _DanmuControlPanelState();
+}
+
+class _DanmuControlPanelState extends State<DanmuControlPanel> {
+  @override
+  void initState() {
+    super.initState();
+    // 可从 controller 读取初始值
+  }
+
+  String toRead(String text, double v) {
+    switch (text) {
+      case '速度':
+        return '${(1 / (v / 10.0) * 100.0).toStringAsFixed(2)}%';
+      case '大小':
+        return '${(v / 16.0 * 100.0).toStringAsFixed(2)}%';
+      case '区域':
+        return '${(v * 100).round()}%';
+      case '不透明度':
+        return '${(v * 100).round()}%';
+      default:
+        return text;
+    }
+  }
+
+  Map<String, double> mins = {
+    '速度': 1,
+    '大小': 4,
+    '区域': 0.1,
+    '不透明度': 0.1,
+  };
+  Map<String, double> maxs = {
+    '速度': 60,
+    '大小': 32,
+    '区域': 1,
+    '不透明度': 1,
+  };
+  Map<String, int> divisions = {'速度': 60, '大小': 200, '区域': 16, '不透明度': 90};
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    Widget lw(String text, RxDouble value) {
+      return SizedBox(
+        width: 40,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              bottom: -8,
+              left: -10,
+              right: -10,
+              child: Center(child: Text(text, style: TextStyle(fontSize: 12))),
+            ),
+            Positioned(
+                left: -20,
+                right: -20,
+                bottom: -4,
+                child: Obx(() => Slider(
+                      value: value.value,
+                      min: mins[text]!,
+                      max: maxs[text]!,
+                      divisions: divisions[text],
+                      label: toRead(text, value.value),
+                      onChanged: (v) {
+                        value.value = v;
+                      },
+                    ))),
+          ],
+        ),
+      );
+    }
+
+    Padding rw(String text, RxBool b) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        child: GestureDetector(
+          onTap: () {
+            b.value = !b.value;
+            widget.videoDamnuController.update();
+          },
+          child: Obx(() => Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: b.value
+                      ? theme.colorScheme.primary.withOpacity(0.12)
+                      : Colors.transparent,
+                  border: Border.all(
+                    color: b.value
+                        ? theme.colorScheme.primary
+                        : theme.dividerColor,
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: b.value
+                        ? theme.colorScheme.primary
+                        : theme.textTheme.bodyMedium?.color,
+                    fontWeight: b.value ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              )),
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.45), // 半透明黑色背景
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // 速度
+          lw('速度', widget.videoDamnuController.duration),
+          // 大小
+          lw('大小', widget.videoDamnuController.fontSize),
+          // 区域
+          lw('区域', widget.videoDamnuController.area),
+          lw('不透明度', widget.videoDamnuController.opacity),
+          // 类型过滤
+          Row(mainAxisSize: MainAxisSize.min, children: [
+            rw('滚动', widget.videoDamnuController.enableScroll),
+            rw('顶部', widget.videoDamnuController.enableTop),
+            rw('底部', widget.videoDamnuController.enableBottom)
+          ]),
+        ],
+      ),
+    );
   }
 }

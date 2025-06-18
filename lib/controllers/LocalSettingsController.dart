@@ -28,7 +28,11 @@ class LocalSettingsController extends GetxController {
       '开启弹幕': true,
       '弹幕不透明度': 1.0,
       '弹幕字体大小': 16.0,
-      '弹幕速度': 0.2,
+      '弹幕速度': 10.0,
+      '弹幕显示区域': 1.0,
+      '弹幕启用滚动': true,
+      '弹幕启用顶部': true,
+      '弹幕启用底部': true,
     };
     defaultSettings.addAll(settings);
     settings.value = defaultSettings;
@@ -70,7 +74,17 @@ class LocalSettingsController extends GetxController {
     });
   }
 
-  Future<void> saveSettings() async {
+  Timer? _saveTimer;
+  void saveSettings() {
+    if (_saveTimer != null && _saveTimer!.isActive) {
+      _saveTimer!.cancel();
+    }
+    _saveTimer = Timer(const Duration(seconds: 1), _saveSettings);
+    // final prefs = await SharedPreferences.getInstance();
+    // await prefs.setString('localSettings', jsonEncode(settings.value));
+  }
+
+  Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('localSettings', jsonEncode(settings.value));
   }

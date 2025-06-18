@@ -41,7 +41,27 @@ class VideoDamnuController extends GetxController {
   Player? player;
   var barrageEnabled = true.obs;
   BuildContext? context;
-
+  //   DanmakuOption({
+  //   this.fontSize = 16,
+  //   this.fontWeight = 4,
+  //   this.area = 1.0,
+  //   this.duration = 10,
+  //   this.opacity = 1.0,
+  //   this.hideBottom = false,
+  //   this.hideScroll = false,
+  //   this.hideTop = false,
+  //   this.hideSpecial = false,
+  //   this.showStroke = true,
+  //   this.massiveMode = false,
+  //   this.safeArea = true,
+  // });
+  var duration = 10.0.obs;
+  var fontSize = 16.0.obs;
+  var area = 1.0.obs;
+  var opacity = 1.0.obs;
+  var enableScroll = true.obs;
+  var enableTop = true.obs;
+  var enableBottom = true.obs;
   Size? size;
   List<Timer> timers = [];
   bool enableSendOnUpdate = false;
@@ -51,7 +71,14 @@ class VideoDamnuController extends GetxController {
   void onInit() {
     super.onInit();
     localSettingsController = Get.find<LocalSettingsController>();
-    barrageEnabled.value = localSettingsController.getSetting('开启弹幕') ?? true;
+    barrageEnabled.value = localSettingsController.getSetting('开启弹幕');
+    duration.value = localSettingsController.getSetting('弹幕速度');
+    fontSize.value = localSettingsController.getSetting('弹幕字体大小');
+    area.value = localSettingsController.getSetting('弹幕显示区域');
+    opacity.value = localSettingsController.getSetting('弹幕不透明度');
+    enableScroll.value = localSettingsController.getSetting('弹幕启用滚动');
+    enableTop.value = localSettingsController.getSetting('弹幕启用顶部');
+    enableBottom.value = localSettingsController.getSetting('弹幕启用底部');
     loadDanmu();
     ever(danmus, (_) {
       if (enableSendOnUpdate) {
@@ -64,6 +91,27 @@ class VideoDamnuController extends GetxController {
         fullscreenBarrageController?.clear();
       }
     });
+    ever(duration, (_) {
+      updateDanmuStyle();
+    });
+    ever(fontSize, (_) {
+      updateDanmuStyle();
+    });
+    ever(area, (_) {
+      updateDanmuStyle();
+    });
+    ever(opacity, (_) {
+      updateDanmuStyle();
+    });
+    ever(enableScroll, (_) {
+      updateDanmuStyle();
+    });
+    ever(enableTop, (_) {
+      updateDanmuStyle();
+    });
+    ever(enableBottom, (_) {
+      updateDanmuStyle();
+    });
     size = Size(300, 20);
   }
 
@@ -75,6 +123,49 @@ class VideoDamnuController extends GetxController {
       }
     } catch (_) {}
     return Colors.white;
+  }
+
+  void updateDanmuStyle() {
+    barrageController.updateOption(
+      DanmakuOption(
+        fontSize: fontSize.value,
+        area: area.value,
+        duration: duration.value.toInt(),
+        opacity: opacity.value,
+        hideBottom: !enableBottom.value,
+        hideScroll: !enableScroll.value,
+        hideTop: !enableTop.value,
+        hideSpecial: false,
+        showStroke: true,
+        massiveMode: false,
+        safeArea: true,
+      ),
+    );
+    if (fullscreenBarrageController != null) {
+      fullscreenBarrageController!.updateOption(
+        DanmakuOption(
+          fontSize: fontSize.value,
+          area: area.value,
+          duration: duration.value.toInt(),
+          opacity: opacity.value,
+          hideBottom: !enableBottom.value,
+          hideScroll: !enableScroll.value,
+          hideTop: !enableTop.value,
+          hideSpecial: false,
+          showStroke: true,
+          massiveMode: false,
+          safeArea: true,
+        ),
+      );
+    }
+    localSettingsController.setSetting('弹幕字体大小', fontSize.value);
+    localSettingsController.setSetting('弹幕显示区域', area.value);
+    localSettingsController.setSetting('弹幕速度', duration.value);
+    localSettingsController.setSetting('弹幕不透明度', opacity.value);
+    localSettingsController.setSetting('弹幕启用滚动', enableScroll.value);
+    localSettingsController.setSetting('弹幕启用顶部', enableTop.value);
+    localSettingsController.setSetting('弹幕启用底部', enableBottom.value);
+    debugPrint('保存到本地: fontSize=$fontSize, area=$area, duration=$duration');
   }
 
   DanmakuItemType toDanmakuItemType(int mode) {
