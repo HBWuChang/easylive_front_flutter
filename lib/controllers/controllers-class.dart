@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
+import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/controllers/controllers-class2.dart';
 import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
@@ -1200,15 +1201,18 @@ class VideoLoadVideoPListController extends GetxController {
   var isLoading = false.obs;
   var selectFileId = ''.obs;
   Timer? _reportTimer;
-
+  String videoId = '';
   int get selectFileIndex {
     return videoPList.indexWhere((file) => file.fileId == selectFileId.value);
   }
 
   bool get multi => videoPList.length > 1;
   VideoLoadVideoPListController(String videoId) {
+    this.videoId = videoId;
     loadVideoPList(videoId);
     ever(selectFileId, (id) {
+      Get.find<LocalSettingsController>()
+          .setSetting('videoPListSelectFileId${this.videoId}', id);
       _reportTimer?.cancel();
       if (id != null && id.toString().isNotEmpty) {
         _reportTimer = Timer.periodic(Duration(seconds: 5), (_) {
@@ -1248,8 +1252,14 @@ class VideoLoadVideoPListController extends GetxController {
         videoPList.value = (res['data'] as List)
             .map((item) => VideoInfoFile(item as Map<String, dynamic>))
             .toList();
+        // selectFileId.value =
+        //     videoPList.isNotEmpty ? videoPList[0].fileId ?? '' : '';
         selectFileId.value =
-            videoPList.isNotEmpty ? videoPList[0].fileId ?? '' : '';
+            Get.find<LocalSettingsController>().getLastPlayFileId(videoId);
+        if ((selectFileId.value.isEmpty && videoPList.isNotEmpty) ||
+            !videoPList.any((file) => file.fileId == selectFileId.value)) {
+          selectFileId.value = videoPList[0].fileId ?? '';
+        }
         if (videoPList.isEmpty) {
           throw Exception('视频分片列表为空');
         }
@@ -1300,55 +1310,6 @@ class UhomeGetUserInfoController extends GetxController {
     } catch (e) {
       showErrorSnackbar(e.toString());
     }
-  }
-}
-
-class LocalSettingsController extends GetxController {
-  var settings = <String, dynamic>{}.obs;
-  void setSetting(String key, dynamic value) {
-    settings[key] = value;
-  }
-
-  String get deviceId {
-    return settings['deviceId'] ?? creatDeviceId();
-  }
-
-  String creatDeviceId() {
-    // 生成两个uuid
-    var uuid = Uuid();
-    String uuid1 = uuid.v4();
-    String uuid2 = uuid.v4();
-    // 拼接后取md5
-    String raw = uuid1 + uuid2;
-    String newDeviceId = md5.convert(raw.codeUnits).toString();
-    settings['deviceId'] = newDeviceId;
-    return newDeviceId;
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-    ever(settings, (_) {
-      saveSettings();
-    });
-  }
-
-  Future<void> saveSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('localSettings', jsonEncode(settings.value));
-  }
-
-  Future<void> loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    settings.value = prefs.getString('localSettings') != null
-        ? Map<String, dynamic>.from(
-            jsonDecode(prefs.getString('localSettings')!))
-        : {};
-    Map<String, dynamic> defaultSettings = {
-      'listOrGrid': true,
-    };
-    defaultSettings.addAll(settings);
-    settings.value = defaultSettings;
   }
 }
 

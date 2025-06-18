@@ -28,6 +28,7 @@ import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'VideoPlayPageInfoWidgets.dart';
 import 'package:flutter_barrage_craft/flutter_barrage_craft.dart';
+import 'VideoPlayDanmu.dart';
 
 class VideoPlayPage extends StatelessWidget {
   const VideoPlayPage({Key? key}) : super(key: key);
@@ -109,42 +110,47 @@ class VideoPlayPage extends StatelessWidget {
                                                   child: Row(children: [
                                                     Expanded(
                                                       child: TextButton(
-                                                        onPressed: () {
-                                                          pageController
-                                                              .animateToPage(
-                                                            0,
-                                                            duration: Duration(
-                                                                milliseconds:
-                                                                    300),
-                                                            curve: Curves.ease,
-                                                          );
-                                                        },
-                                                        child: Text(
-                                                          '简介',
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .colorScheme
-                                                                .primary,
-                                                          ),
-                                                        ),
-                                                      ),
+                                                          onPressed: () {
+                                                            pageController
+                                                                .animateToPage(
+                                                              0,
+                                                              duration: Duration(
+                                                                  milliseconds:
+                                                                      300),
+                                                              curve:
+                                                                  Curves.ease,
+                                                            );
+                                                          },
+                                                          child:
+                                                              HoverFollowWidget(
+                                                            child: Text(
+                                                              '简介',
+                                                              style: TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .primary,
+                                                              ),
+                                                            ),
+                                                          )),
                                                     ),
                                                     Expanded(
-                                                      child: TextButton(
-                                                        onPressed: () {
-                                                          pageController
-                                                              .animateToPage(
-                                                            1,
-                                                            duration: Duration(
-                                                                milliseconds:
-                                                                    300),
-                                                            curve: Curves.ease,
-                                                          );
-                                                        },
+                                                        child: TextButton(
+                                                      onPressed: () {
+                                                        pageController
+                                                            .animateToPage(
+                                                          1,
+                                                          duration: Duration(
+                                                              milliseconds:
+                                                                  300),
+                                                          curve: Curves.ease,
+                                                        );
+                                                      },
+                                                      child: HoverFollowWidget(
                                                         child: Obx(() => Text(
                                                               '评论 ${commentController.commentDataTotalCount.value}',
                                                               style: TextStyle(
@@ -159,7 +165,7 @@ class VideoPlayPage extends StatelessWidget {
                                                               ),
                                                             )),
                                                       ),
-                                                    )
+                                                    ))
                                                   ]),
                                                 ),
                                                 SizedBox(
@@ -307,6 +313,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late final VideoController controller;
   late final VideoDamnuController videoDamnuController;
   final TextEditingController textEditingController = TextEditingController();
+  late Widget damnuOverlay;
+  late Widget fullscreenDamnuOverlay;
+  GlobalKey danmuKey = GlobalKey();
   FocusNode focusNode = FocusNode();
   DateTime? lastSendTime;
   final RxBool isSending = false.obs;
@@ -338,11 +347,36 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             ));
     Get.find<AppBarController>().playerList.add(player);
     controller = VideoController(player);
+    damnuOverlay = IgnorePointer(
+      child: VideoPlayDanmu(
+        videoId: widget.videoId,
+        fileId: widget.fileId,
+        width: Get.width,
+        height: Get.height,
+      ),
+    );
+    fullscreenDamnuOverlay = IgnorePointer(
+      child: FullscreenVideoPlayDanmu(
+        videoId: widget.videoId,
+        fileId: widget.fileId,
+        width: Get.width,
+        height: Get.height,
+      ),
+    );
     // videoDamnuController =
     //     VideoDamnuController(videoId: widget.videoId, fileId: widget.fileId);
     videoDamnuController = Get.put(
         VideoDamnuController(videoId: widget.videoId, fileId: widget.fileId),
         tag: '${widget.videoId}VideoDamnuController');
+    videoDamnuController.player = player;
+    videoDamnuController.player!.stream.playing.listen((playing) {
+      if (playing) {
+        videoDamnuController.resumeDanmu();
+      } else {
+        videoDamnuController.pauseDanmu();
+      }
+    });
+
     _openVideo();
     focusNode.addListener(() {
       if (focusNode.hasFocus && player.state.playing) {
@@ -400,6 +434,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+        'VideoPlayerWidget build: fileId=${widget.fileId}, videoId=${widget.videoId}');
     MaterialDesktopVideoControlsThemeData t({bool fullscreen = false}) =>
         MaterialDesktopVideoControlsThemeData(
             toggleFullscreenOnDoublePress: true,
@@ -408,6 +444,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             seekBarColor: Theme.of(context).colorScheme.primary,
             seekBarThumbColor: Theme.of(context).colorScheme.primary,
             seekBarPositionColor: Theme.of(context).colorScheme.primary,
+            extraOverlay: fullscreen ? fullscreenDamnuOverlay : damnuOverlay,
             bottomButtonBar: [
               // MaterialDesktopSkipPreviousButton(),
               MaterialDesktopPlayOrPauseButton(),
@@ -415,59 +452,62 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               MaterialDesktopVolumeButton(),
               MaterialDesktopPositionIndicator(),
               Spacer(),
-              SizedBox(
-                  width: 400,
-                  height: 40,
-                  child: TextField(
-                    controller: textEditingController,
-                    focusNode: focusNode,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '发送弹幕',
-                      hintStyle: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(0.7)),
-                      border: OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Theme.of(context)
-                          .colorScheme
-                          .surface
-                          .withOpacity(0.3),
-                      prefixIcon: Builder(
-                        builder: (iconContext) => IconButton(
-                          icon: Text('A',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(context).colorScheme.primary)),
-                          onPressed: () {
-                            showDanmuStyleMenu(iconContext);
-                          },
+              HoverFollowWidget(
+                  sensitivity: 0.2,
+                  child: SizedBox(
+                      width: 400,
+                      height: 40,
+                      child: TextField(
+                        controller: textEditingController,
+                        focusNode: focusNode,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
-                      ),
-                      suffixIcon: Obx(() => IconButton(
-                            icon: Icon(
-                              Icons.send,
-                              color: isSending.value
-                                  ? Theme.of(context).disabledColor
-                                  : Theme.of(context).colorScheme.primary,
+                        decoration: InputDecoration(
+                          hintText: '发送弹幕',
+                          hintStyle: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.7)),
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .withOpacity(0.3),
+                          prefixIcon: Builder(
+                            builder: (iconContext) => IconButton(
+                              icon: Text('A',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary)),
+                              onPressed: () {
+                                showDanmuStyleMenu(iconContext);
+                              },
                             ),
-                            onPressed: isSending.value
-                                ? null
-                                : () {
-                                    sendDanmu();
-                                  },
-                          )),
-                    ),
-                    onSubmitted: (text) {
-                      sendDanmu();
-                    },
-                  )),
+                          ),
+                          suffixIcon: Obx(() => IconButton(
+                                icon: Icon(
+                                  Icons.send,
+                                  color: isSending.value
+                                      ? Theme.of(context).disabledColor
+                                      : Theme.of(context).colorScheme.primary,
+                                ),
+                                onPressed: isSending.value
+                                    ? null
+                                    : () {
+                                        sendDanmu();
+                                      },
+                              )),
+                        ),
+                        onSubmitted: (text) {
+                          sendDanmu();
+                        },
+                      ))),
               Spacer(),
               if (!fullscreen)
                 MaterialDesktopCustomButton(
@@ -518,10 +558,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       fontWeight: FontWeight.bold)))
             ]);
 
+    // 关键：弹幕层和视频同层，保证全屏时弹幕可见
     return MaterialDesktopVideoControlsTheme(
-        normal: t(),
-        fullscreen: t(fullscreen: true),
-        child: Video(controller: controller));
+      normal: t(),
+      fullscreen: t(fullscreen: true),
+      child: Video(controller: controller),
+    );
   }
 
   // 新增：弹幕样式选择弹窗（锚定按钮位置）

@@ -179,6 +179,9 @@ class MaterialDesktopVideoControlsThemeData {
   /// Whether to shift the subtitles upwards when the controls are visible.
   final bool shiftSubtitlesOnControlsVisibilityChange;
 
+  /// 额外覆盖层Widget（如弹幕层），会在播放器最顶层渲染
+  final Widget? extraOverlay;
+
   /// {@macro material_desktop_video_controls_theme_data}
   const MaterialDesktopVideoControlsThemeData({
     this.displaySeekBar = true,
@@ -228,6 +231,7 @@ class MaterialDesktopVideoControlsThemeData {
     this.volumeBarThumbColor = const Color(0xFFFFFFFF),
     this.volumeBarTransitionDuration = const Duration(milliseconds: 150),
     this.shiftSubtitlesOnControlsVisibilityChange = true,
+    this.extraOverlay,
   });
 
   /// Creates a copy of this [MaterialDesktopVideoControlsThemeData] with the given fields replaced by the non-null parameter values.
@@ -269,6 +273,7 @@ class MaterialDesktopVideoControlsThemeData {
     Color? volumeBarThumbColor,
     Duration? volumeBarTransitionDuration,
     bool? shiftSubtitlesOnControlsVisibilityChange,
+    Widget? extraOverlay,
   }) {
     return MaterialDesktopVideoControlsThemeData(
       displaySeekBar: displaySeekBar ?? this.displaySeekBar,
@@ -323,6 +328,7 @@ class MaterialDesktopVideoControlsThemeData {
       shiftSubtitlesOnControlsVisibilityChange:
           shiftSubtitlesOnControlsVisibilityChange ??
               this.shiftSubtitlesOnControlsVisibilityChange,
+      extraOverlay: extraOverlay ?? this.extraOverlay,
     );
   }
 }
@@ -866,6 +872,9 @@ class _MaterialDesktopVideoControlsState
                           ),
                         ),
                       ),
+                      // 修正：extraOverlay 应通过 MaterialDesktopVideoControlsTheme 访问
+                      if (_theme(context).extraOverlay != null)
+                        _theme(context).extraOverlay!,
                     ],
                   ),
                 ),

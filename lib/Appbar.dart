@@ -296,7 +296,8 @@ class AppBarContent extends StatelessWidget {
                     windowManager.setSkipTaskbar(false);
                   },
                 ),
-                IconButton(
+                HoverFollowWidget(
+                    child: IconButton(
                   tooltip: '创作中心',
                   icon: Icon(Icons.create, size: 13),
                   onPressed: () {
@@ -304,7 +305,7 @@ class AppBarContent extends StatelessWidget {
                         false;
                     Get.toNamed(Routes.platformPage, id: Routes.mainGetId);
                   },
-                ),
+                )),
                 IconButton(
                   tooltip: Texts.close,
                   icon: Icon(

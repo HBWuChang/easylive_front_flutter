@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
+import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/enums.dart';
 import 'package:easylive/pages/MainPage/VideoInfoWidget.dart';
 import 'package:easylive/settings.dart';
@@ -615,7 +616,7 @@ class VideoPlayPageInfo extends StatelessWidget {
                   curve: Curves.easeInOut,
                 );
               },
-              child: Icon(Icons.arrow_upward),
+              child: HoverFollowWidget(child: Icon(Icons.arrow_upward)),
             )
           : SizedBox.shrink()),
     );
@@ -630,7 +631,7 @@ class VideoPlayPageInfo extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              btn,
+              HoverFollowWidget(child: btn),
               if (count != null)
                 Text(
                   toShowNumText(count),

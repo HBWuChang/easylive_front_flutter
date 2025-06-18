@@ -239,7 +239,8 @@ class CommentController extends GetxController {
             throw Exception('回复的评论不存在');
           }
         } else {
-          if (commentDataList[0].topType == CommentTopTypeEnum.TOP.type) {
+          if (commentDataList.isNotEmpty &&
+              commentDataList[0].topType == CommentTopTypeEnum.TOP.type) {
             commentDataList.insert(1, newComment);
           } else {
             commentDataList.insert(0, newComment);
@@ -592,7 +593,7 @@ class VideoComment {
     replyUserId = json['replyUserId'];
     topType = json['topType'];
     postTime = DateTime.tryParse(json['postTime'] ?? '');
-    likeCount = json['likeCount']?? 0;
+    likeCount = json['likeCount'] ?? 0;
     hateCount = json['hateCount'] ?? 0;
     avatar = json['avatar'];
     nickName = json['nickName'];

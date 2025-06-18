@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' show PointerScrollEvent;
 
 import 'package:easylive/Funcs.dart';
+import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/pages/MainPage/MainPage.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPage.dart';
 import 'package:easylive/pages/pages.dart';

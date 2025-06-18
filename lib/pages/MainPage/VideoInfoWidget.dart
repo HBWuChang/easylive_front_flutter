@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
+import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/controllers-class.dart';
@@ -31,122 +32,128 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        MouseRegion(
-          onEnter: (_) => setState(() => _hovered = true),
-          onExit: (_) => setState(() => _hovered = false),
-          child: AnimatedScale(
-            scale: _hovered ? 1.05 : 1.0,
-            duration: Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            child: Stack(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    final videoId = widget.video.videoId;
-                    if (videoId != null) {
-                      Get.find<AppBarController>()
-                          .extendBodyBehindAppBar
-                          .value = false;
-                      Get.toNamed('${Routes.videoPlayPage}?videoId=$videoId',
-                          id: Routes.mainGetId);
-                    }
-                  },
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: widget.video.videoCover != null &&
-                              widget.video.videoCover!.isNotEmpty
-                          ? ExtendedImage.network(
-                              Constants.baseUrl +
-                                  ApiAddr.fileGetResourcet +
-                                  widget.video.videoCover!,
-                              fit: BoxFit.cover,
-                            )
-                          : Container(color: Colors.grey[200]),
+        HoverFollowWidget(
+            maxOffset: 12,
+            child: MouseRegion(
+              onEnter: (_) => setState(() => _hovered = true),
+              onExit: (_) => setState(() => _hovered = false),
+              child: AnimatedScale(
+                scale: _hovered ? 1.05 : 1.0,
+                duration: Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                child: Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        final videoId = widget.video.videoId;
+                        if (videoId != null) {
+                          Get.find<AppBarController>()
+                              .extendBodyBehindAppBar
+                              .value = false;
+                          Get.toNamed(
+                              '${Routes.videoPlayPage}?videoId=$videoId',
+                              id: Routes.mainGetId);
+                        }
+                      },
+                      child: AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: widget.video.videoCover != null &&
+                                  widget.video.videoCover!.isNotEmpty
+                              ? ExtendedImage.network(
+                                  Constants.baseUrl +
+                                      ApiAddr.fileGetResourcet +
+                                      widget.video.videoCover!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(color: Colors.grey[200]),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    height: 38,
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.vertical(bottom: Radius.circular(8)),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        height: 38,
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.vertical(bottom: Radius.circular(8)),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.7)
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 8,
+                      bottom: 8,
+                      child: Row(
+                        children: [
+                          Icon(Icons.play_arrow, color: Colors.white, size: 16),
+                          SizedBox(width: 2),
+                          Text(
+                            (widget.video.playCount ?? 0).toString(),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                shadows: [
+                                  Shadow(color: Colors.black, blurRadius: 2)
+                                ]),
+                          ),
+                          SizedBox(width: 10),
+                          Icon(Icons.subtitles, color: Colors.white, size: 16),
+                          SizedBox(width: 2),
+                          Text(
+                            (widget.video.danmuCount ?? 0).toString(),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                shadows: [
+                                  Shadow(color: Colors.black, blurRadius: 2)
+                                ]),
+                          ),
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                Positioned(
-                  left: 8,
-                  bottom: 8,
-                  child: Row(
-                    children: [
-                      Icon(Icons.play_arrow, color: Colors.white, size: 16),
-                      SizedBox(width: 2),
-                      Text(
-                        (widget.video.playCount ?? 0).toString(),
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            shadows: [
-                              Shadow(color: Colors.black, blurRadius: 2)
-                            ]),
-                      ),
-                      SizedBox(width: 10),
-                      Icon(Icons.subtitles, color: Colors.white, size: 16),
-                      SizedBox(width: 2),
-                      Text(
-                        (widget.video.danmuCount ?? 0).toString(),
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            shadows: [
-                              Shadow(color: Colors.black, blurRadius: 2)
-                            ]),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+              ),
+            )),
         SizedBox(height: 6),
-        Text(
+        HoverFollowWidget(
+            child: Text(
           widget.video.videoName ?? '',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-        ),
+        )),
         SizedBox(height: 2),
-        Row(
-          children: [
-            Icon(Icons.person, size: 14, color: Colors.grey),
-            SizedBox(width: 3),
-            Text(widget.video.nickName ?? '',
-                style: TextStyle(fontSize: 13, color: Colors.grey[700])),
-            SizedBox(width: 10),
-            Icon(Icons.access_time, size: 14, color: Colors.grey),
-            SizedBox(width: 3),
-            Text(
-              widget.video.createTime != null
-                  ? _formatDate(widget.video.createTime!)
-                  : '',
-              style: TextStyle(fontSize: 13, color: Colors.grey[700]),
-            ),
-          ],
-        ),
+        HoverFollowWidget(
+            maxOffset: 8,
+            child: Row(
+              children: [
+                Icon(Icons.person, size: 14, color: Colors.grey),
+                SizedBox(width: 3),
+                Text(widget.video.nickName ?? '',
+                    style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                SizedBox(width: 10),
+                Icon(Icons.access_time, size: 14, color: Colors.grey),
+                SizedBox(width: 3),
+                Text(
+                  widget.video.createTime != null
+                      ? _formatDate(widget.video.createTime!)
+                      : '',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                ),
+              ],
+            )),
       ],
     );
   }
@@ -199,7 +206,8 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                       // 左侧封面
                       Expanded(
                         flex: 2,
-                        child: MouseRegion(
+                        child: HoverFollowWidget(
+                            child: MouseRegion(
                           onEnter: (_) => hovered.value = true,
                           onExit: (_) => hovered.value = false,
                           child: Obx(() => AnimatedScale(
@@ -271,7 +279,7 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                   ),
                                 ),
                               )),
-                        ),
+                        )),
                       ),
                       SizedBox(width: 12),
                       // 右侧信息
@@ -282,19 +290,23 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // 标题，两行
-                            SizedBox(
-                              height: 40,
-                              child: Text(
-                                widget.video.videoName ?? '',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 15),
-                              ),
-                            ),
+                            HoverFollowWidget(
+                                maxOffset: 4,
+                                child: SizedBox(
+                                  height: 40,
+                                  child: Text(
+                                    widget.video.videoName ?? '',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15),
+                                  ),
+                                )),
                             SizedBox(height: 4),
                             // up主
-                            Row(
+                            HoverFollowWidget(
+                                child: Row(
                               children: [
                                 Icon(Icons.person,
                                     size: 14, color: Colors.grey),
@@ -308,10 +320,11 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                   ),
                                 ),
                               ],
-                            ),
+                            )),
                             SizedBox(height: 4),
                             // 播放量和弹幕
-                            Row(
+                            HoverFollowWidget(
+                                child: Row(
                               children: [
                                 Icon(Icons.play_arrow,
                                     size: 14, color: Colors.grey),
@@ -331,7 +344,7 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                       fontSize: 13, color: Colors.grey[700]),
                                 ),
                               ],
-                            ),
+                            )),
                           ],
                         ),
                       ),
