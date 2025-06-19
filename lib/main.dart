@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'dart:ui' show PointerScrollEvent;
-
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/pages/MainPage/MainPage.dart';
+import 'package:easylive/pages/UHome/Uhome.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPage.dart';
 import 'package:easylive/pages/pages.dart';
 import 'package:easylive/pages/PlatformPage/PlatformPageSubmit.dart';
@@ -18,9 +18,7 @@ import 'controllers/controllers-class.dart';
 import 'api_service.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';
-
 import 'pages/PlatformPage/PlatformPage.dart';
-
 import 'package:media_kit/media_kit.dart';
 import 'package:flutter/gestures.dart';
 import 'Appbar.dart';
@@ -163,6 +161,17 @@ class _HomeState extends State<Home> {
                       settings: settings,
                       routeName: settings.name,
                       page: () => VideoPlayPage(),
+                      transition: Transition.fadeIn,
+                      middlewares: [appBarController.listenPopMiddleware]);
+                  appBarController.addAndCleanReapeatRoute(
+                      route, settings.name!);
+                  return route;
+                }
+                if (settings.name!.startsWith(Routes.uhome)) {
+                  var route = GetPageRoute(
+                      settings: settings,
+                      routeName: settings.name,
+                      page: () => Uhome(),
                       transition: Transition.fadeIn,
                       middlewares: [appBarController.listenPopMiddleware]);
                   appBarController.addAndCleanReapeatRoute(

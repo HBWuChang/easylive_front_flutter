@@ -107,24 +107,28 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
               TextField(
                 controller: nickNameController,
                 decoration: InputDecoration(
-                    labelText: Texts.userName,
-                    helperText: Texts.userNameHelperText),
+                  labelText: Texts.userName,
+                ),
+                maxLength: 20,
               ),
               SizedBox(height: 8),
               TextField(
                 controller: personIntroductionController,
                 decoration:
                     InputDecoration(labelText: Texts.personIntroduction),
+                maxLength: 80,
               ),
               SizedBox(height: 8),
               TextField(
                 controller: noticeInfoController,
                 decoration: InputDecoration(labelText: Texts.noticeInfo),
+                maxLength: 300,
               ),
               SizedBox(height: 8),
               TextField(
                 controller: schoolController,
                 decoration: InputDecoration(labelText: Texts.school),
+                maxLength: 150,
               ),
               SizedBox(height: 16),
               ElevatedButton(

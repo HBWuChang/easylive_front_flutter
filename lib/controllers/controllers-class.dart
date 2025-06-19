@@ -214,6 +214,7 @@ class AccountController extends GetxController {
 }
 
 class UserInfoController extends GetxController {
+  late String _userId;
   var userInfo = <String, dynamic>{}.obs;
 
   // {
@@ -233,7 +234,13 @@ class UserInfoController extends GetxController {
   //   "haveFocus": false,
   //   "theme": "https://s.040905.xyz/d/v/business-spirit-unit.gif?%E2%80%A6gn=uDy2k6zQMaZr8CnNBem03KTPdcQGX-JVOIRcEBcVOhk=:0"
   // }
-  String get userId => userInfo['userId'] ?? '';
+  UserInfoController({String? userId}) {
+    if (userId != null && userId.isNotEmpty) {
+      _userId = userId;
+      getUserInfo(null);
+    }
+  }
+  String get userId => _userId;
   String get nickName => userInfo['nickName'] ?? '';
   set nickName(String value) {
     userInfo['nickName'] = value;
@@ -277,9 +284,14 @@ class UserInfoController extends GetxController {
   bool get haveFocus => userInfo['haveFocus'] ?? false;
   String? get theme => userInfo['theme'] ?? '';
 
-  Future<Map<String, dynamic>> getUserInfo(String userId) async {
+  Future<Map<String, dynamic>> getUserInfo(String? userId) async {
+    if (userId != null && userId.isNotEmpty) {
+      _userId = userId;
+    } else if (_userId.isEmpty) {
+      _userId = Get.find<AccountController>().userId ?? '';
+    }
     try {
-      var res = await ApiService.uhomeGetUserInfo(userId);
+      var res = await ApiService.uhomeGetUserInfo(_userId);
       if (res['code'] == 200) {
         userInfo.value = res['data'];
         return userInfo;

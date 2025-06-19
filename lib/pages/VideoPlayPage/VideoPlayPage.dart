@@ -95,170 +95,38 @@ class VideoPlayPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // 顶部按钮栏和横条
-                              SizedBox(
-                                  height: 38,
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        SizedBox(
-                                            width: 200,
-                                            child: Column(
-                                              children: [
-                                                SizedBox(
-                                                  height: 30,
-                                                  child: Row(children: [
-                                                    Expanded(
-                                                      child: TextButton(
-                                                          onPressed: () {
-                                                            pageController
-                                                                .animateToPage(
-                                                              0,
-                                                              duration: Duration(
-                                                                  milliseconds:
-                                                                      300),
-                                                              curve:
-                                                                  Curves.ease,
-                                                            );
-                                                          },
-                                                          child:
-                                                              HoverFollowWidget(
-                                                            child: Text(
-                                                              '简介',
-                                                              style: TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .colorScheme
-                                                                    .primary,
-                                                              ),
-                                                            ),
-                                                          )),
-                                                    ),
-                                                    Expanded(
-                                                        child: TextButton(
-                                                      onPressed: () {
-                                                        pageController
-                                                            .animateToPage(
-                                                          1,
-                                                          duration: Duration(
-                                                              milliseconds:
-                                                                  300),
-                                                          curve: Curves.ease,
-                                                        );
-                                                      },
-                                                      child: HoverFollowWidget(
-                                                        child: Obx(() => Text(
-                                                              '评论 ${commentController.commentDataTotalCount.value}',
-                                                              style: TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .colorScheme
-                                                                    .primary,
-                                                              ),
-                                                            )),
-                                                      ),
-                                                    ))
-                                                  ]),
-                                                ),
-                                                SizedBox(
-                                                  height: 4,
-                                                  child: LayoutBuilder(
-                                                    builder:
-                                                        (context, constraints) {
-                                                      return AnimatedBuilder(
-                                                        animation:
-                                                            pageController,
-                                                        builder:
-                                                            (context, child) {
-                                                          double page = 0.0;
-                                                          try {
-                                                            page = pageController
-                                                                        .hasClients &&
-                                                                    pageController
-                                                                            .page !=
-                                                                        null
-                                                                ? pageController
-                                                                    .page!
-                                                                : pageController
-                                                                    .initialPage
-                                                                    .toDouble();
-                                                          } catch (_) {}
-                                                          double width =
-                                                              constraints
-                                                                      .maxWidth /
-                                                                  2;
-                                                          double minLine =
-                                                              width * 0.7;
-                                                          double maxLine =
-                                                              width * 1.4;
-                                                          double progress =
-                                                              (page - page.floor())
-                                                                  .abs();
-                                                          double dist =
-                                                              (progress > 0.5)
-                                                                  ? 1 - progress
-                                                                  : progress;
-                                                          double lineWidth =
-                                                              minLine +
-                                                                  (maxLine -
-                                                                          minLine) *
-                                                                      (dist *
-                                                                          2);
-                                                          double left = page *
-                                                                  width +
-                                                              (width -
-                                                                      lineWidth) /
-                                                                  2;
-                                                          return Stack(
-                                                            children: [
-                                                              Positioned(
-                                                                left: left,
-                                                                width:
-                                                                    lineWidth,
-                                                                top: 0,
-                                                                bottom: 0,
-                                                                child:
-                                                                    Container(
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    borderRadius:
-                                                                        BorderRadius
-                                                                            .circular(2),
-                                                                    color: Theme.of(
-                                                                            context)
-                                                                        .colorScheme
-                                                                        .primary,
-                                                                  ),
-                                                                  height: 4,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            )),
-                                        SizedBox(
-                                            width: 50,
-                                            child: IconButton(
-                                              icon: Icon(
-                                                Icons.more_vert,
-                                                size: 20,
-                                              ),
-                                              onPressed: () {},
-                                            ))
-                                      ])),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                    width: 200,
+                                    child: Obx(() => AnimatedTabBarWidget(
+                                      pageController: pageController,
+                                      tabLabels: [
+                                        TextSpan(text: '简介'),
+                                        TextSpan(
+                                          children: [
+                                            TextSpan(text: '评论 '),
+                                            TextSpan(
+                                              text: '${commentController.commentDataTotalCount.value}',
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    )),
+                                  ),
+                                  SizedBox(
+                                    width: 50,
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.more_vert,
+                                        size: 20,
+                                      ),
+                                      onPressed: () {},
+                                    ),
+                                  ),
+                                ],
+                              ),
                               DividerWithPaddingHorizontal(padding: 0),
                               // 内容区 PreloadPageView
                               Expanded(
@@ -363,12 +231,28 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         },
         option: DanmakuOption(
           massiveMode: true,
+          fontSize: videoDamnuController.fontSize.value,
+          opacity: videoDamnuController.opacity.value,
+          area: videoDamnuController.area.value,
+          hideScroll: !videoDamnuController.enableScroll.value,
+          hideTop: !videoDamnuController.enableTop.value,
+          hideBottom: !videoDamnuController.enableBottom.value,
+          duration: videoDamnuController.duration.value.toInt(),
         ));
     fullscreenDamnuOverlay = DanmakuScreen(
       createdController: (e) {
         videoDamnuController.fullscreenBarrageController = e;
       },
-      option: DanmakuOption(),
+      option: DanmakuOption(
+        massiveMode: true,
+        fontSize: videoDamnuController.fontSize.value,
+        opacity: videoDamnuController.opacity.value,
+        area: videoDamnuController.area.value,
+        hideScroll: !videoDamnuController.enableScroll.value,
+        hideTop: !videoDamnuController.enableTop.value,
+        hideBottom: !videoDamnuController.enableBottom.value,
+        duration: videoDamnuController.duration.value.toInt(),
+      ),
     );
     videoDamnuController.player = player;
     player.stream.playing.listen((playing) {

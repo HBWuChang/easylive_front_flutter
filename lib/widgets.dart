@@ -5,7 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'api_service.dart';
 import 'package:extended_image/extended_image.dart';
-import 'dart:math' as math;
 
 Widget Avatar({String? avatarValue, double? radius = 16, Key? key}) {
   // 如果avatarValue为空或null，显示默认头像
@@ -160,6 +159,130 @@ class _HoverFollowWidgetState extends State<HoverFollowWidget> with TickerProvid
           offset: _offset,
           child: widget.child,
         ),
+      ),
+    );
+  }
+}
+
+/// 带动画横条的页面切换标签栏 Widget
+class AnimatedTabBarWidget extends StatelessWidget {
+  final dynamic pageController; // 支持 PageController 和 PreloadPageController
+  final List<TextSpan> tabLabels;
+  final double? barHeight;
+  final double? barWidthMultiplier;
+  final double? spacing;
+  final double? containerHeight;
+
+  const AnimatedTabBarWidget({
+    Key? key,
+    required this.pageController,
+    required this.tabLabels,
+    this.barHeight = 4.0,
+    this.barWidthMultiplier = 0.7,
+    this.spacing = 8.0,
+    this.containerHeight = 38.0,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: containerHeight,
+      child: Column(
+        children: [
+          SizedBox(
+            height: containerHeight! - barHeight! - spacing!,
+            child: Row(
+              children: List.generate(tabLabels.length, (index) {
+                return Expanded(
+                  child: AnimatedBuilder(
+                    animation: pageController,
+                    builder: (context, child) {
+                      double page = 0.0;
+                      try {
+                        page = pageController.hasClients &&
+                                pageController.page != null
+                            ? pageController.page!
+                            : pageController.initialPage.toDouble();
+                      } catch (_) {}
+                      
+                      // 判断当前标签是否为选中状态
+                      bool isSelected = (page.round() == index);
+                      
+                      return TextButton(
+                        onPressed: () {
+                          pageController.animateToPage(
+                            index,
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.ease,
+                          );
+                        },
+                        child: HoverFollowWidget(
+                          child: Text.rich(
+                            tabLabels[index],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ),
+          SizedBox(height: spacing),
+          SizedBox(
+            height: barHeight,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return AnimatedBuilder(
+                  animation: pageController,
+                  builder: (context, child) {
+                    double page = 0.0;
+                    try {
+                      page = pageController.hasClients &&
+                              pageController.page != null
+                          ? pageController.page!
+                          : pageController.initialPage.toDouble();
+                    } catch (_) {}
+                    
+                    double tabWidth = constraints.maxWidth / tabLabels.length;
+                    double minLine = tabWidth * barWidthMultiplier!;
+                    double maxLine = tabWidth * (barWidthMultiplier! + 0.7);
+                    
+                    double progress = (page - page.floor()).abs();
+                    double dist = (progress > 0.5) ? 1 - progress : progress;
+                    double lineWidth = minLine + (maxLine - minLine) * (dist * 2);
+                    double left = page * tabWidth + (tabWidth - lineWidth) / 2;
+                    
+                    return Stack(
+                      children: [
+                        Positioned(
+                          left: left,
+                          width: lineWidth,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(2),
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            height: barHeight,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

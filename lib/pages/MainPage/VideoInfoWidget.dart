@@ -141,8 +141,20 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
               children: [
                 Icon(Icons.person, size: 14, color: Colors.grey),
                 SizedBox(width: 3),
-                Text(widget.video.nickName ?? '',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[700])),
+                TextButton(
+                    onPressed: () {
+                      Get.toNamed(
+                          '${Routes.uhome}?userId=${widget.video.userId}',
+                          id: Routes.mainGetId);
+                    },
+                    child: Text(
+                        widget.video.nickName ??
+                            Get.find<UserInfoController>(
+                                    tag:
+                                        '${widget.video.userId}UserInfoController')
+                                .nickName,
+                        style:
+                            TextStyle(fontSize: 13, color: Colors.grey[700]))),
                 SizedBox(width: 10),
                 Icon(Icons.access_time, size: 14, color: Colors.grey),
                 SizedBox(width: 3),

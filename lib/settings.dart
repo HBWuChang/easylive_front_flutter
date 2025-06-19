@@ -12,6 +12,7 @@ class Constants {
       "^(?![0-9]+\$)(?![a-zA-Z]+\$)[0-9A-Za-z]{6,18}\$";
   static const int errorMsgDuration = 2000; // 错误消息持续时间，单位毫秒
   static const String defaultAvatar = 'assets/images/user-avatar.png';
+  static const String defaultUHomeBg= 'assets/images/uhomebg.avif';
   static const String DISABLE_DANMU = "1"; // 禁用弹幕
   static const String DISABLE_COMMENT = "0"; // 禁用评论
   static const String Coin_svg =
@@ -38,6 +39,7 @@ class Routes {
   static const String loginPage = '/login';
   static const String platformPage = '/platform';
   static const String videoPlayPage = '/videoPlayPage';
+  static const String uhome = '/uhome';
 }
 
 class Texts {
