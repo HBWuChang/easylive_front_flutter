@@ -6,27 +6,25 @@ import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 
 class VideoSeriesDetailPage extends StatelessWidget {
-  final UserVideoSeries videoSeries;
-  
+  final UhomeSeriesController uhomeSeriesController;
+
   const VideoSeriesDetailPage({
     Key? key,
-    required this.videoSeries,
+    required this.uhomeSeriesController,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Column(
         children: [
           // 顶部导航栏
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.grey[300]!,
+                  color: Theme.of(context).dividerColor,
                   width: 1,
                 ),
               ),
@@ -35,11 +33,11 @@ class VideoSeriesDetailPage extends StatelessWidget {
               children: [
                 // 返回按钮
                 IconButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () =>
+                      Get.back(id: int.parse(uhomeSeriesController.userId)),
                   icon: const Icon(Icons.arrow_back),
                   style: IconButton.styleFrom(
-                    backgroundColor: Colors.grey[100],
-                    foregroundColor: Colors.black87,
+                    backgroundColor: Theme.of(context).hoverColor,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -65,7 +63,8 @@ class VideoSeriesDetailPage extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      videoSeries.seriesName,
+                      uhomeSeriesController
+                          .videoSeriesDetail.value.videoSeries!.seriesName,
                       style: const TextStyle(
                         color: Colors.black87,
                         fontSize: 18,
@@ -79,34 +78,37 @@ class VideoSeriesDetailPage extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      '${videoSeries.videoInfoList.length}个视频',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                    Text(
-                      _formatDate(videoSeries.updateTime),
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 11,
-                      ),
-                    ),
+                    Obx(() => Text(
+                          '${uhomeSeriesController.videoSeriesDetail.value.seriesVideoList!.length}个视频',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        )),
+                    Obx(() => Text(
+                          _formatDate(uhomeSeriesController
+                              .videoSeriesDetail.value.videoSeries!.updateTime),
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 11,
+                          ),
+                        )),
                   ],
                 ),
               ],
             ),
           ),
-          
+
           // 合集描述（如果有）
-          if (videoSeries.seriesDescription.isNotEmpty)
+          if (uhomeSeriesController.videoSeriesDetail.value.videoSeries!
+              .seriesDescription.isNotEmpty)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
-              color: Colors.grey[50],
+              color: Theme.of(context).cardColor,
               child: Text(
-                videoSeries.seriesDescription,
+                uhomeSeriesController
+                    .videoSeriesDetail.value.videoSeries!.seriesDescription,
                 style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 14,
@@ -114,62 +116,44 @@ class VideoSeriesDetailPage extends StatelessWidget {
                 ),
               ),
             ),
-          
+
           // 播放全部按钮
           Container(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      // TODO: 播放全部视频
-                    },
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('播放全部'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[600],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
+            child:
                 // 最新添加排序按钮
                 TextButton.icon(
-                  onPressed: () {
-                    // TODO: 切换排序方式
-                  },
-                  icon: const Icon(Icons.sort),
-                  label: const Text('最新添加'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.black87,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                ),
-              ],
+              onPressed: () {
+                // TODO: 切换排序方式
+              },
+              icon: const Icon(Icons.sort),
+              label: const Text('最新添加'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black87,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
             ),
           ),
-          
+
           // 视频列表
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: videoSeries.videoInfoList.length,
-              itemBuilder: (context, index) {
-                final video = videoSeries.videoInfoList[index];
-                return VideoDetailItem(
-                  video: video,
-                  index: index + 1,
-                  onTap: () {
-                    // TODO: 播放指定视频
+            child: Obx(() => ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: uhomeSeriesController
+                      .videoSeriesDetail.value.seriesVideoList!.length,
+                  itemBuilder: (context, index) {
+                    final video = uhomeSeriesController
+                        .videoSeriesDetail.value.seriesVideoList![index];
+                    return VideoSeriesDetailItem(
+                      video: video,
+                      index: index,
+                      onTap: () {
+                        // TODO: 播放指定视频
+                      },
+                    );
                   },
-                );
-              },
-            ),
+                )),
           ),
         ],
       ),
@@ -195,13 +179,13 @@ class VideoSeriesDetailPage extends StatelessWidget {
   }
 }
 
-// 视频详细条目控件
-class VideoDetailItem extends StatefulWidget {
-  final VideoInfo video;
+// 视频详细条目控件 - 适用于 UserVideoSeriesVideo
+class VideoSeriesDetailItem extends StatefulWidget {
+  final UserVideoSeriesVideo video;
   final int index;
   final VoidCallback? onTap;
 
-  const VideoDetailItem({
+  const VideoSeriesDetailItem({
     Key? key,
     required this.video,
     required this.index,
@@ -209,10 +193,10 @@ class VideoDetailItem extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<VideoDetailItem> createState() => _VideoDetailItemState();
+  State<VideoSeriesDetailItem> createState() => _VideoSeriesDetailItemState();
 }
 
-class _VideoDetailItemState extends State<VideoDetailItem> {
+class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
   bool _isHovered = false;
 
   @override
@@ -223,13 +207,15 @@ class _VideoDetailItemState extends State<VideoDetailItem> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _isHovered ? Colors.grey[50] : Colors.white,
+            color: _isHovered ? Theme.of(context).hoverColor : null,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _isHovered ? Colors.grey[300]! : Colors.grey[200]!,
+              color: _isHovered
+                  ? Theme.of(context).dividerColor
+                  : Theme.of(context).dividerColor.withOpacity(0.3),
               width: 1,
             ),
           ),
@@ -237,81 +223,92 @@ class _VideoDetailItemState extends State<VideoDetailItem> {
             children: [
               // 序号
               Container(
-                width: 32,
-                height: 32,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(16),
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Theme.of(context).dividerColor.withOpacity(0.3),
+                    width: 1,
+                  ),
                 ),
                 child: Center(
                   child: Text(
-                    '${widget.index}',
-                    style: const TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
+                    '${widget.index + 1}',
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(width: 12),
-              
+
               // 视频封面
               Container(
-                width: 120,
-                height: 72,
+                width: 160,
+                height: 90,
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: widget.video.videoCover?.isNotEmpty == true
-                    ? ExtendedImage.network(
-                        ApiService.baseUrl + ApiAddr.fileGetResourcet + widget.video.videoCover!,
-                        fit: BoxFit.cover,
-                        loadStateChanged: (ExtendedImageState state) {
-                          switch (state.extendedImageLoadState) {
-                            case LoadState.loading:
-                              return Container(
-                                color: Colors.grey[300],
-                                child: const Center(
-                                  child: SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                child: widget.video.videoCover.isNotEmpty
+                    ? Hero(
+                        tag:
+                            'videoSeries-${widget.video.seriesId}-${widget.index}',
+                        child: ExtendedImage.network(
+                          ApiService.baseUrl +
+                              ApiAddr.fileGetResourcet +
+                              widget.video.videoCover,
+                          fit: BoxFit.cover,
+                          loadStateChanged: (ExtendedImageState state) {
+                            switch (state.extendedImageLoadState) {
+                              case LoadState.loading:
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: const Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.grey),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            case LoadState.failed:
-                              return Container(
-                                color: Colors.grey[300],
-                                child: const Icon(
-                                  Icons.video_file,
-                                  color: Colors.grey,
-                                  size: 24,
-                                ),
-                              );
-                            case LoadState.completed:
-                              return state.completedWidget;
-                          }
-                        },
-                      )
+                                );
+                              case LoadState.failed:
+                                return Container(
+                                  color: Colors.grey[300],
+                                  child: const Icon(
+                                    Icons.video_file,
+                                    color: Colors.grey,
+                                    size: 32,
+                                  ),
+                                );
+                              case LoadState.completed:
+                                return state.completedWidget;
+                            }
+                          },
+                        ))
                     : Container(
                         color: Colors.grey[300],
                         child: const Icon(
                           Icons.video_file,
                           color: Colors.grey,
-                          size: 24,
+                          size: 32,
                         ),
                       ),
               ),
-              
-              const SizedBox(width: 12),
-              
+
+              const SizedBox(width: 16),
+
               // 视频信息
               Expanded(
                 child: Column(
@@ -319,45 +316,45 @@ class _VideoDetailItemState extends State<VideoDetailItem> {
                   children: [
                     // 视频标题
                     Text(
-                      widget.video.videoName ?? '未知视频',
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 15,
+                      widget.video.videoName,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.titleMedium?.color,
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        height: 1.3,
+                        height: 1.2,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
-                    // 视频统计信息
+                    const SizedBox(height: 8),
+                    // 播放量和上传时间
                     Row(
                       children: [
                         Icon(
-                          Icons.remove_red_eye,
+                          Icons.play_circle_outline,
                           color: Colors.grey[500],
-                          size: 14,
+                          size: 16,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${widget.video.playCount ?? 0}',
+                          '${_formatPlayCount(widget.video.playCount)}次播放',
                           style: TextStyle(
                             color: Colors.grey[600],
-                            fontSize: 12,
+                            fontSize: 13,
                           ),
                         ),
                         const SizedBox(width: 16),
                         Icon(
-                          Icons.thumb_up,
+                          Icons.access_time,
                           color: Colors.grey[500],
-                          size: 14,
+                          size: 16,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${widget.video.likeCount ?? 0}',
+                          _formatDate(widget.video.createTime),
                           style: TextStyle(
                             color: Colors.grey[600],
-                            fontSize: 12,
+                            fontSize: 13,
                           ),
                         ),
                       ],
@@ -365,38 +362,24 @@ class _VideoDetailItemState extends State<VideoDetailItem> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(width: 12),
-              
-              // 时长和日期
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // 时长
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _formatDuration(Duration(seconds: widget.video.duration ?? 0)),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // 上传日期
-                  Text(
-                    _formatDate(widget.video.createTime ?? DateTime.now()),
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
+
+              // 播放按钮
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: _isHovered
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).primaryColor.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.play_arrow,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
             ],
           ),
@@ -405,19 +388,31 @@ class _VideoDetailItemState extends State<VideoDetailItem> {
     );
   }
 
-  String _formatDuration(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
-    
-    if (hours > 0) {
-      return '${hours}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  String _formatPlayCount(int playCount) {
+    if (playCount >= 10000) {
+      return '${(playCount / 10000).toStringAsFixed(1)}万';
+    } else if (playCount >= 1000) {
+      return '${(playCount / 1000).toStringAsFixed(1)}千';
     } else {
-      return '${minutes}:${seconds.toString().padLeft(2, '0')}';
+      return playCount.toString();
     }
   }
 
   String _formatDate(DateTime date) {
-    return '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return '今天';
+    } else if (difference.inDays == 1) {
+      return '昨天';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays}天前';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return '${months}个月前';
+    } else {
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    }
   }
 }

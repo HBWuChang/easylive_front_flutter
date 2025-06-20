@@ -43,13 +43,13 @@ class VideoSeriesPage extends StatelessWidget {
   final userId;
   // 构建视频页面
   const VideoSeriesPage({Key? key, this.userId}) : super(key: key);
-  
+
   // 使用 Get 进行嵌套路由跳转的方法
   void navigateToDetail(UserVideoSeries videoSeries) {
-    final navigatorId = userId as int; // userId 必须是 int 类型
+    final navigatorId = int.parse(userId);
     Get.toNamed('/detail', arguments: videoSeries, id: navigatorId);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // 检查 userId 是否为空
@@ -84,47 +84,55 @@ class VideoSeriesPage extends StatelessWidget {
         ),
       );
     }
-    
+
     UhomeSeriesController uhomeSeriesController =
         Get.find<UhomeSeriesController>(tag: '${userId}UhomeSeriesController');
     LocalSettingsController localSettingsController =
         Get.find<LocalSettingsController>();
-    
+
     // 注册嵌套路由
     Get.routing.args = {};
-        
-    return Navigator(
-      key: GlobalKey<NavigatorState>(),
-      onGenerateRoute: (settings) {
-        Widget page;
-        switch (settings.name) {
-          case '/detail':
-            final videoSeries = settings.arguments as UserVideoSeries;
-            page = VideoSeriesDetailPage(videoSeries: videoSeries);
-            break;
-          default:
-            page = _buildMainPage(uhomeSeriesController, localSettingsController);
-        }
-        return PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.ease;
 
-            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+    return HeroControllerScope(
+        controller: MaterialApp.createMaterialHeroController(),
+        child: Navigator(
+          key: Get.nestedKey(int.parse(userId)),
+          onGenerateRoute: (settings) {
+            Widget page;
+            switch (settings.name) {
+              case '/detail':
+                uhomeSeriesController.nowSelectSeriesId.value =
+                    (settings.arguments as UserVideoSeries).seriesId;
+                page = VideoSeriesDetailPage(
+                    uhomeSeriesController: uhomeSeriesController);
+                break;
+              default:
+                page = _buildMainPage(
+                    uhomeSeriesController, localSettingsController);
+            }
+            return PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => page,
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
+                const curve = Curves.ease;
 
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
+
+                return SlideTransition(
+                  position: animation.drive(tween),
+                  child: child,
+                );
+              },
             );
           },
-        );
-      },
-    );
+        ));
   }
 
-  Widget _buildMainPage(UhomeSeriesController uhomeSeriesController, LocalSettingsController localSettingsController) {
+  Widget _buildMainPage(UhomeSeriesController uhomeSeriesController,
+      LocalSettingsController localSettingsController) {
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -146,8 +154,10 @@ class VideoSeriesPage extends StatelessWidget {
 
               return Obx(() {
                 // 检查设置值，决定使用卡片模式还是列表模式
-                bool isCardMode = localSettingsController.getSetting('uhomeVideoListType') ?? true;
-                
+                bool isCardMode =
+                    localSettingsController.getSetting('uhomeVideoListType') ??
+                        true;
+
                 if (isCardMode) {
                   // 卡片模式（原有的 Wrap 布局）
                   return Wrap(
@@ -331,42 +341,46 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                                 ),
                                 clipBehavior: Clip.antiAlias,
                                 child: widget.videoSeries.cover.isNotEmpty
-                                    ? ExtendedImage.network(
-                                        ApiService.baseUrl +
-                                            ApiAddr.fileGetResourcet +
-                                            widget.videoSeries.cover,
-                                        fit: BoxFit.cover,
-                                        loadStateChanged:
-                                            (ExtendedImageState state) {
-                                          switch (
-                                              state.extendedImageLoadState) {
-                                            case LoadState.loading:
-                                              return Container(
-                                                color: Colors.grey[300],
-                                                child: const Center(
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation<
-                                                            Color>(Colors.grey),
+                                    ? Hero(
+                                        tag:
+                                            'videoSeries-${widget.videoSeries.seriesId}-0',
+                                        child: ExtendedImage.network(
+                                          ApiService.baseUrl +
+                                              ApiAddr.fileGetResourcet +
+                                              widget.videoSeries.cover,
+                                          fit: BoxFit.cover,
+                                          loadStateChanged:
+                                              (ExtendedImageState state) {
+                                            switch (
+                                                state.extendedImageLoadState) {
+                                              case LoadState.loading:
+                                                return Container(
+                                                  color: Colors.grey[300],
+                                                  child: const Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                                  Color>(
+                                                              Colors.grey),
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                            case LoadState.failed:
-                                              return Container(
-                                                color: Colors.grey[300],
-                                                child: const Icon(
-                                                  Icons.video_library,
-                                                  color: Colors.grey,
-                                                  size: 50,
-                                                ),
-                                              );
-                                            case LoadState.completed:
-                                              return state.completedWidget;
-                                          }
-                                        },
-                                      )
+                                                );
+                                              case LoadState.failed:
+                                                return Container(
+                                                  color: Colors.grey[300],
+                                                  child: const Icon(
+                                                    Icons.video_library,
+                                                    color: Colors.grey,
+                                                    size: 50,
+                                                  ),
+                                                );
+                                              case LoadState.completed:
+                                                return state.completedWidget;
+                                            }
+                                          },
+                                        ))
                                     : Container(
                                         color: Colors.grey[300],
                                         child: const Icon(
@@ -491,7 +505,6 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
         margin: const EdgeInsets.all(8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -502,101 +515,103 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
           ],
         ),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 合集标题行
-          Row(
-            children: [
-              // 合集图标
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: Colors.blue[600],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.video_library,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
-              const SizedBox(width: 12),
-              // 合集名称
-              Expanded(
-                child: Text(
-                  widget.videoSeries.seriesName,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              // 视频数量
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${widget.videoSeries.videoInfoList.length}个视频',
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // 操作按钮
-              MouseRegion(
-                onEnter: (_) => setState(() => _isHovered = true),
-                onExit: (_) => setState(() => _isHovered = false),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 合集标题行
+            Row(
+              children: [
+                // 合集图标
+                Container(
+                  width: 24,
+                  height: 24,
                   decoration: BoxDecoration(
-                    color: _isHovered ? Colors.grey[100] : Colors.transparent,
-                    borderRadius: BorderRadius.circular(6),
+                    color: Colors.blue[600],
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Icon(
-                    Icons.more_vert,
-                    color: Colors.grey,
-                    size: 18,
+                    Icons.video_library,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 合集名称
+                Expanded(
+                  child: Text(
+                    widget.videoSeries.seriesName,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                // 视频数量
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${widget.videoSeries.videoInfoList.length}个视频',
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 操作按钮
+                MouseRegion(
+                  onEnter: (_) => setState(() => _isHovered = true),
+                  onExit: (_) => setState(() => _isHovered = false),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: _isHovered ? Colors.grey[100] : Colors.transparent,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.more_vert,
+                      color: Colors.grey,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // 视频列表
+            if (widget.videoSeries.videoInfoList.isNotEmpty)
+              Column(
+                children: widget.videoSeries.videoInfoList.take(3).map((video) {
+                  return VideoListItemTile(video: video);
+                }).toList(),
+              ),
+
+            // 如果有更多视频，显示"查看全部"
+            if (widget.videoSeries.videoInfoList.length > 3)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: TextButton(
+                  onPressed: widget.onTap,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blue[600],
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                  child: Text(
+                    '查看全部 ${widget.videoSeries.videoInfoList.length} 个视频',
+                    style: const TextStyle(fontSize: 14),
                   ),
                 ),
               ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 视频列表
-          if (widget.videoSeries.videoInfoList.isNotEmpty)
-            Column(
-              children: widget.videoSeries.videoInfoList.take(3).map((video) {
-                return VideoListItemTile(video: video);
-              }).toList(),
-            ),
-          
-          // 如果有更多视频，显示"查看全部"
-          if (widget.videoSeries.videoInfoList.length > 3)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: TextButton(
-                onPressed: widget.onTap,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.blue[600],
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                ),
-                child: Text(
-                  '查看全部 ${widget.videoSeries.videoInfoList.length} 个视频',
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-            ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -627,10 +642,12 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: _isHovered ? Colors.grey[50] : Colors.transparent,
+          color: _isHovered ? Theme.of(context).hoverColor : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: _isHovered ? Colors.grey[300]! : Colors.transparent,
+            color: _isHovered
+                ? Theme.of(context).dividerColor
+                : Colors.transparent,
             width: 1,
           ),
         ),
@@ -647,7 +664,9 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
               clipBehavior: Clip.antiAlias,
               child: widget.video.videoCover?.isNotEmpty == true
                   ? ExtendedImage.network(
-                      ApiService.baseUrl + ApiAddr.fileGetResourcet + widget.video.videoCover!,
+                      ApiService.baseUrl +
+                          ApiAddr.fileGetResourcet +
+                          widget.video.videoCover!,
                       fit: BoxFit.cover,
                       loadStateChanged: (ExtendedImageState state) {
                         switch (state.extendedImageLoadState) {
@@ -660,7 +679,8 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
                                   height: 16,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.grey),
                                   ),
                                 ),
                               ),
@@ -688,9 +708,9 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
                       ),
                     ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // 视频信息
             Expanded(
               child: Column(
@@ -719,7 +739,7 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
                 ],
               ),
             ),
-            
+
             // 播放按钮
             Container(
               width: 36,
@@ -741,7 +761,8 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
   }
 
   String _formatVideoInfo() {
-    final duration = _formatDuration(Duration(seconds: widget.video.duration ?? 0));
+    final duration =
+        _formatDuration(Duration(seconds: widget.video.duration ?? 0));
     final date = _formatDate(widget.video.createTime ?? DateTime.now());
     return '$duration • $date';
   }
@@ -750,7 +771,7 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
-    
+
     if (hours > 0) {
       return '${hours}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     } else {

@@ -46,7 +46,7 @@ class VideoPlayPage extends StatelessWidget {
           Get.find<CommentController>(tag: '${videoId}CommentController');
     } else {
       commentController =
-          Get.put(CommentController(), tag: '${videoId}CommentController');
+          Get.put(CommentController(), tag: '${videoId}CommentController',permanent: true);
       commentController.setVideoId(videoId);
       commentController.loadComments();
     }
@@ -57,7 +57,7 @@ class VideoPlayPage extends StatelessWidget {
           tag: '${videoId}VideoGetVideoInfoController');
     } else {
       videoGetVideoInfoController = Get.put(VideoGetVideoInfoController(),
-          tag: '${videoId}VideoGetVideoInfoController');
+          tag: '${videoId}VideoGetVideoInfoController',permanent: true);
       videoGetVideoInfoController.loadVideoInfo(videoId, routeName: routeName);
     }
 
@@ -65,7 +65,7 @@ class VideoPlayPage extends StatelessWidget {
         tag: '${videoId}VideoLoadVideoPListController')) {
     } else {
       Get.put(VideoLoadVideoPListController(videoId),
-          tag: '${videoId}VideoLoadVideoPListController');
+          tag: '${videoId}VideoLoadVideoPListController',permanent: true);
     }
 
     return GetBuilder<VideoLoadVideoPListController>(

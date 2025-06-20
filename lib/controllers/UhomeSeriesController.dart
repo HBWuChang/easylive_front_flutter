@@ -19,9 +19,11 @@ import 'package:canvas_danmaku/canvas_danmaku.dart';
 
 class UhomeSeriesController extends GetxController {
   final String userId;
+  var nowSelectSeriesId = 0.obs;
   var userVideoSeries = <UserVideoSeries>[].obs;
   final LocalSettingsController localSettingsController =
       Get.find<LocalSettingsController>();
+  var videoSeriesDetail = UhomeGetVideoSeriesDetail().obs; // 用于存储当前系列的详细信息
   bool lasttype = true; // true: 网格，false: 列表
   UhomeSeriesController({required this.userId});
 
@@ -36,6 +38,14 @@ class UhomeSeriesController extends GetxController {
           settings['uhomeVideoListType'] != lasttype) {
         lasttype = settings['uhomeVideoListType'];
         loadUserVideoSeries();
+      }
+    });
+    ever(nowSelectSeriesId, (id) {
+      // 监听当前选择的系列ID变化
+      if (id != 0) {
+        videoSeriesDetail.value = UhomeGetVideoSeriesDetail.fromUserVideoSeries(
+            userVideoSeries.firstWhere((series) => series.seriesId == id));
+        loadVideoSeriesDetail();
       }
     });
   }
@@ -61,6 +71,68 @@ class UhomeSeriesController extends GetxController {
       );
     }
   }
+
+  Future<void> loadVideoSeriesDetail() async {
+    try {
+      if (nowSelectSeriesId.value == 0) return; // 如果没有选择系列，直接返回
+      var res = await ApiService.uhomeSeriesGetVideoSeriesDetail(
+          nowSelectSeriesId.value);
+      if (res['code'] == 200) {
+        videoSeriesDetail.value =
+            UhomeGetVideoSeriesDetail.fromJson(res['data']);
+      } else {
+        throw Exception(res['info']);
+      }
+    } catch (e) {
+      showErrorSnackbar(
+        e.toString(),
+      );
+    }
+  }
+}
+
+class UhomeGetVideoSeriesDetail {
+  UserVideoSeries? videoSeries;
+  List<UserVideoSeriesVideo>? seriesVideoList;
+  UhomeGetVideoSeriesDetail();
+  // 从 JSON 创建的构造函数
+  UhomeGetVideoSeriesDetail.fromJson(Map<String, dynamic> json)
+      : videoSeries =
+            UserVideoSeries(json['videoSeries'] as Map<String, dynamic>),
+        seriesVideoList = (json['seriesVideoList'] as List<dynamic>?)
+                ?.map((item) =>
+                    UserVideoSeriesVideo(item as Map<String, dynamic>))
+                .toList() ??
+            [];
+
+  // 从 UserVideoSeries 创建的构造函数
+  UhomeGetVideoSeriesDetail.fromUserVideoSeries(UserVideoSeries userVideoSeries)
+      : videoSeries = userVideoSeries,
+        seriesVideoList = userVideoSeries.videoInfoList.isEmpty
+            ? [
+                UserVideoSeriesVideo({
+                  'seriesId': userVideoSeries.seriesId,
+                  'videoId': '',
+                  'userId': userVideoSeries.userId,
+                  'sort': 0,
+                  'videoCover': userVideoSeries.cover,
+                  'videoName': '',
+                  'playCount': 0,
+                  'createTime': DateTime.now().toIso8601String(),
+                })
+              ]
+            : userVideoSeries.videoInfoList
+                .map((video) => UserVideoSeriesVideo({
+                      'seriesId': userVideoSeries.seriesId,
+                      'videoId': video.videoId,
+                      'userId': userVideoSeries.userId,
+                      'sort': 0,
+                      'videoCover': video.videoCover,
+                      'videoName': video.videoName,
+                      'playCount': video.playCount,
+                      'createTime': video.createTime?.toIso8601String(),
+                    }))
+                .toList();
 }
 
 class UserVideoSeries {
@@ -123,4 +195,55 @@ class UserVideoSeries {
                 ?.map((item) => VideoInfo(item as Map<String, dynamic>))
                 .toList() ??
             [];
+}
+
+class UserVideoSeriesVideo {
+// public class UserVideoSeriesVideo implements Serializable {
+
+// 	/**
+// 	 * 列表ID
+// 	 */
+// 	private Integer seriesId;
+
+// 	/**
+// 	 * 视频ID
+// 	 */
+// 	private String videoId;
+
+// 	/**
+// 	 * 用户ID
+// 	 */
+// 	private String userId;
+
+// 	/**
+// 	 * 排序
+// 	 */
+// 	private Integer sort;
+
+// 	private String videoCover;
+// 	private String videoName;
+// 	private Integer playCount;
+// 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+// 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+// 	private Date createTime;
+
+  final int seriesId;
+  final String videoId;
+  final String userId;
+  final int sort;
+  final String videoCover;
+  final String videoName;
+  final int playCount;
+  final DateTime createTime;
+
+  UserVideoSeriesVideo(Map<String, dynamic> json)
+      : seriesId = json['seriesId'] ?? 0,
+        videoId = json['videoId'] ?? '',
+        userId = json['userId'] ?? '',
+        sort = json['sort'] ?? 0,
+        videoCover = json['videoCover'] ?? '',
+        videoName = json['videoName'] ?? '',
+        playCount = json['playCount'] ?? 0,
+        createTime =
+            DateTime.parse(json['createTime'] ?? '1970-01-01T00:00:00Z');
 }

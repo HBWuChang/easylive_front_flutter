@@ -46,11 +46,14 @@ class Uhome extends StatefulWidget {
   _UhomeState createState() => _UhomeState();
 }
 
-class _UhomeState extends State<Uhome> {
+class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
   late UserInfoController userInfoController;
   bool showDetailedInfo = false; // 控制详细信息显示
   late PageController pageController; // 页面控制器
   var showuhomeVideoListType = false.obs; // 控制视频列表类型
+  late AnimationController _buttonAnimationController;
+  late Animation<double> _slideAnimation;
+  
   @override
   void initState() {
     super.initState();
@@ -59,19 +62,38 @@ class _UhomeState extends State<Uhome> {
       // debugPrint('当前页面索引: ${pageController.page?.round()}'); // 打印当前页面索引
       changeShowuhomeVideoListType(pageController.page?.round() ?? 0);
     });
+    
+    // 初始化动画控制器
+    _buttonAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _slideAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _buttonAnimationController,
+      curve: Curves.easeInOut,
+    ));
   }
 
   void changeShowuhomeVideoListType(int index) {
     if (index == 0) {
-      showuhomeVideoListType.value = false; // 显示视频列表类型
+      // 切换到视频页面，隐藏按钮
+      _buttonAnimationController.reverse();
+      showuhomeVideoListType.value = false;
     } else {
-      showuhomeVideoListType.value = true; // 隐藏视频列表类型
+      // 切换到合集页面，显示按钮
+      showuhomeVideoListType.value = true;
+      _buttonAnimationController.forward();
     }
   }
 
   @override
   void dispose() {
     pageController.dispose();
+    _buttonAnimationController.dispose();
     super.dispose();
   }
 
@@ -96,12 +118,12 @@ class _UhomeState extends State<Uhome> {
       userInfoController.getUserInfo(null);
     } else {
       userInfoController = Get.put(UserInfoController(userId: userId),
-          tag: '${userId}UserInfoController');
+          tag: '${userId}UserInfoController',permanent: true);
     }
     if (!Get.isRegistered<UhomeSeriesController>(
         tag: '${userId}UhomeSeriesController')) {
       Get.put(UhomeSeriesController(userId: userId),
-          tag: '${userId}UhomeSeriesController');
+          tag: '${userId}UhomeSeriesController',permanent: true);
     }
     Obx s1(Widget icon, String text) {
       return Obx(() {
@@ -334,22 +356,44 @@ class _UhomeState extends State<Uhome> {
                   Spacer(),
                   Obx(() {
                     if (!showuhomeVideoListType.value) {
-                      return SizedBox.shrink();
+                      return SizeTransition(
+                        sizeFactor: _slideAnimation,
+                        axis: Axis.horizontal,
+                        axisAlignment: 1.0, // 从右侧开始动画
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1.0, 0.0), // 从右侧滑入
+                            end: Offset.zero,
+                          ).animate(_slideAnimation),
+                          child: const SizedBox.shrink(),
+                        ),
+                      );
                     }
-                    return IconButton(
-                      icon: Iconify(
-                        localSettingsController.getSetting('uhomeVideoListType')
-                            ? Tabler.layout_grid
-                            : Tabler.layout_list,
-                        size: 24,
-                        color: Theme.of(context).primaryColor,
+                    return SizeTransition(
+                      sizeFactor: _slideAnimation,
+                      axis: Axis.horizontal,
+                      axisAlignment: 1.0, // 从右侧开始动画
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1.0, 0.0), // 从右侧滑入
+                          end: Offset.zero,
+                        ).animate(_slideAnimation),
+                        child: IconButton(
+                          icon: Iconify(
+                            localSettingsController.getSetting('uhomeVideoListType')
+                                ? Tabler.layout_grid
+                                : Tabler.layout_list,
+                            size: 24,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          onPressed: () {
+                            localSettingsController.setSetting(
+                                'uhomeVideoListType',
+                                !localSettingsController
+                                    .getSetting('uhomeVideoListType'));
+                          },
+                        ),
                       ),
-                      onPressed: () {
-                        localSettingsController.setSetting(
-                            'uhomeVideoListType',
-                            !localSettingsController
-                                .getSetting('uhomeVideoListType'));
-                      },
                     );
                   }),
                   SizedBox(width: 24), // 留出右侧空间

@@ -46,7 +46,7 @@ class VideoPlayPageInfo extends StatelessWidget {
     } else {
       videoGetVideoRecommendController = Get.put(
           VideoGetVideoRecommendController(),
-          tag: '${videoId}VideoGetVideoRecommendController');
+          tag: '${videoId}VideoGetVideoRecommendController',permanent: true);
     }
     final infoColor1 = Theme.of(context).colorScheme.secondary;
     final infoColor2 = Theme.of(context).colorScheme.tertiary;
