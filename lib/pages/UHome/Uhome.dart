@@ -6,6 +6,7 @@ import 'package:easylive/Funcs.dart';
 import 'package:easylive/controllers/VideoCommentController.dart';
 import 'package:easylive/controllers/VideoDamnuController.dart';
 import 'package:easylive/enums.dart';
+import 'package:easylive/pages/UHome/VideoSeriesPage.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPageComments.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPageInfo.dart';
 import 'package:easylive/settings.dart';
@@ -13,6 +14,8 @@ import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
+import '../../controllers/LocalSettingsController.dart';
+import '../../controllers/UhomeSeriesController.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
@@ -47,11 +50,23 @@ class _UhomeState extends State<Uhome> {
   late UserInfoController userInfoController;
   bool showDetailedInfo = false; // 控制详细信息显示
   late PageController pageController; // 页面控制器
-
+  var showuhomeVideoListType = false.obs; // 控制视频列表类型
   @override
   void initState() {
     super.initState();
     pageController = PageController();
+    pageController.addListener(() {
+      // debugPrint('当前页面索引: ${pageController.page?.round()}'); // 打印当前页面索引
+      changeShowuhomeVideoListType(pageController.page?.round() ?? 0);
+    });
+  }
+
+  void changeShowuhomeVideoListType(int index) {
+    if (index == 0) {
+      showuhomeVideoListType.value = false; // 显示视频列表类型
+    } else {
+      showuhomeVideoListType.value = true; // 隐藏视频列表类型
+    }
   }
 
   @override
@@ -83,6 +98,11 @@ class _UhomeState extends State<Uhome> {
       userInfoController = Get.put(UserInfoController(userId: userId),
           tag: '${userId}UserInfoController');
     }
+    if (!Get.isRegistered<UhomeSeriesController>(
+        tag: '${userId}UhomeSeriesController')) {
+      Get.put(UhomeSeriesController(userId: userId),
+          tag: '${userId}UhomeSeriesController');
+    }
     Obx s1(Widget icon, String text) {
       return Obx(() {
         if (userInfoController.userInfo[text] == null ||
@@ -103,6 +123,8 @@ class _UhomeState extends State<Uhome> {
       });
     }
 
+    LocalSettingsController localSettingsController =
+        Get.find<LocalSettingsController>();
     return Scaffold(
       body: CustomScrollView(
         shrinkWrap: true,
@@ -310,6 +332,27 @@ class _UhomeState extends State<Uhome> {
                         spacing: 0,
                       )),
                   Spacer(),
+                  Obx(() {
+                    if (!showuhomeVideoListType.value) {
+                      return SizedBox.shrink();
+                    }
+                    return IconButton(
+                      icon: Iconify(
+                        localSettingsController.getSetting('uhomeVideoListType')
+                            ? Tabler.layout_grid
+                            : Tabler.layout_list,
+                        size: 24,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      onPressed: () {
+                        localSettingsController.setSetting(
+                            'uhomeVideoListType',
+                            !localSettingsController
+                                .getSetting('uhomeVideoListType'));
+                      },
+                    );
+                  }),
+                  SizedBox(width: 24), // 留出右侧空间
                 ],
               ),
             ),
@@ -338,7 +381,20 @@ class _UhomeState extends State<Uhome> {
                     );
                   },
                 ),
-                _buildCollectionPage(),
+                GetBuilder<UserInfoController>(
+                  tag: routeName,
+                  init: userInfoController,
+                  builder: (controller) {
+                    if (controller.userId.isEmpty) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    return VideoSeriesPage(
+                      userId: controller.userId,
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -370,7 +426,7 @@ class _UhomeState extends State<Uhome> {
         backgroundColor:
             isFollowed ? Colors.grey[300] : Theme.of(context).primaryColor,
         foregroundColor: isFollowed ? Colors.black87 : Colors.white,
-        minimumSize: Size(110, 44), // 从Size(90, 36)增加到Size(110, 44)
+        minimumSize: Size(110, 44),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12)), // 从20改为12，更适合矩形
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // 添加内边距
@@ -392,41 +448,6 @@ class _UhomeState extends State<Uhome> {
         isFollowed ? '已关注' : '+ 关注',
         style:
             TextStyle(fontSize: 16, fontWeight: FontWeight.w500), // 增加字体大小和权重
-      ),
-    );
-  }
-
-  // 构建合集页面
-  Widget _buildCollectionPage() {
-    return Container(
-      padding: EdgeInsets.all(24),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.collections,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            SizedBox(height: 16),
-            Text(
-              '合集列表页面',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey[600],
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '这里将显示用户的视频合集',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

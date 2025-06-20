@@ -7,6 +7,7 @@ import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../api_service.dart';
@@ -25,6 +26,7 @@ class LocalSettingsController extends GetxController {
         : {};
     Map<String, dynamic> defaultSettings = {
       'listOrGrid': true,
+      'uhomeVideoListType': true,
       '开启弹幕': true,
       '弹幕不透明度': 1.0,
       '弹幕字体大小': 16.0,
