@@ -89,6 +89,25 @@ class UhomeSeriesController extends GetxController {
       );
     }
   }
+
+  Future<List<VideoInfo>> uhomeseriesloadAllVideo(int seriesId) async {
+    try {
+      var res = await ApiService.uhomeSeriesLoadAllVideo(seriesId);
+      if (res['code'] == 200) {
+        // 成功后重新加载系列列表
+        return (res['data'] as List<dynamic>)
+            .map((item) => VideoInfo(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception(res['info']);
+      }
+    } catch (e) {
+      showErrorSnackbar(
+        e.toString(),
+      );
+      return [];
+    }
+  }
 }
 
 class UhomeGetVideoSeriesDetail {

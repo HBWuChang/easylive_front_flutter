@@ -1,16 +1,7 @@
-import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
-import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/controllers/LocalSettingsController.dart';
-import 'package:easylive/controllers/VideoCommentController.dart';
-import 'package:easylive/controllers/VideoDamnuController.dart';
-import 'package:easylive/enums.dart';
-import 'package:easylive/pages/VideoPlayPage/VideoPlayPageComments.dart';
-import 'package:easylive/pages/VideoPlayPage/VideoPlayPageInfo.dart';
 import 'package:easylive/settings.dart';
-import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/UhomeSeriesController.dart';
@@ -18,26 +9,6 @@ import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 import 'VideoSeriesDetailPage.dart';
 import 'package:extended_image/extended_image.dart';
-import 'package:preload_page_view/preload_page_view.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:typed_data';
-import 'package:desktop_drop/desktop_drop.dart';
-import 'package:cross_file/cross_file.dart';
-import 'package:dotted_decoration/dotted_decoration.dart';
-import 'dart:ui' as ui;
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
-import 'package:flutter/gestures.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:canvas_danmaku/canvas_danmaku.dart';
-// import 'package:iconify_flutter_plus/iconify_flutter_plus.dart'; // For Iconify Widget
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter_plus/icons/zondicons.dart'; // for Non Colorful Icons
-import 'package:iconify_flutter/icons/tabler.dart';
-import 'package:iconify_flutter/icons/ph.dart';
-import '../../controllers/UhomeController.dart';
-import '../MainPage/VideoInfoWidget.dart';
 
 class VideoSeriesPage extends StatelessWidget {
   final userId;
@@ -300,31 +271,37 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                           children: [
                             // 合集效果 - 深灰色背景层（最下层）
                             Positioned(
-                              top: 0,
-                              left: 24,
-                              right: 24,
-                              bottom: 32,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[400],
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
+                                top: 0,
+                                left: 24,
+                                right: 24,
+                                bottom: 190,
+                                child: Hero(
+                                  tag:
+                                      'videoSeries-${widget.videoSeries.seriesId}-2',
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[400],
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                )),
 
                             // 合集效果 - 浅灰色背景层（中间层）
                             Positioned(
-                              top: 12,
-                              left: 8,
-                              right: 8,
-                              bottom: 28,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[600],
-                                  borderRadius: BorderRadius.circular(11),
-                                ),
-                              ),
-                            ),
+                                top: 12,
+                                left: 8,
+                                right: 8,
+                                bottom: 175,
+                                child: Hero(
+                                  tag:
+                                      'videoSeries-${widget.videoSeries.seriesId}-1',
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[600],
+                                      borderRadius: BorderRadius.circular(11),
+                                    ),
+                                  ),
+                                )),
 
                             // 背景封面图片容器（最上层）
                             Positioned(
@@ -391,29 +368,6 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                                       ),
                               ),
                             ),
-
-                            // 视频数量标签（右上角）
-                            if (widget.videoSeries.videoInfoList.isNotEmpty)
-                              Positioned(
-                                top: 36,
-                                right: 12,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.7),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    '${widget.videoSeries.videoInfoList.length}个内容',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
                       ),
@@ -433,26 +387,30 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 合集名称
-              Text(
-                widget.videoSeries.seriesName,
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  height: 1.2,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Hero(
+                  tag: 'videoSeries-${widget.videoSeries.seriesId}-Name',
+                  child: Text(
+                    widget.videoSeries.seriesName,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  )),
               const SizedBox(height: 4),
               // 最后更新日期
-              Text(
-                _formatDate(widget.videoSeries.updateTime),
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 13,
-                ),
-              ),
+              Hero(
+                  tag: 'videoSeries-${widget.videoSeries.seriesId}-Time',
+                  child: Text(
+                    _formatDate(widget.videoSeries.updateTime),
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 13,
+                    ),
+                  )),
             ],
           ),
         ),
@@ -496,6 +454,23 @@ class VideoSeriesListItem extends StatefulWidget {
 
 class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
   bool _isHovered = false;
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return '今天';
+    } else if (difference.inDays == 1) {
+      return '昨天';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays}天前';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return '${months}个月前';
+    } else {
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -536,32 +511,40 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
                 ),
                 const SizedBox(width: 12),
                 // 合集名称
-                Expanded(
-                  child: Text(
-                    widget.videoSeries.seriesName,
-                    style: const TextStyle(
-                      color: Colors.black87,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+
+                Text(
+                  widget.videoSeries.seriesName,
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                // 视频数量
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(12),
+                SizedBox(width: 8),
+                // 最后更新日期
+                Hero(
+                    tag: 'videoSeries-${widget.videoSeries.seriesId}-Time',
+                    child: Text(
+                      _formatDate(widget.videoSeries.updateTime),
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    )),
+                Spacer(),
+                TextButton(
+                  onPressed: widget.onTap,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blue[600],
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
                   child: Text(
-                    '${widget.videoSeries.videoInfoList.length}个视频',
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 12,
-                    ),
+                    '查看全部视频',
+                    style: const TextStyle(fontSize: 14),
                   ),
                 ),
+
                 const SizedBox(width: 8),
                 // 操作按钮
                 MouseRegion(
@@ -584,30 +567,50 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
             ),
 
             const SizedBox(height: 16),
-
-            // 视频列表
+            // 视频横向列表
             if (widget.videoSeries.videoInfoList.isNotEmpty)
-              Column(
-                children: widget.videoSeries.videoInfoList.take(3).map((video) {
-                  return VideoListItemTile(video: video);
-                }).toList(),
-              ),
+              SizedBox(
+                height: 180, // 调整高度以适应16:11比例
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // 计算可变容器宽度
+                    final availableWidth = constraints.maxWidth;
+                    final itemCount =
+                        math.min(widget.videoSeries.videoInfoList.length, 5);
+                    final totalMargin = (itemCount - 1) * 12; // 间距总和
+                    final containerPadding = 32; // 左右内边距
+                    final itemWidth = math.max(
+                        140,
+                        (availableWidth - totalMargin - containerPadding) /
+                            itemCount);
 
-            // 如果有更多视频，显示"查看全部"
-            if (widget.videoSeries.videoInfoList.length > 3)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: TextButton(
-                  onPressed: widget.onTap,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.blue[600],
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  ),
-                  child: Text(
-                    '查看全部 ${widget.videoSeries.videoInfoList.length} 个视频',
-                    style: const TextStyle(fontSize: 14),
-                  ),
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: itemCount,
+                      itemBuilder: (context, index) {
+                        final video = widget.videoSeries.videoInfoList[index];
+                        return ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minWidth: 140.0,
+                            maxWidth: double.infinity, // 最大无限制
+                          ),
+                          child: AspectRatio(
+                            aspectRatio: 16 / 12, // 整体比例16:11
+                            child: Container(
+                                width: itemWidth
+                                    .clamp(140.0, double.infinity)
+                                    .toDouble(),
+                                margin: EdgeInsets.only(
+                                    right: index < itemCount - 1 ? 12 : 0),
+                                child: VideoHorizontalItem(
+                                    video: video,
+                                    seriesId: widget.videoSeries.seriesId,
+                                    index: index)),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
           ],
@@ -794,6 +797,249 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
       return '${months}个月前';
     } else {
       return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    }
+  }
+}
+
+// 横向视频项组件（用于合集列表展示）
+class VideoHorizontalItem extends StatefulWidget {
+  final VideoInfo video;
+  final int seriesId;
+  final int index;
+  const VideoHorizontalItem({
+    Key? key,
+    required this.video,
+    required this.seriesId,
+    required this.index,
+  }) : super(key: key);
+
+  @override
+  State<VideoHorizontalItem> createState() => _VideoHorizontalItemState();
+}
+
+class _VideoHorizontalItemState extends State<VideoHorizontalItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: () {
+          final videoId = widget.video.videoId;
+          if (videoId != null) {
+            Get.find<AppBarController>().extendBodyBehindAppBar.value = false;
+            Get.toNamed(
+              '${Routes.videoPlayPage}?videoId=$videoId',
+              id: Routes.mainGetId,
+            );
+          }
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: _isHovered
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.06)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.all(4),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // 根据容器宽度计算响应式字体大小
+              final containerWidth = constraints.maxWidth;
+              final baseFontSize =
+                  (containerWidth / 140 * 12).clamp(10.0, 16.0);
+              final playCountFontSize =
+                  (containerWidth / 140 * 10).clamp(8.0, 12.0);
+              final timeFontSize = (containerWidth / 140 * 10).clamp(8.0, 12.0);
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 视频封面 (占总高度的16/11部分)
+                  Expanded(
+                    flex: 9, // 封面占9份
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9, // 确保16:9比例
+                      child: AnimatedScale(
+                        scale: _isHovered ? 1.03 : 1.0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutCubic,
+                        child: Hero(
+                            tag:
+                                'videoSeries-${widget.seriesId}-${widget.index}',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    child: widget.video.videoCover != null &&
+                                            widget.video.videoCover!.isNotEmpty
+                                        ? ExtendedImage.network(
+                                            Constants.baseUrl +
+                                                ApiAddr.fileGetResourcet +
+                                                widget.video.videoCover!,
+                                            fit: BoxFit.cover,
+                                            cache: true,
+                                          )
+                                        : Container(
+                                            color: Colors.grey[200],
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.videocam_outlined,
+                                                color: Colors.grey,
+                                                size: containerWidth * 0.15,
+                                              ),
+                                            ),
+                                          ),
+                                  ),
+                                  // 渐变遮罩
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    height: 30,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                          bottom: Radius.circular(6),
+                                        ),
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors.transparent,
+                                            Colors.black.withOpacity(0.7),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // 播放量 (左下角)
+                                  Positioned(
+                                    left: 6,
+                                    bottom: 6,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.play_arrow,
+                                          size: playCountFontSize + 2,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          _formatPlayCount(
+                                              widget.video.playCount ?? 0),
+                                          style: TextStyle(
+                                            fontSize: playCountFontSize,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w500,
+                                            shadows: [
+                                              Shadow(
+                                                offset: const Offset(0.5, 0.5),
+                                                blurRadius: 1.0,
+                                                color: Colors.black
+                                                    .withOpacity(0.8),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                      ),
+                    ),
+                  ),
+
+                  // 标题和时间信息区域 (占2份)
+                  Expanded(
+                    flex: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 2,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // 视频标题
+                          Expanded(
+                            child: Hero(
+                                tag:
+                                    'videoSeriesName-${widget.seriesId}-${widget.index}',
+                                child: Text(
+                                  widget.video.videoName ?? '未知视频',
+                                  maxLines: 1, // 确保标题只有一行
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: baseFontSize,
+                                    fontWeight: FontWeight.w500,
+                                    color: _isHovered
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.black87,
+                                    height: 1.2,
+                                  ),
+                                )),
+                          ),
+
+                          // 发布时间
+                          if (widget.video.createTime != null)
+                            Hero(
+                                tag:
+                                    'videoSeriesTime-${widget.seriesId}-${widget.index}',
+                                child: Text(
+                                  _formatDate(widget.video.createTime!),
+                                  style: TextStyle(
+                                    fontSize: timeFontSize,
+                                    color: Colors.grey,
+                                  ),
+                                )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatPlayCount(int count) {
+    if (count >= 10000) {
+      return '${(count / 10000).toStringAsFixed(1)}万';
+    }
+    return count.toString();
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays > 365) {
+      return '${(difference.inDays / 365).floor()}年前';
+    } else if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()}个月前';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays}天前';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}小时前';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}分钟前';
+    } else {
+      return '刚刚';
     }
   }
 }
