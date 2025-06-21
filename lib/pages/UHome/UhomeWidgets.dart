@@ -1,15 +1,15 @@
 import 'package:easylive/Funcs.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:extended_image/extended_image.dart';
 import '../../controllers/UhomeSeriesController.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
-import 'VideoSeriesPage.dart';
 
 // 视频选择弹窗
 class VideoSelectionDialog extends StatefulWidget {
-  final int seriesId;
+  final int? seriesId;
   final List<String> excludeVideoIds;
   final UhomeSeriesController uhomeSeriesController;
 
@@ -471,7 +471,9 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
             Row(
               children: [
                 Text(
-                  '编辑合集',
+                  widget.uhomeSeriesController.nowSelectSeriesId.value == 0
+                      ? '新建合集'
+                      : '编辑合集',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -550,8 +552,16 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
                           excludeVideoIds: [
                             ..._sortableVideos.map((video) => video.videoId),
                           ],
-                          seriesId: widget.uhomeSeriesController
-                              .videoSeriesDetail.value.videoSeries!.seriesId,
+                          seriesId: widget
+                                      .uhomeSeriesController
+                                      .videoSeriesDetail
+                                      .value
+                                      .videoSeries
+                                      ?.seriesId ==
+                                  0
+                              ? null
+                              : widget.uhomeSeriesController.videoSeriesDetail
+                                  .value.videoSeries?.seriesId,
                           uhomeSeriesController: widget.uhomeSeriesController,
                         ),
                       );
@@ -635,15 +645,21 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
                     onPressed: () async {
                       try {
                         if (saving) return; // 如果正在保存则不重复提交
+                        if (_sortableVideos.isEmpty) {
+                          throw Exception('合集视频不能为空');
+                        }
                         saving = true; // 设置保存状态为正在保存
                         var res = await ApiService.uhomeSeriesSaveVideoSeries(
                             seriesId: widget
-                                    .uhomeSeriesController
-                                    .videoSeriesDetail
-                                    .value
-                                    .videoSeries
-                                    ?.seriesId ??
-                                0,
+                                        .uhomeSeriesController
+                                        .videoSeriesDetail
+                                        .value
+                                        .videoSeries
+                                        ?.seriesId ==
+                                    0
+                                ? null
+                                : widget.uhomeSeriesController.videoSeriesDetail
+                                    .value.videoSeries?.seriesId,
                             seriesName: _titleController.text.trim(),
                             seriesDesc: _descriptionController.text.trim(),
                             videoIds: _sortableVideos
@@ -651,6 +667,14 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
                                 .toList()
                                 .join(','));
                         if (res['code'] == 200) {
+                          final videoSeries = widget.uhomeSeriesController
+                              .videoSeriesDetail.value.videoSeries;
+                          if (videoSeries == null ||
+                              videoSeries.seriesId == 0) {
+                            widget.uhomeSeriesController.loadUserVideoSeries();
+                            Get.back(result: true);
+                            showResSnackbar(res);
+                          }
                           var toDeleteVideos = widget.uhomeSeriesController
                               .videoSeriesDetail.value.seriesVideoList!
                               .where((video) => !_sortableVideos
@@ -670,6 +694,7 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
                               throw Exception(res1['info']);
                             }
                           }
+
                           var res2 =
                               await ApiService.uhomeSeriesSaveSeriesVideo(
                                   seriesId: widget
@@ -686,7 +711,7 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
                             widget.uhomeSeriesController
                                 .loadVideoSeriesDetail();
                             widget.uhomeSeriesController.loadUserVideoSeries();
-                            Get.back(); // 关闭对话框
+                            Get.back(result: true);
                             showResSnackbar(res2);
                           } else {
                             throw Exception(res2['info']);

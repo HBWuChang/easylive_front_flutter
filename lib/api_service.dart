@@ -752,11 +752,11 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> uhomeSeriesLoadAllVideo(
-      int seriesId) async {
+      int? seriesId) async {
     return toJson(await get(
       ApiAddr.uhomeSeriesLoadAllVideo,
       query: {
-        'seriesId': seriesId.toString(),
+        'seriesId': seriesId?.toString() ?? '',
       },
       useToken: true,
     ));

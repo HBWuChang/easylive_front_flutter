@@ -3,6 +3,7 @@ import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:get/get.dart';
 import 'api_service.dart';
 import 'package:extended_image/extended_image.dart';
 
@@ -97,13 +98,14 @@ class HoverFollowWidget extends StatefulWidget {
   State<HoverFollowWidget> createState() => _HoverFollowWidgetState();
 }
 
-class _HoverFollowWidgetState extends State<HoverFollowWidget> with TickerProviderStateMixin {
+class _HoverFollowWidgetState extends State<HoverFollowWidget>
+    with TickerProviderStateMixin {
   Offset _offset = Offset.zero;
   Offset _targetOffset = Offset.zero;
   Offset? _lastPointer;
   late Ticker _ticker;
   final double _spring = 0.12; // 回中速度
-  final double _follow = 0.5;  // 跟随鼠标的速度
+  final double _follow = 0.5; // 跟随鼠标的速度
 
   @override
   void initState() {
@@ -204,10 +206,10 @@ class AnimatedTabBarWidget extends StatelessWidget {
                             ? pageController.page!
                             : pageController.initialPage.toDouble();
                       } catch (_) {}
-                      
+
                       // 判断当前标签是否为选中状态
                       bool isSelected = (page.round() == index);
-                      
+
                       return TextButton(
                         onPressed: () {
                           pageController.animateToPage(
@@ -224,7 +226,10 @@ class AnimatedTabBarWidget extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               color: isSelected
                                   ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).textTheme.bodyLarge?.color,
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color,
                             ),
                           ),
                         ),
@@ -250,16 +255,17 @@ class AnimatedTabBarWidget extends StatelessWidget {
                           ? pageController.page!
                           : pageController.initialPage.toDouble();
                     } catch (_) {}
-                    
+
                     double tabWidth = constraints.maxWidth / tabLabels.length;
                     double minLine = tabWidth * barWidthMultiplier!;
                     double maxLine = tabWidth * (barWidthMultiplier! + 0.7);
-                    
+
                     double progress = (page - page.floor()).abs();
                     double dist = (progress > 0.5) ? 1 - progress : progress;
-                    double lineWidth = minLine + (maxLine - minLine) * (dist * 2);
+                    double lineWidth =
+                        minLine + (maxLine - minLine) * (dist * 2);
                     double left = page * tabWidth + (tabWidth - lineWidth) / 2;
-                    
+
                     return Stack(
                       children: [
                         Positioned(
@@ -283,6 +289,89 @@ class AnimatedTabBarWidget extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// 可点击查看全文的文本组件
+class ExpandableText extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+  final int maxLines;
+  final TextAlign textAlign;
+
+  const ExpandableText({
+    Key? key,
+    required this.text,
+    this.style,
+    this.maxLines = 1,
+    this.textAlign = TextAlign.start,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textPainter = TextPainter(
+          text: TextSpan(text: text, style: style),
+          maxLines: maxLines,
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout(maxWidth: constraints.maxWidth);
+
+        final isOverflowing = textPainter.didExceedMaxLines;
+
+        return GestureDetector(
+          onTap: isOverflowing ? () => _showFullTextDialog(context) : null,
+          child: Text(
+            text,
+            style: style?.copyWith(
+                  // color: isOverflowing
+                      // ? Theme.of(context).primaryColor
+                      // : style?.color,
+                ) ??
+                TextStyle(
+                  // color: isOverflowing ? Theme.of(context).primaryColor : null,
+                ),
+            maxLines: maxLines,
+            overflow: TextOverflow.ellipsis,
+            textAlign: textAlign,
+          ),
+        );
+      },
+    );
+  }
+
+  void _showFullTextDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.6,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.6,
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Flexible(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).dividerColor,
+                  width: 1,
+                ),
+              ),
+              child: SelectableText(
+                text,
+                style: style ?? const TextStyle(fontSize: 14),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

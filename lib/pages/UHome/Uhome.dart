@@ -1,43 +1,22 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:math' as math;
-import 'package:crypto/crypto.dart';
 import 'package:easylive/Funcs.dart';
-import 'package:easylive/controllers/VideoCommentController.dart';
-import 'package:easylive/controllers/VideoDamnuController.dart';
-import 'package:easylive/enums.dart';
-import 'package:easylive/pages/UHome/VideoSeriesPage.dart';
-import 'package:easylive/pages/VideoPlayPage/VideoPlayPageComments.dart';
-import 'package:easylive/pages/VideoPlayPage/VideoPlayPageInfo.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import '../../controllers/LocalSettingsController.dart';
 import '../../controllers/UhomeSeriesController.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
-import 'package:preload_page_view/preload_page_view.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:typed_data';
-import 'package:desktop_drop/desktop_drop.dart';
-import 'package:cross_file/cross_file.dart';
-import 'package:dotted_decoration/dotted_decoration.dart';
-import 'dart:ui' as ui;
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter/gestures.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:canvas_danmaku/canvas_danmaku.dart';
 // import 'package:iconify_flutter_plus/iconify_flutter_plus.dart'; // For Iconify Widget
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter_plus/icons/zondicons.dart'; // for Non Colorful Icons
 import 'package:iconify_flutter/icons/tabler.dart';
 import 'package:iconify_flutter/icons/ph.dart';
+import 'UhomeWidgets.dart';
 import 'VideoListPage.dart';
+import 'VideoSeriesPage.dart';
 
 class Uhome extends StatefulWidget {
   Uhome({Key? key}) : super(key: key);
@@ -53,7 +32,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
   var showuhomeVideoListType = false.obs; // 控制视频列表类型
   late AnimationController _buttonAnimationController;
   late Animation<double> _slideAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -62,13 +41,13 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
       // debugPrint('当前页面索引: ${pageController.page?.round()}'); // 打印当前页面索引
       changeShowuhomeVideoListType(pageController.page?.round() ?? 0);
     });
-    
+
     // 初始化动画控制器
     _buttonAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _slideAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -80,11 +59,12 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
 
   void changeShowuhomeVideoListType(int index) {
     if (index == 0) {
-      // 切换到视频页面，隐藏按钮
-      _buttonAnimationController.reverse();
-      showuhomeVideoListType.value = false;
+      // 切换到视频页面，先执行退出动画，再隐藏按钮
+      _buttonAnimationController.reverse().then((_) {
+        showuhomeVideoListType.value = false;
+      });
     } else {
-      // 切换到合集页面，显示按钮
+      // 切换到合集页面，先显示按钮，再执行进入动画
       showuhomeVideoListType.value = true;
       _buttonAnimationController.forward();
     }
@@ -118,12 +98,12 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
       userInfoController.getUserInfo(null);
     } else {
       userInfoController = Get.put(UserInfoController(userId: userId),
-          tag: '${userId}UserInfoController',permanent: true);
+          tag: '${userId}UserInfoController', permanent: true);
     }
     if (!Get.isRegistered<UhomeSeriesController>(
         tag: '${userId}UhomeSeriesController')) {
       Get.put(UhomeSeriesController(userId: userId),
-          tag: '${userId}UhomeSeriesController',permanent: true);
+          tag: '${userId}UhomeSeriesController', permanent: true);
     }
     Obx s1(Widget icon, String text) {
       return Obx(() {
@@ -212,8 +192,8 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: Obx(() => Text(
-                                            userInfoController
+                                      child: Obx(() => ExpandableText(
+                                            text: userInfoController
                                                     .personIntroduction
                                                     .isNotEmpty
                                                 ? userInfoController
@@ -223,7 +203,6 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                                 fontSize: 14,
                                                 color: Colors.grey[700]),
                                             maxLines: 1, // 简介始终只显示一行
-                                            overflow: TextOverflow.ellipsis,
                                           )),
                                     ),
                                     SizedBox(width: 8),
@@ -354,8 +333,10 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                         spacing: 0,
                       )),
                   Spacer(),
-                  Obx(() {
-                    if (!showuhomeVideoListType.value) {
+                  // 使用 AnimatedBuilder 来统一管理动画
+                  AnimatedBuilder(
+                    animation: _slideAnimation,
+                    builder: (context, child) {
                       return SizeTransition(
                         sizeFactor: _slideAnimation,
                         axis: Axis.horizontal,
@@ -365,37 +346,43 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                             begin: const Offset(1.0, 0.0), // 从右侧滑入
                             end: Offset.zero,
                           ).animate(_slideAnimation),
-                          child: const SizedBox.shrink(),
+                          child: Obx(() => showuhomeVideoListType.value
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      tooltip: '编辑合集列表',
+                                      icon: Icon(Icons.edit,
+                                          size: 24,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                      onPressed: () =>
+                                          _showEditSeriesListDialog(
+                                              context, userId),
+                                    ),
+                                    IconButton(
+                                      icon: Iconify(
+                                        localSettingsController.getSetting(
+                                                'uhomeVideoListType')
+                                            ? Tabler.layout_grid
+                                            : Tabler.layout_list,
+                                        size: 24,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      onPressed: () {
+                                        localSettingsController.setSetting(
+                                            'uhomeVideoListType',
+                                            !localSettingsController.getSetting(
+                                                'uhomeVideoListType'));
+                                      },
+                                    ),
+                                  ],
+                                )
+                              : const SizedBox.shrink()),
                         ),
                       );
-                    }
-                    return SizeTransition(
-                      sizeFactor: _slideAnimation,
-                      axis: Axis.horizontal,
-                      axisAlignment: 1.0, // 从右侧开始动画
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(1.0, 0.0), // 从右侧滑入
-                          end: Offset.zero,
-                        ).animate(_slideAnimation),
-                        child: IconButton(
-                          icon: Iconify(
-                            localSettingsController.getSetting('uhomeVideoListType')
-                                ? Tabler.layout_grid
-                                : Tabler.layout_list,
-                            size: 24,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          onPressed: () {
-                            localSettingsController.setSetting(
-                                'uhomeVideoListType',
-                                !localSettingsController
-                                    .getSetting('uhomeVideoListType'));
-                          },
-                        ),
-                      ),
-                    );
-                  }),
+                    },
+                  ),
                   SizedBox(width: 24), // 留出右侧空间
                 ],
               ),
@@ -447,6 +434,14 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
     );
   }
 
+  // 显示编辑合集列表的弹窗
+  Future<void> _showEditSeriesListDialog(
+      BuildContext context, String userId) async {
+    await Get.dialog(
+      EditSeriesListDialog(userId: userId),
+    );
+  }
+
   Widget _buildCount(String label, dynamic value) {
     return Column(
       children: [
@@ -494,5 +489,427 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
             TextStyle(fontSize: 16, fontWeight: FontWeight.w500), // 增加字体大小和权重
       ),
     );
+  }
+}
+
+// 编辑合集列表弹窗
+class EditSeriesListDialog extends StatefulWidget {
+  final String userId;
+
+  const EditSeriesListDialog({
+    Key? key,
+    required this.userId,
+  }) : super(key: key);
+
+  @override
+  State<EditSeriesListDialog> createState() => _EditSeriesListDialogState();
+}
+
+class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
+  late UhomeSeriesController _uhomeSeriesController;
+  List<UserVideoSeries> _sortableSeriesList = [];
+  bool operating = false; // 用于防止重复操作
+  @override
+  void initState() {
+    super.initState();
+    _uhomeSeriesController = Get.find<UhomeSeriesController>(
+      tag: '${widget.userId}UhomeSeriesController',
+    );
+    _sortableSeriesListInit();
+  }
+
+  Future<void> _sortableSeriesListInit() async {
+    try {
+      var res =
+          await _uhomeSeriesController.loadUserVideoSeries(lasttype: true);
+      setState(() {
+        _sortableSeriesList = res;
+      });
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.6,
+        height: MediaQuery.of(context).size.height * 0.7,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            // 标题栏
+            Row(
+              children: [
+                Text(
+                  '编辑合集列表',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // 添加合集按钮
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).primaryColor.withOpacity(0.3),
+                  width: 2,
+                  style: BorderStyle.solid,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).primaryColor.withOpacity(0.05),
+              ),
+              child: InkWell(
+                onTap: () async {
+                  _uhomeSeriesController.nowSelectSeriesId.value =
+                      0; // 重置当前选择的合集ID
+                  var res = await Get.dialog(EditSeriesDialog(
+                    uhomeSeriesController: _uhomeSeriesController,
+                  ));
+                  if (res != null && res)
+                    await _sortableSeriesListInit(); // 重新加载合集列表
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.add_circle_outline,
+                      size: 48,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '添加新合集',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '点击创建一个新的视频合集',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 合集列表标题
+            Row(
+              children: [
+                const Icon(Icons.sort, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  '合集排序',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.titleMedium?.color,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '拖动调整顺序',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // 可拖动合集列表
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).dividerColor,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _sortableSeriesList.isEmpty
+                    ? const Center(
+                        child: Text(
+                          '暂无合集',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      )
+                    : ReorderableListView.builder(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: _sortableSeriesList.length,
+                        onReorder: (oldIndex, newIndex) async {
+                          try {
+                            if (operating) return; // 防止重复操作
+                            operating = true;
+                            if (newIndex > oldIndex) {
+                              newIndex -= 1; // 调整索引
+                            }
+                            final movedItem =
+                                _sortableSeriesList.removeAt(oldIndex);
+                            _sortableSeriesList.insert(newIndex, movedItem);
+                            showResSnackbar(
+                                (await ApiService
+                                    .uhomeSeriesChangeVideoSeriesSort(
+                                        _sortableSeriesList
+                                            .map((e) => e.seriesId)
+                                            .toList()
+                                            .join(','))),
+                                notShowIfSuccess: true);
+                            await _sortableSeriesListInit();
+                            _uhomeSeriesController.loadUserVideoSeries();
+                          } catch (e) {
+                            showErrorSnackbar(e.toString());
+                          } finally {
+                            operating = false;
+                          }
+                        },
+                        itemBuilder: (context, index) {
+                          final series = _sortableSeriesList[index];
+                          return DraggableSeriesItem(
+                            key: ValueKey(series.seriesId),
+                            series: series,
+                            index: index,
+                            onDelete: () async {
+                              if (operating) return; // 防止重复操作
+                              operating = true;
+                              try {
+                                final confirm = await showConfirmDialog(
+                                  '确认删除合集 "${series.seriesName}" 吗？',
+                                );
+                                if (confirm) {
+                                  showResSnackbar(
+                                      (await ApiService
+                                          .uhomeSeriesDelVideoSeries(
+                                              series.seriesId)),
+                                      notShowIfSuccess: true);
+                                  // 重新加载合集列表
+                                  await _sortableSeriesListInit();
+                                }
+                              } catch (e) {
+                                showErrorSnackbar(e.toString());
+                              } finally {
+                                operating = false;
+                              }
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 可拖动的合集条目
+class DraggableSeriesItem extends StatelessWidget {
+  final UserVideoSeries series;
+  final int index;
+  final VoidCallback? onDelete;
+
+  const DraggableSeriesItem({
+    Key? key,
+    required this.series,
+    required this.index,
+    this.onDelete,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 12),
+
+          // 序号
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                '${index + 1}',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // 合集封面
+          Container(
+            width: 80,
+            height: 45,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(6),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: series.cover.isNotEmpty
+                ? ExtendedImage.network(
+                    ApiService.baseUrl +
+                        ApiAddr.fileGetResourcet +
+                        series.cover,
+                    fit: BoxFit.cover,
+                    loadStateChanged: (ExtendedImageState state) {
+                      switch (state.extendedImageLoadState) {
+                        case LoadState.loading:
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Center(
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.grey),
+                                ),
+                              ),
+                            ),
+                          );
+                        case LoadState.failed:
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.video_library,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
+                          );
+                        case LoadState.completed:
+                          return state.completedWidget;
+                      }
+                    },
+                  )
+                : Container(
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.video_library,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                  ),
+          ),
+          const SizedBox(width: 16),
+
+          // 合集信息
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ExpandableText(
+                  text: series.seriesName,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.titleMedium?.color,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      color: Colors.grey[500],
+                      size: 12,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatDate(series.updateTime),
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // 删除按钮
+          if (onDelete != null)
+            IconButton(
+              onPressed: onDelete,
+              icon: Icon(
+                Icons.delete_outline,
+                color: Colors.red[400],
+                size: 20,
+              ),
+              tooltip: '删除合集',
+              constraints: const BoxConstraints(
+                minWidth: 32,
+                minHeight: 32,
+              ),
+              padding: const EdgeInsets.all(4),
+            ),
+          SizedBox(width: 24),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return '今天';
+    } else if (difference.inDays == 1) {
+      return '昨天';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays}天前';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return '${months}个月前';
+    } else {
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    }
   }
 }

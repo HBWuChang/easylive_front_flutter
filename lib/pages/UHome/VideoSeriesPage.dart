@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'package:easylive/Funcs.dart';
 import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +6,9 @@ import 'package:get/get.dart';
 import '../../controllers/UhomeSeriesController.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
+import '../../widgets.dart';
 import 'VideoSeriesDetailPage.dart';
+import 'UhomeWidgets.dart';
 import 'package:extended_image/extended_image.dart';
 
 class VideoSeriesPage extends StatelessWidget {
@@ -389,8 +390,8 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
               // 合集名称
               Hero(
                   tag: 'videoSeries-${widget.videoSeries.seriesId}-Name',
-                  child: Text(
-                    widget.videoSeries.seriesName,
+                  child: ExpandableText(
+                    text: widget.videoSeries.seriesName,
                     style: const TextStyle(
                       color: Colors.black87,
                       fontSize: 16,
@@ -398,7 +399,6 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                       height: 1.2,
                     ),
                     maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   )),
               const SizedBox(height: 4),
               // 最后更新日期
@@ -513,25 +513,26 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
                 // 合集名称
 
                 Hero(
-                    tag: 'videoSeries-${widget.videoSeries.seriesId}-Name',
-                    child: Text(
-                      widget.videoSeries.seriesName,
+                  tag: 'videoSeries-${widget.videoSeries.seriesId}-Name',
+                  child: ConstrainedBox(
+                    constraints:  BoxConstraints(maxWidth:Get.width - 400),
+                    child: ExpandableText(
+                      text: widget.videoSeries.seriesName,
                       style: const TextStyle(
                         color: Colors.black87,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
-                    )),
+                      maxLines: 1,
+                    ),
+                  ),
+                ),
                 SizedBox(width: 8),
                 // 最后更新日期
                 Hero(
                     tag: 'videoSeries-${widget.videoSeries.seriesId}-Time',
-                    child: Text(
-                      _formatDate(widget.videoSeries.updateTime),
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                      ),
+                    child: ExpandableText(
+                      text: _formatDate(widget.videoSeries.updateTime),
                     )),
                 Spacer(),
                 TextButton(

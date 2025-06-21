@@ -1,10 +1,9 @@
-import 'package:easylive/Funcs.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:extended_image/extended_image.dart';
 import '../../controllers/UhomeSeriesController.dart';
-import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
+import '../../widgets.dart';
 import 'UhomeWidgets.dart';
 import 'VideoSeriesPage.dart';
 
@@ -45,39 +44,59 @@ class VideoSeriesDetailPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 // 合集标题
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Hero(
-                        tag:
-                            'videoSeries-${uhomeSeriesController.videoSeriesDetail.value.videoSeries!.seriesId}-Name',
-                        child: Obx(() => Text(
-                              uhomeSeriesController.videoSeriesDetail.value
-                                  .videoSeries!.seriesName,
-                              style: const TextStyle(
-                                color: Colors.black87,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ))),
-                    // 合集描述（如果有）
-                    if (uhomeSeriesController.videoSeriesDetail.value
-                        .videoSeries!.seriesDescription.isNotEmpty)
-                      Obx(() => Text(
-                            uhomeSeriesController.videoSeriesDetail.value
-                                .videoSeries!.seriesDescription,
-                            style: const TextStyle(
-                              color: Colors.black87,
-                              fontSize: 14,
-                              height: 1.4,
-                            ),
-                          )),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Hero(
+                          tag:
+                              'videoSeries-${uhomeSeriesController.videoSeriesDetail.value.videoSeries!.seriesId}-Name',
+                          child: ConstrainedBox(
+                              constraints:
+                                  BoxConstraints(maxWidth: Get.width - 400),
+                              child: Obx(() => ExpandableText(
+                                    text: uhomeSeriesController
+                                        .videoSeriesDetail
+                                        .value
+                                        .videoSeries!
+                                        .seriesName,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                  )))),
+                      // 合集描述（如果有）
+                      if (uhomeSeriesController.videoSeriesDetail.value
+                          .videoSeries!.seriesDescription.isNotEmpty)
+                        ConstrainedBox(
+                            constraints:
+                                BoxConstraints(maxWidth: Get.width - 400),
+                            child: Obx(() => Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: ExpandableText(
+                                    text: uhomeSeriesController
+                                        .videoSeriesDetail
+                                        .value
+                                        .videoSeries!
+                                        .seriesDescription,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                      height: 1.4,
+                                    ),
+                                    maxLines: 2,
+                                  ),
+                                ))),
+                    ],
+                  ),
                 ),
                 const Spacer(),
                 // 编辑按钮
                 IconButton(
                   onPressed: () => _showEditSeriesDialog(context),
+                  tooltip: '编辑合集内容',
                   icon: const Icon(Icons.edit),
                   style: IconButton.styleFrom(
                     backgroundColor: Theme.of(context).hoverColor,
@@ -125,7 +144,6 @@ class VideoSeriesDetailPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 16),
-                
               ],
             ),
           ),
@@ -196,7 +214,6 @@ class VideoSeriesDetailPage extends StatelessWidget {
       ),
     );
   }
-
 }
 
 // 视频详细条目控件 - 适用于 UserVideoSeriesVideo

@@ -1,21 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:math';
 import 'package:easylive/controllers/LocalSettingsController.dart';
-import 'package:easylive/controllers/controllers-class2.dart';
-import 'package:easylive/enums.dart';
-import 'package:easylive/settings.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../api_service.dart';
 import '../Funcs.dart';
-import 'package:media_kit/media_kit.dart';
 import 'controllers-class.dart';
-import 'package:canvas_danmaku/canvas_danmaku.dart';
 
 class UhomeSeriesController extends GetxController {
   final String userId;
@@ -48,21 +36,31 @@ class UhomeSeriesController extends GetxController {
             userVideoSeries.firstWhere((series) => series.seriesId == id));
         loadVideoSeriesDetail();
       }
+      else {
+        videoSeriesDetail.value = UhomeGetVideoSeriesDetail();
+      }
     });
   }
 
-  Future<void> loadUserVideoSeries() async {
+  Future<List<UserVideoSeries>> loadUserVideoSeries({bool? lasttype}) async {
     try {
+      bool lasttypet = lasttype ?? this.lasttype; // 使用传入的参数或默认值
       var res;
-      if (lasttype) {
+      if (lasttypet) {
         res = await ApiService.uhomeSeriesLoadVideoSeries(userId);
       } else {
         res = await ApiService.uhomeSeriesLoadVideoSeriesWithVideo(userId);
       }
       if (res['code'] == 200) {
+        if (lasttype != null) {
+          return (res['data'] as List<dynamic>)
+              .map((item) => UserVideoSeries(item as Map<String, dynamic>))
+              .toList();
+        }
         userVideoSeries.value = (res['data'] as List<dynamic>)
             .map((item) => UserVideoSeries(item as Map<String, dynamic>))
             .toList();
+        return [];
       } else {
         throw Exception(res['info']);
       }
@@ -70,6 +68,7 @@ class UhomeSeriesController extends GetxController {
       showErrorSnackbar(
         e.toString(),
       );
+      return []; // 返回空列表表示加载失败
     }
   }
 
@@ -101,7 +100,7 @@ class UhomeSeriesController extends GetxController {
   // 获取当前排序方式的显示文本
   String get sortOrderText => isAscendingSort.value ? '正序' : '倒序';
 
-  Future<List<VideoInfo>> uhomeseriesloadAllVideo(int seriesId) async {
+  Future<List<VideoInfo>> uhomeseriesloadAllVideo(int? seriesId) async {
     try {
       var res = await ApiService.uhomeSeriesLoadAllVideo(seriesId);
       if (res['code'] == 200) {
