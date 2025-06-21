@@ -512,14 +512,16 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
                 const SizedBox(width: 12),
                 // 合集名称
 
-                Text(
-                  widget.videoSeries.seriesName,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Hero(
+                    tag: 'videoSeries-${widget.videoSeries.seriesId}-Name',
+                    child: Text(
+                      widget.videoSeries.seriesName,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )),
                 SizedBox(width: 8),
                 // 最后更新日期
                 Hero(

@@ -25,6 +25,7 @@ class UhomeSeriesController extends GetxController {
       Get.find<LocalSettingsController>();
   var videoSeriesDetail = UhomeGetVideoSeriesDetail().obs; // 用于存储当前系列的详细信息
   bool lasttype = true; // true: 网格，false: 列表
+  var isAscendingSort = true.obs; // 排序方式：false为最新添加（降序），true为最早添加（升序）
   UhomeSeriesController({required this.userId});
 
   @override
@@ -80,6 +81,7 @@ class UhomeSeriesController extends GetxController {
       if (res['code'] == 200) {
         videoSeriesDetail.value =
             UhomeGetVideoSeriesDetail.fromJson(res['data']);
+        // 加载完成后应用排序
       } else {
         throw Exception(res['info']);
       }
@@ -89,6 +91,15 @@ class UhomeSeriesController extends GetxController {
       );
     }
   }
+
+  // 切换排序方式
+  void toggleSortOrder() {
+    isAscendingSort.value = !isAscendingSort.value;
+    update();
+  }
+
+  // 获取当前排序方式的显示文本
+  String get sortOrderText => isAscendingSort.value ? '正序' : '倒序';
 
   Future<List<VideoInfo>> uhomeseriesloadAllVideo(int seriesId) async {
     try {
@@ -265,4 +276,30 @@ class UserVideoSeriesVideo {
         playCount = json['playCount'] ?? 0,
         createTime =
             DateTime.parse(json['createTime'] ?? '1970-01-01T00:00:00Z');
+}
+
+VideoInfo userVideoSeriesVideoToVideoInfo(
+    UserVideoSeriesVideo userVideoSeriesVideo) {
+  return VideoInfo({
+    'videoId': userVideoSeriesVideo.videoId,
+    'userId': userVideoSeriesVideo.userId,
+    'videoCover': userVideoSeriesVideo.videoCover,
+    'videoName': userVideoSeriesVideo.videoName,
+    'playCount': userVideoSeriesVideo.playCount,
+    'createTime': userVideoSeriesVideo.createTime.toIso8601String(),
+  });
+}
+
+UserVideoSeriesVideo videoInfoToUserVideoSeriesVideo(
+    VideoInfo videoInfo, int seriesId) {
+  return UserVideoSeriesVideo({
+    'seriesId': seriesId,
+    'videoId': videoInfo.videoId,
+    'userId': videoInfo.userId,
+    'sort': 0, // 默认排序为0
+    'videoCover': videoInfo.videoCover,
+    'videoName': videoInfo.videoName,
+    'playCount': videoInfo.playCount,
+    'createTime': videoInfo.createTime!.toIso8601String(),
+  });
 }
