@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:dotted_decoration/dotted_decoration.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'PlatformPageComment.dart';
 import 'PlatformPageDanmaku.dart';
@@ -55,19 +56,19 @@ class _PlatformPageState extends State<PlatformPage> {
       body: Row(
         children: [
           Container(
-            width: 130,
+            width: 130.w,
             color: Theme.of(context).colorScheme.surfaceVariant,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 32),
+                 SizedBox(height: 32.w),
                 Center(
                   child: Text(
                     '创作中心',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 32),
+                 SizedBox(height: 32.w),
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -79,10 +80,10 @@ class _PlatformPageState extends State<PlatformPage> {
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12.r)),
                       padding: EdgeInsets.symmetric(vertical: 14),
                       textStyle:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                     ),
                     onPressed: () => _jumpToPage(1),
                   ),
@@ -127,12 +128,12 @@ Widget _sideBtn(String text, IconData icon, int pageIndex, bool selected,
               : Theme.of(Get.context!).colorScheme.onSurface),
       label: Text(text,
           style: TextStyle(
-              fontSize: 13,
+              fontSize: 13.sp,
               color: selected
                   ? Theme.of(Get.context!).colorScheme.primary
                   : Theme.of(Get.context!).colorScheme.onSurface)),
       style: TextButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         alignment: Alignment.centerLeft,
         backgroundColor: selected

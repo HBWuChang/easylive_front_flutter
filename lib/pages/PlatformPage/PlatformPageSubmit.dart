@@ -11,6 +11,7 @@ import 'dart:typed_data';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:dotted_decoration/dotted_decoration.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PlatformPageSubmit extends StatefulWidget {
   const PlatformPageSubmit({Key? key}) : super(key: key);
@@ -116,11 +117,11 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text(isRequired ? '*' : '  ',
-            style: TextStyle(color: Colors.red, fontSize: 16)),
-        Text(name, style: TextStyle(fontSize: 16)),
-        SizedBox(width: 16),
+            style: TextStyle(color: Colors.red, fontSize: 16.sp)),
+        Text(name, style: TextStyle(fontSize: 16.sp)),
+        SizedBox(width: 16.w),
         SizedBox(
-          width: width ?? Get.width - 230,
+          width: (width ?? Get.width - 230).w,
           child: widget,
         ),
       ],
@@ -157,26 +158,26 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                   processFiles(detail.files);
                 },
                 child: Container(
-                  height: 400,
-                  width: 600,
+                  height: 400.w,
+                  width: 600.w,
                   decoration: DottedDecoration(
                     color: Colors.blue,
                     shape: Shape.box,
-                    borderRadius: const BorderRadius.all(Radius.circular(24)),
+                    borderRadius:  BorderRadius.all(Radius.circular(24.r)),
                   ),
                   child: Center(child: Text("将视频文件拖放到此处")),
                 ),
               ),
               Text(
                 '或',
-                style: TextStyle(fontSize: 16, color: Colors.black54),
+                style: TextStyle(fontSize: 16.sp, color: Colors.black54),
               ),
               ElevatedButton.icon(
                 icon: Icon(Icons.file_open),
                 label: Text('选择视频文件'),
                 onPressed: _pickFile,
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 24.w),
             ],
           ),
         ),
@@ -324,7 +325,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                 )
               ]));
             }),
-            SizedBox(height: 16),
+            SizedBox(height: 16.w),
             // 基本设置
             Form(
                 key: _formKey,
@@ -334,8 +335,8 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                         child: Column(children: [
                           Text('基本设置',
                               style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
-                          SizedBox(height: 16),
+                                  fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 16.w),
                           widgetWithName(
                               '封面',
                               Card(
@@ -343,8 +344,8 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                       horizontal: 8, vertical: 4),
                                   clipBehavior: Clip.hardEdge,
                                   child: Container(
-                                      width: 214,
-                                      height: 120,
+                                      width: 214.w,
+                                      height: 120.w,
                                       child: GestureDetector(
                                         onTap: () async {
                                           platformPageSubmitController
@@ -377,8 +378,8 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                                       ApiAddr.fileGetResourcet +
                                                       platformPageSubmitController
                                                           .videoCover.value,
-                                                  width: 214,
-                                                  height: 120,
+                                                  width: 214.w,
+                                                  height: 120.w,
                                                   fit: BoxFit.cover,
                                                   cache: true,
                                                 )
@@ -386,7 +387,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                         }),
                                       ))),
                               isRequired: true,
-                              width: 230),
+                              width: 230.w),
                           widgetWithName(
                             '标题',
                             TextFormField(
@@ -424,7 +425,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                       },
                                     ),
                                     Text('自制'),
-                                    SizedBox(width: 16),
+                                    SizedBox(width: 16.w),
                                     Radio<int>(
                                       value: 1,
                                       groupValue: platformPageSubmitController
@@ -439,7 +440,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                 );
                               }),
                               SizedBox(
-                                width: 20,
+                                width: 20.w,
                               ),
                               Obx(() {
                                 if (platformPageSubmitController
@@ -447,7 +448,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                     1) return SizedBox.shrink();
 
                                 return SizedBox(
-                                  width: 590,
+                                  width: 590.w,
                                   child: TextFormField(
                                     controller: platformPageSubmitController
                                         .origin_infoController,
@@ -505,11 +506,11 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                               }
 
                               return SizedBox(
-                                  width: 400,
+                                  width: 400.w,
                                   child: Row(
                                     children: [
                                       SizedBox(
-                                          width: 200,
+                                          width: 200.w,
                                           child: DropdownButtonFormField<int>(
                                             value: validIds.contains(currentId)
                                                 ? currentId
@@ -534,7 +535,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                             decoration: InputDecoration(
                                               border: OutlineInputBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(12),
+                                                    BorderRadius.circular(12.r),
                                                 borderSide: BorderSide(
                                                   color: Theme.of(context)
                                                       .colorScheme
@@ -543,7 +544,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                               ),
                                               enabledBorder: OutlineInputBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(12),
+                                                    BorderRadius.circular(12.r),
                                                 borderSide: BorderSide(
                                                   color: Theme.of(context)
                                                       .colorScheme
@@ -552,7 +553,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(12),
+                                                    BorderRadius.circular(12.r),
                                                 borderSide: BorderSide(
                                                   color: Theme.of(context)
                                                       .colorScheme
@@ -581,15 +582,15 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .onSurface,
-                                              fontSize: 15,
+                                              fontSize: 15.sp,
                                             ),
                                             borderRadius:
-                                                BorderRadius.circular(12),
+                                                BorderRadius.circular(12.r),
                                           )),
-                                      SizedBox(width: 16),
+                                      SizedBox(width: 16.w),
                                       if (childCategories.isNotEmpty)
                                         SizedBox(
-                                            width: 200,
+                                            width: 200.w,
                                             child: DropdownButtonFormField<int>(
                                               value: childValidIds
                                                       .contains(childCurrentId)
@@ -613,7 +614,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                               decoration: InputDecoration(
                                                 border: OutlineInputBorder(
                                                   borderRadius:
-                                                      BorderRadius.circular(12),
+                                                      BorderRadius.circular(12.r),
                                                   borderSide: BorderSide(
                                                     color: Theme.of(context)
                                                         .colorScheme
@@ -623,7 +624,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                                 enabledBorder:
                                                     OutlineInputBorder(
                                                   borderRadius:
-                                                      BorderRadius.circular(12),
+                                                      BorderRadius.circular(12.r),
                                                   borderSide: BorderSide(
                                                     color: Theme.of(context)
                                                         .colorScheme
@@ -633,7 +634,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                                 focusedBorder:
                                                     OutlineInputBorder(
                                                   borderRadius:
-                                                      BorderRadius.circular(12),
+                                                      BorderRadius.circular(12.r),
                                                   borderSide: BorderSide(
                                                     color: Theme.of(context)
                                                         .colorScheme
@@ -662,10 +663,10 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                                 color: Theme.of(context)
                                                     .colorScheme
                                                     .onSurface,
-                                                fontSize: 15,
+                                                fontSize: 15.sp,
                                               ),
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(12.r),
                                             ))
                                     ],
                                   ));
@@ -778,7 +779,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                     child: Column(children: [
                       Text('更多设置',
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                              fontSize: 18.sp, fontWeight: FontWeight.bold)),
                       SizedBox(height: 16),
                       widgetWithName(
                           '互动设置',
@@ -795,7 +796,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                                     },
                                   ),
                                   Text('关闭评论'),
-                                  SizedBox(width: 16),
+                                  SizedBox(width: 16.w),
                                   Checkbox(
                                     value: platformPageSubmitController
                                         .disableDanmaku.value,
@@ -810,18 +811,18 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                             }),
                           ]),
                           isRequired: false,
-                          width: 230),
+                          width: 230.w),
                     ]))),
 
             SizedBox(
-                height: 50,
+                height: 50.w,
                 child: TextButton.icon(
                     style: TextButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor:
                             Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16))),
+                            borderRadius: BorderRadius.circular(16.r))),
                     onPressed: () async {
                       try {
                         for (var filePost
@@ -858,9 +859,9 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                         color: Theme.of(context).colorScheme.onPrimary),
                     label: Text('立即投稿',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)))),
+                            fontSize: 18.sp, fontWeight: FontWeight.bold)))),
             SizedBox(
-              height: 50,
+              height: 50.w,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -869,7 +870,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       foregroundColor: Theme.of(context).colorScheme.onSurface,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+                          borderRadius: BorderRadius.circular(16.r)),
                     ),
                     onPressed: () async {
                       bool confirm = await showConfirmDialog('确定清除当前投稿信息吗？',title: "警告");
@@ -880,7 +881,7 @@ class _PlatformPageSubmitState extends State<PlatformPageSubmit> {
                     icon: Icon(Icons.delete, size: 16, color: Colors.redAccent),
                     label: Text('清除当前投稿信息',
                         style:
-                            TextStyle(fontSize: 14, color: Colors.redAccent)),
+                            TextStyle(fontSize: 14.sp, color: Colors.redAccent)),
                   ),
                 ],
               ),

@@ -12,6 +12,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:image/image.dart' as img;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UpdateUserInfoCard extends StatefulWidget {
   final double? areaWidth;
@@ -69,11 +70,11 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: Constants.updateUserInfoCardWidth,
-      height: Constants.updateUserInfoCardHeight,
+      width: Constants.updateUserInfoCardWidth.w,
+      height: Constants.updateUserInfoCardHeight.w,
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -84,9 +85,9 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
                 Column(children: [
                   Text(
                     Texts.updateUserInfo,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 16.w),
                 ]),
                 Tooltip(
                   message: Texts.changeAvatar,
@@ -100,7 +101,7 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
                       },
                       child: Obx(() => Avatar(
                             avatarValue: userInfoController.avatar,
-                            radius: 40,
+                            radius: 40.r,
                           ))),
                 ),
               ]),
@@ -111,26 +112,26 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
                 ),
                 maxLength: 20,
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 8.w),
               TextField(
                 controller: personIntroductionController,
                 decoration:
                     InputDecoration(labelText: Texts.personIntroduction),
                 maxLength: 80,
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 8.w),
               TextField(
                 controller: noticeInfoController,
                 decoration: InputDecoration(labelText: Texts.noticeInfo),
                 maxLength: 300,
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 8.w),
               TextField(
                 controller: schoolController,
                 decoration: InputDecoration(labelText: Texts.school),
                 maxLength: 150,
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 16.w),
               ElevatedButton(
                 onPressed: () async {
                   try {
@@ -213,11 +214,11 @@ class _UploadImageCardState extends State<UploadImageCard> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: Constants.uploadImageCardWidth,
-      height: Constants.uploadImageCardHeight,
+      width: Constants.uploadImageCardWidth.w,
+      height: Constants.uploadImageCardHeight.w,
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -225,8 +226,8 @@ class _UploadImageCardState extends State<UploadImageCard> {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                  height: 400,
-                  width: 400,
+                  height: 400.w,
+                  width: 400.w,
                   child: Obx(() {
                     if (imageDataController.hasImage) {
                       return ExtendedImage.memory(
@@ -306,10 +307,10 @@ class _UploadImageCardState extends State<UploadImageCard> {
                             Theme.of(context).colorScheme.surface, // 跟随主题
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                         ),
                         iconEnabledColor: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         underline: SizedBox(), // 去掉下划线
                       )),
                   TextButton.icon(
@@ -322,7 +323,7 @@ class _UploadImageCardState extends State<UploadImageCard> {
                       label: Text(Texts.reset)),
                 ],
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 16.w),
               ElevatedButton(
                 onPressed: () async {
                   try {
@@ -338,8 +339,8 @@ class _UploadImageCardState extends State<UploadImageCard> {
                             image,
                             x: cropRect.left.toInt(),
                             y: cropRect.top.toInt(),
-                            width: cropRect.width.toInt(),
-                            height: cropRect.height.toInt(),
+                            width: cropRect.width.w.toInt(),
+                            height: cropRect.height.w.toInt(),
                           );
                           Uint8List croppedData =
                               Uint8List.fromList(img.encodePng(croppedImage));

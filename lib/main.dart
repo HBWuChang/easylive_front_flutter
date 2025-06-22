@@ -22,6 +22,7 @@ import 'pages/PlatformPage/PlatformPage.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:flutter/gestures.dart';
 import 'Appbar.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,30 +56,36 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      home: Home(),
-      theme: ThemeData(
-        colorSchemeSeed: Colors.pink,
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
-      getPages: [
-        // 你可以在这里定义路由
-        GetPage(name: Routes.homePage, page: () => Home()),
-        GetPage(name: Routes.platformPage, page: () => PlatformPage()),
-      ],
-      supportedLocales: [
-        const Locale('zh', 'CN'), // 中文简体
-        // 其他支持的语言
-      ],
-      locale: const Locale('zh', 'CN'), // 设置默认语言为中文
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-    );
+    return ScreenUtilInit(
+        designSize: const Size(1920, 1080),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return GetMaterialApp(
+            home: Home(),
+            theme: ThemeData(
+              colorSchemeSeed: Colors.pink,
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData.dark(),
+            themeMode: ThemeMode.system,
+            getPages: [
+              // 你可以在这里定义路由
+              GetPage(name: Routes.homePage, page: () => Home()),
+              GetPage(name: Routes.platformPage, page: () => PlatformPage()),
+            ],
+            supportedLocales: [
+              const Locale('zh', 'CN'), // 中文简体
+              // 其他支持的语言
+            ],
+            locale: const Locale('zh', 'CN'), // 设置默认语言为中文
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+          );
+        });
   }
 }
 
@@ -197,7 +204,7 @@ class _HomeState extends State<Home> {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: kToolbarHeight,
+                height: kToolbarHeight.w,
                 child: Material(
                   color: appBarController.appBarOpaque.value
                       ? Colors.white

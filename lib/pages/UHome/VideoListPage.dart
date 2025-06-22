@@ -35,6 +35,7 @@ import 'package:iconify_flutter/icons/tabler.dart';
 import 'package:iconify_flutter/icons/ph.dart';
 import '../../controllers/UhomeController.dart';
 import '../MainPage/VideoInfoWidget.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class VideoListPage extends StatelessWidget {
   final userId;
@@ -75,7 +76,7 @@ class VideoListPage extends StatelessWidget {
                         Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: SizedBox(
-                                width: itemWidth,
+                                width: itemWidth.w,
                                 child: VideoInfoWidget(
                                   video: video,
                                 )))
@@ -83,7 +84,7 @@ class VideoListPage extends StatelessWidget {
                   ));
             },
           ),
-          SizedBox(height: 24),
+          SizedBox(height: 24.w),
           // 分页组件
           Obx(() =>
               _buildPaginationWidget(context, uHomeLoadVideoListController)),
@@ -118,15 +119,15 @@ class VideoListPage extends StatelessWidget {
           if (controller.pageTotal.value > 10) ...[
             SizedBox(width: 8),
             Container(
-              width: 60,
-              height: 32,
+              width: 60.w,
+              height: 32.w,
               child: TextField(
                 controller: _pageInputController,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12),
+                style: TextStyle(fontSize: 12.sp),
                 decoration: InputDecoration(
                   hintText: '页码',
-                  hintStyle: TextStyle(fontSize: 10),
+                  hintStyle: TextStyle(fontSize: 10.sp),
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   border: OutlineInputBorder(
@@ -160,7 +161,7 @@ class VideoListPage extends StatelessWidget {
             Text(
               '/ ${controller.pageTotal.value}',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 12.sp,
                 color: Theme.of(context).textTheme.bodySmall?.color,
               ),
             ),
@@ -227,8 +228,8 @@ class VideoListPage extends StatelessWidget {
     bool isCurrentPage = controller.pageNo.value == pageNumber;
 
     return Container(
-      width: 32,
-      height: 32,
+      width: 32.w,
+      height: 32.w,
       child: TextButton(
         onPressed:
             isCurrentPage ? null : () => _goToPage(controller, pageNumber),
@@ -245,7 +246,7 @@ class VideoListPage extends StatelessWidget {
         child: Text(
           pageNumber.toString(),
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: isCurrentPage ? FontWeight.bold : FontWeight.normal,
           ),
         ),
@@ -256,13 +257,13 @@ class VideoListPage extends StatelessWidget {
   // 构建省略号
   Widget _buildEllipsis(BuildContext context) {
     return Container(
-      width: 32,
-      height: 32,
+      width: 32.w,
+      height: 32.w,
       alignment: Alignment.center,
       child: Text(
         '...',
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 12.sp,
           color: Theme.of(context).textTheme.bodySmall?.color,
         ),
       ),
@@ -273,7 +274,7 @@ class VideoListPage extends StatelessWidget {
   Widget _buildPageButton(
       BuildContext context, String text, bool enabled, VoidCallback onPressed) {
     return Container(
-      height: 32,
+      height: 32.w,
       child: TextButton(
         onPressed: enabled ? onPressed : null,
         style: TextButton.styleFrom(
@@ -294,7 +295,7 @@ class VideoListPage extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
         ),

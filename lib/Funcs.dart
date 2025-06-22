@@ -12,6 +12,7 @@ import 'dart:io';
 // import 'package:image/image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void openLoginDialog() {
   Get.dialog(
@@ -26,13 +27,13 @@ void openLoginDialog() {
                     Constants.loginDialogMinHeight) /
                 Get.height,
             child: Material(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 clipBehavior: Clip.antiAlias,
                 child: LoginPage(
                   areaWidth: max(Get.width * Constants.loginDialogResizeRate,
-                      Constants.loginDialogMinWidth),
+                      Constants.loginDialogMinWidth).w,
                   areaHeight: max(Get.height * Constants.loginDialogResizeRate,
-                      Constants.loginDialogMinHeight),
+                      Constants.loginDialogMinHeight).w,
                 )),
           ),
         );
@@ -144,11 +145,11 @@ void showUpdateUserInfoCard() async {
   await Get.dialog(
     Center(
       child: SizedBox(
-        width: Constants.updateUserInfoCardWidth,
-        height: Constants.updateUserInfoCardHeight,
+        width: Constants.updateUserInfoCardWidth.w,
+        height: Constants.updateUserInfoCardHeight.w,
         child: UpdateUserInfoCard(
-          areaWidth: Constants.updateUserInfoCardWidth,
-          areaHeight: Constants.updateUserInfoCardHeight,
+          areaWidth: Constants.updateUserInfoCardWidth.w,
+          areaHeight: Constants.updateUserInfoCardHeight.w,
         ),
       ),
     ),
@@ -164,8 +165,8 @@ Future<dynamic> showUploadImageCard(
   var res = await Get.dialog(
     Center(
       child: SizedBox(
-        width: Constants.uploadImageCardWidth,
-        height: Constants.uploadImageCardHeight,
+        width: Constants.uploadImageCardWidth.w,
+        height: Constants.uploadImageCardHeight.w,
         child: UploadImageCard(
           imagePath: imagePath,
           cropAspectRatios: cropAspectRatios,

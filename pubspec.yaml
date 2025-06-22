@@ -34,6 +34,9 @@ dependencies:
     sdk: flutter
   get:
   rhttp: ^0.12.0
+  cronet_http: ^1.3.4  # For Android
+  fetch_client: ^1.1.4  # For Web
+  http: ^1.2.2  # For common HTTP functionality
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -60,6 +63,7 @@ dependencies:
     path: packages/canvas_danmaku-0.2.7
   iconify_flutter_plus: ^1.0.4
   iconify_flutter: ^0.0.7
+  flutter_screenutil:
 dev_dependencies:
   flutter_test:
     sdk: flutter

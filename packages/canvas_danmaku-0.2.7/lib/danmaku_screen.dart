@@ -9,7 +9,6 @@ import 'dart:ui' as ui;
 import 'models/danmaku_option.dart';
 import '/models/danmaku_content_item.dart';
 import 'dart:math';
-
 class DanmakuScreen extends StatefulWidget {
   // 创建Screen后返回控制器
   final Function(DanmakuController) createdController;

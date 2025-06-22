@@ -22,6 +22,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // 投币弹窗
 Future<Map<String, dynamic>?> showCoinDialog() async {
@@ -43,9 +44,9 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       child: SizedBox(
-        width: 500,
+        width: 500.w,
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -56,9 +57,9 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                 children: [
                   Text('请选择投币数量',
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
                   SizedBox(
-                      width: 150,
+                      width: 150.w,
                       child: Row(
                         children: [
                           Checkbox(
@@ -68,12 +69,12 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                                   _checked = value ?? true;
                                 });
                               }),
-                          Text('同时点赞', style: TextStyle(fontSize: 16)),
+                          Text('同时点赞', style: TextStyle(fontSize: 16.sp)),
                         ],
                       ))
                 ],
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 20.w),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -87,7 +88,7 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                         decoration: DottedDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           shape: Shape.box,
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                          borderRadius: BorderRadius.all(Radius.circular(16.r)),
                           strokeWidth: 2,
                           dash: _hover1 ? [1, 0] : [6, 4], // 实线/虚线
                         ),
@@ -99,19 +100,19 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                               startFrame: 0,
                               frameCount: 24,
                               totalFrames: 24,
-                              frameWidth: 187,
-                              frameHeight: 300,
+                              frameWidth: 187.w,
+                              frameHeight: 300.w,
                               duration: Duration(milliseconds: 1200),
                               scale: 1,
                             ),
                             SizedBox(height: 8),
-                            Text('投1个', style: TextStyle(fontSize: 15)),
+                            Text('投1个', style: TextStyle(fontSize: 15.sp)),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 40),
+                  SizedBox(width: 40.w),
                   GestureDetector(
                     onTap: () =>
                         Get.back(result: {'coins': 2, 'like': _checked}),
@@ -122,7 +123,7 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                         decoration: DottedDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           shape: Shape.box,
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                          borderRadius: BorderRadius.all(Radius.circular(16.r)),
                           strokeWidth: 2,
                           dash: _hover2 ? [1, 0] : [6, 4],
                         ),
@@ -134,13 +135,13 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                               startFrame: 0,
                               frameCount: 24,
                               totalFrames: 24,
-                              frameWidth: 187,
-                              frameHeight: 300,
+                              frameWidth: 187.w,
+                              frameHeight: 300.w,
                               duration: Duration(milliseconds: 1200),
                               scale: 1,
                             ),
                             SizedBox(height: 8),
-                            Text('投2个', style: TextStyle(fontSize: 15)),
+                            Text('投2个', style: TextStyle(fontSize: 15.sp)),
                           ],
                         ),
                       ),
@@ -148,7 +149,7 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 16.w),
               TextButton(
                 onPressed: () => Get.back(result: null),
                 child: Text('取消'),
@@ -217,8 +218,8 @@ class _CoinSpriteAnimationWidgetState extends State<CoinSpriteAnimationWidget>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.frameWidth * widget.scale,
-      height: widget.frameHeight * widget.scale,
+      width: (widget.frameWidth * widget.scale).w,
+      height:( widget.frameHeight * widget.scale).w,
       child: ClipRect(
         child: Stack(
           children: [
@@ -227,8 +228,8 @@ class _CoinSpriteAnimationWidgetState extends State<CoinSpriteAnimationWidget>
               top: 0,
               child: Image.asset(
                 widget.imagePath,
-                width: widget.frameWidth * widget.totalFrames * widget.scale,
-                height: widget.frameHeight * widget.scale,
+                width: (widget.frameWidth * widget.totalFrames * widget.scale).w,
+                height: (widget.frameHeight * widget.scale).w,
                 fit: BoxFit.none,
                 filterQuality: FilterQuality.high,
               ),
@@ -373,8 +374,8 @@ class _ImagePreviewDialogState extends State<_ImagePreviewDialog> {
                       child: ExtendedImage.network(
                         widget.imgUrl,
                         fit: BoxFit.contain,
-                        width: constraints.maxWidth * 0.95,
-                        height: constraints.maxHeight * 0.95,
+                        width: constraints.maxWidth * 0.95.w,
+                        height: constraints.maxHeight * 0.95.w,
                         mode: ExtendedImageMode.gesture,
                         initGestureConfigHandler: (_) => GestureConfig(
                           minScale: 0.5,
@@ -416,7 +417,7 @@ class _ImagePreviewDialogState extends State<_ImagePreviewDialog> {
                         });
                       },
                     ),
-                    SizedBox(width: 16),
+                    SizedBox(width: 16.w),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black54,
@@ -481,8 +482,8 @@ class ImagePreviewDialogState extends State<ImagePreviewDialog> {
                       child: ExtendedImage.network(
                         widget.imgUrl,
                         fit: BoxFit.contain,
-                        width: constraints.maxWidth * 0.95,
-                        height: constraints.maxHeight * 0.95,
+                        width: constraints.maxWidth * 0.95.w,
+                        height: constraints.maxHeight * 0.95.w,
                         mode: ExtendedImageMode.gesture,
                         initGestureConfigHandler: (_) => GestureConfig(
                           minScale: 0.5,
@@ -524,7 +525,7 @@ class ImagePreviewDialogState extends State<ImagePreviewDialog> {
                         });
                       },
                     ),
-                    SizedBox(width: 16),
+                    SizedBox(width: 16.w),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black54,
@@ -579,7 +580,7 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
   Widget build(BuildContext context) {
     final text = widget.comment.content;
     final textStyle =
-        TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface);
+        TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurface);
     return LayoutBuilder(
       builder: (context, constraints) {
         double realMaxWidth = 300;
@@ -589,7 +590,7 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
           text: span,
           maxLines: maxLines,
           textDirection: TextDirection.ltr,
-        )..layout(maxWidth: realMaxWidth);
+        )..layout(maxWidth: realMaxWidth.w);
         needExpand = tp.didExceedMaxLines;
         return ConstrainedBox(
           constraints: BoxConstraints(maxWidth: realMaxWidth),
@@ -616,7 +617,7 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                             ),
                           ),
                         ),
@@ -625,7 +626,7 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
                       TextSpan(
                         text: '  ',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                         ),
                       ),
                     if (widget.comment.replyNickName != null)
@@ -633,7 +634,7 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
                         text: '回复 ',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.tertiary,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                         ),
                       ),
                     if (widget.comment.replyNickName != null)
@@ -642,7 +643,7 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                         ),
                         mouseCursor: SystemMouseCursors.click,
                         recognizer: TapGestureRecognizer()
@@ -671,7 +672,7 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
                       padding: EdgeInsets.zero, minimumSize: Size(40, 24)),
                   onPressed: () => setState(() => expanded = !expanded),
                   child: Text(expanded ? '收起' : '展开',
-                      style: TextStyle(fontSize: 14)),
+                      style: TextStyle(fontSize: 14.sp)),
                 ),
             ],
           ),
@@ -709,7 +710,7 @@ class ChildCommentItemWidget extends StatelessWidget {
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
+                fontSize: 15.sp,
               ),
               mouseCursor: SystemMouseCursors.click,
               recognizer: TapGestureRecognizer()
@@ -723,7 +724,7 @@ class ChildCommentItemWidget extends StatelessWidget {
                 text: '回复 ',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.tertiary,
-                  fontSize: 15,
+                  fontSize: 15.sp,
                 ),
               ),
             if (replyNickName != null)
@@ -732,7 +733,7 @@ class ChildCommentItemWidget extends StatelessWidget {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 15.sp,
                 ),
                 mouseCursor: SystemMouseCursors.click,
                 recognizer: TapGestureRecognizer()
@@ -745,7 +746,7 @@ class ChildCommentItemWidget extends StatelessWidget {
             TextSpan(
               text: content,
               style: TextStyle(
-                  fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
+                  fontSize: 15.sp, color: Theme.of(context).colorScheme.onSurface),
             ),
           ],
         ),

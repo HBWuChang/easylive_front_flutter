@@ -17,7 +17,7 @@ import 'controllers/controllers-class.dart';
 import 'api_service.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:io';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'pages/PlatformPage/PlatformPage.dart';
 
 import 'package:media_kit/media_kit.dart';
@@ -72,7 +72,7 @@ class AppBarContent extends StatelessWidget {
               final routes = appBarController.top_routeWithName;
               final selectedName = appBarController.selectedRouteName.value;
               return Container(
-                height: kToolbarHeight,
+                height: kToolbarHeight.w,
                 child: Listener(
                   onPointerSignal: (event) {
                     if (event is PointerScrollEvent) {
@@ -100,7 +100,7 @@ class AppBarContent extends StatelessWidget {
                       children: [
                         for (int index = 0; index < routes.length; index++)
                           SizedBox(
-                              width: appBarController.tabWidth.value,
+                              width: appBarController.tabWidth.value.w,
                               key: ValueKey(routes[index].name),
                               child: GestureDetector(
                                 key: ValueKey(routes[index].name),
@@ -122,8 +122,8 @@ class AppBarContent extends StatelessWidget {
                                               ? 2
                                               : 6),
                                   constraints: BoxConstraints(
-                                    minWidth: appBarController.tabWidth.value,
-                                    maxWidth: appBarController.tabWidth.value,
+                                    minWidth: appBarController.tabWidth.value.w,
+                                    maxWidth: appBarController.tabWidth.value.w,
                                   ),
                                   decoration: BoxDecoration(
                                     color: routes[index].name == selectedName
@@ -132,7 +132,7 @@ class AppBarContent extends StatelessWidget {
                                             .primary
                                             .withOpacity(0.12)
                                         : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(8.r),
                                     boxShadow:
                                         routes[index].name == selectedName
                                             ? [
@@ -141,7 +141,7 @@ class AppBarContent extends StatelessWidget {
                                                         .colorScheme
                                                         .primary
                                                         .withOpacity(0.15),
-                                                    blurRadius: 6,
+                                                    blurRadius: 6.r,
                                                     offset: Offset(0, 2))
                                               ]
                                             : [],
@@ -164,9 +164,9 @@ class AppBarContent extends StatelessWidget {
                                                         horizontal: 8),
                                                 child: Obx(
                                                   () => SizedBox(
-                                                      width: appBarController
+                                                      width:( appBarController
                                                               .tabWidth.value -
-                                                          54, // 减去关闭按钮和间距
+                                                          54).w, // 减去关闭按钮和间距
                                                       child: Obx(() => Text(
                                                             routes[index]
                                                                     .title
@@ -229,7 +229,7 @@ class AppBarContent extends StatelessWidget {
             }),
           ),
           Container(
-            width: 200,
+            width: 200.w,
             child: Row(
               children: [
                 MouseRegion(
@@ -259,8 +259,8 @@ class AppBarContent extends StatelessWidget {
                     },
                     child: accountController.userId == null
                         ? SizedBox(
-                            width: 40,
-                            height: 40,
+                            width: 40.w,
+                            height: 40.w,
                             child: IconButton(
                               tooltip: Texts.login,
                               iconSize: 40,

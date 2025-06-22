@@ -7,6 +7,7 @@ import '../../api_service.dart';
 import '../../widgets.dart';
 import 'UhomeWidgets.dart';
 import 'VideoSeriesPage.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class VideoSeriesDetailPage extends StatelessWidget {
   final UhomeSeriesController uhomeSeriesController;
@@ -54,16 +55,16 @@ class VideoSeriesDetailPage extends StatelessWidget {
                               'videoSeries-${uhomeSeriesController.videoSeriesDetail.value.videoSeries!.seriesId}-Name',
                           child: ConstrainedBox(
                               constraints:
-                                  BoxConstraints(maxWidth: Get.width - 400),
+                                  BoxConstraints(maxWidth: (Get.width - 400).w),
                               child: Obx(() => ExpandableText(
                                     text: uhomeSeriesController
                                         .videoSeriesDetail
                                         .value
                                         .videoSeries!
                                         .seriesName,
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                       color: Colors.black87,
-                                      fontSize: 18,
+                                      fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     maxLines: 1,
@@ -73,7 +74,7 @@ class VideoSeriesDetailPage extends StatelessWidget {
                           .videoSeries!.seriesDescription.isNotEmpty)
                         ConstrainedBox(
                             constraints:
-                                BoxConstraints(maxWidth: Get.width - 400),
+                                BoxConstraints(maxWidth:( Get.width - 400).w),
                             child: Obx(() => Padding(
                                   padding: const EdgeInsets.only(top: 4),
                                   child: ExpandableText(
@@ -82,9 +83,9 @@ class VideoSeriesDetailPage extends StatelessWidget {
                                         .value
                                         .videoSeries!
                                         .seriesDescription,
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                       color: Colors.black87,
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       height: 1.4,
                                     ),
                                     maxLines: 2,
@@ -128,7 +129,7 @@ class VideoSeriesDetailPage extends StatelessWidget {
                           '${uhomeSeriesController.videoSeriesDetail.value.seriesVideoList!.length}个视频',
                           style: TextStyle(
                             color: Colors.grey[600],
-                            fontSize: 12,
+                            fontSize: 12.sp,
                           ),
                         )),
                     Hero(
@@ -142,7 +143,7 @@ class VideoSeriesDetailPage extends StatelessWidget {
                                   .updateTime),
                               style: TextStyle(
                                 color: Colors.grey[500],
-                                fontSize: 11,
+                                fontSize: 11.sp,
                               ),
                             ))),
                   ],
@@ -264,11 +265,11 @@ class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
             children: [
               // 序号
               Container(
-                width: 28,
-                height: 28,
+                width: 28.w,
+                height: 28.w,
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(14.r),
                   border: Border.all(
                     color: Theme.of(context).dividerColor.withOpacity(0.3),
                     width: 1,
@@ -279,7 +280,7 @@ class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
                     '${widget.index + 1}',
                     style: TextStyle(
                       color: Theme.of(context).textTheme.bodyMedium?.color,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -290,8 +291,8 @@ class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
 
               // 视频封面
               Container(
-                width: 160,
-                height: 90,
+                width: 160.w,
+                height: 90.w,
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(8),
@@ -311,10 +312,10 @@ class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
                               case LoadState.loading:
                                 return Container(
                                   color: Colors.grey[300],
-                                  child: const Center(
+                                  child:  Center(
                                     child: SizedBox(
                                       width: 20,
-                                      height: 20,
+                                      height: 20.w,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         valueColor:
@@ -364,7 +365,7 @@ class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
                           style: TextStyle(
                             color:
                                 Theme.of(context).textTheme.titleMedium?.color,
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w500,
                             height: 1.2,
                           ),
@@ -385,7 +386,7 @@ class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
                           '${_formatPlayCount(widget.video.playCount)}次播放',
                           style: TextStyle(
                             color: Colors.grey[600],
-                            fontSize: 13,
+                            fontSize: 13.sp,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -402,7 +403,7 @@ class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
                               _formatDate(widget.video.createTime),
                               style: TextStyle(
                                 color: Colors.grey[600],
-                                fontSize: 13,
+                                fontSize: 13.sp,
                               ),
                             )),
                       ],
@@ -415,13 +416,13 @@ class _VideoSeriesDetailItemState extends State<VideoSeriesDetailItem> {
 
               // 播放按钮
               Container(
-                width: 40,
-                height: 40,
+                width: 40.w,
+                height: 40.w,
                 decoration: BoxDecoration(
                   color: _isHovered
                       ? Theme.of(context).primaryColor
                       : Theme.of(context).primaryColor.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: const Icon(
                   Icons.play_arrow,
@@ -495,7 +496,7 @@ class _VideoSeriesGridItemState extends State<VideoSeriesGridItem> {
         child: Container(
           decoration: BoxDecoration(
             color: _isHovered ? Theme.of(context).hoverColor : null,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: _isHovered
                   ? Theme.of(context).dividerColor
@@ -545,10 +546,10 @@ class _VideoSeriesGridItemState extends State<VideoSeriesGridItem> {
                                     case LoadState.loading:
                                       return Container(
                                         color: Colors.grey[300],
-                                        child: const Center(
+                                        child:  Center(
                                           child: SizedBox(
-                                            width: 20,
-                                            height: 20,
+                                            width: 20.w,
+                                            height: 20.w,
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
                                               valueColor:
@@ -591,13 +592,13 @@ class _VideoSeriesGridItemState extends State<VideoSeriesGridItem> {
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Text(
                           '${widget.index + 1}',
-                          style: const TextStyle(
+                          style:  TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -617,11 +618,11 @@ class _VideoSeriesGridItemState extends State<VideoSeriesGridItem> {
                           ),
                           child: Center(
                             child: Container(
-                              width: 48,
-                              height: 48,
+                              width: 48.w,
+                              height: 48.w,
                               decoration: BoxDecoration(
                                 color: Theme.of(context).primaryColor,
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(24.r),
                               ),
                               child: const Icon(
                                 Icons.play_arrow,
@@ -656,7 +657,7 @@ class _VideoSeriesGridItemState extends State<VideoSeriesGridItem> {
                                   .textTheme
                                   .titleMedium
                                   ?.color,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
                               height: 1.3,
                             ),
@@ -684,7 +685,7 @@ class _VideoSeriesGridItemState extends State<VideoSeriesGridItem> {
                                     '${_formatPlayCount(widget.video.playCount)}次播放',
                                     style: TextStyle(
                                       color: Colors.grey[600],
-                                      fontSize: 11,
+                                      fontSize: 11.sp,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -700,7 +701,7 @@ class _VideoSeriesGridItemState extends State<VideoSeriesGridItem> {
                               _formatDate(widget.video.createTime),
                               style: TextStyle(
                                 color: Colors.grey[600],
-                                fontSize: 11,
+                                fontSize: 11.sp,
                               ),
                             ),
                           ),

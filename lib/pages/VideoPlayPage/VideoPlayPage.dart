@@ -29,6 +29,7 @@ import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'VideoPlayPageInfoWidgets.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class VideoPlayPage extends StatelessWidget {
   const VideoPlayPage({Key? key}) : super(key: key);
@@ -89,7 +90,7 @@ class VideoPlayPage extends StatelessWidget {
                   // 右侧：分P信息（简介/评论）
                   AnimatedContainer(
                     duration: Duration(milliseconds: 150),
-                    width: showSidebar.value ? 400 : 0,
+                    width: (showSidebar.value ? 400 : 0).w,
                     child: showSidebar.value
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +100,7 @@ class VideoPlayPage extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   SizedBox(
-                                    width: 200,
+                                    width: 200.w,
                                     child: Obx(() => AnimatedTabBarWidget(
                                       pageController: pageController,
                                       tabLabels: [
@@ -116,7 +117,7 @@ class VideoPlayPage extends StatelessWidget {
                                     )),
                                   ),
                                   SizedBox(
-                                    width: 50,
+                                    width: 50.w,
                                     child: IconButton(
                                       icon: Icon(
                                         Icons.more_vert,
@@ -231,7 +232,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         },
         option: DanmakuOption(
           massiveMode: true,
-          fontSize: videoDamnuController.fontSize.value,
+          fontSize: videoDamnuController.fontSize.value.sp,
           opacity: videoDamnuController.opacity.value,
           area: videoDamnuController.area.value,
           hideScroll: !videoDamnuController.enableScroll.value,
@@ -245,7 +246,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       },
       option: DanmakuOption(
         massiveMode: true,
-        fontSize: videoDamnuController.fontSize.value,
+        fontSize: videoDamnuController.fontSize.value.sp,
         opacity: videoDamnuController.opacity.value,
         area: videoDamnuController.area.value,
         hideScroll: !videoDamnuController.enableScroll.value,
@@ -364,8 +365,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                 onExit: (_) => _hideDanmuPanelWithDelay(),
                 child: Obx(() => AnimatedContainer(
                       duration: Duration(milliseconds: 200),
-                      width: showDanmuPanel.value ? 330 : 0,
-                      height: 40,
+                      width: (showDanmuPanel.value ? 330 : 0).w,
+                      height: 40.w,
                       margin: EdgeInsets.only(),
                       curve: Curves.easeOut,
                       child: showDanmuPanel.value
@@ -377,13 +378,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               ),
 
               SizedBox(
-                width: 400,
-                height: 40,
+                width: 400.w,
+                height: 40.w,
                 child: TextField(
                   controller: textEditingController,
                   focusNode: focusNode,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                   decoration: InputDecoration(
@@ -468,8 +469,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: SizedBox(
-                            width: 40,
-                            height: 20,
+                            width: 40.w,
+                            height: 20.w,
                             child: Row(
                               children: [
                                 Obx(() => Icon(
@@ -496,13 +497,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   '${(Get.find<VideoNowWatchingCountController>().nowWatchingCountMap[widget.fileId] ?? 1).toString()} 人正在观看',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.bold))),
               Obx(() => Text(
                   videoDamnuController.danmus.length.toString() + ' 条弹幕',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.bold)))
             ]);
 
@@ -576,7 +577,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                                     : theme.dividerColor,
                                 width: 2,
                               ),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(16.r),
                             ),
                             child: Text(
                               m['label'],
@@ -594,7 +595,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       );
                     }).toList(),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 12.w),
                   // 自定义颜色输入和预览
                   Row(
                     children: [
@@ -602,12 +603,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           style: TextStyle(color: theme.colorScheme.primary)),
                       SizedBox(width: 8),
                       SizedBox(
-                        width: 70,
+                        width: 70.w,
                         child: TextField(
                           controller: colorController,
                           maxLength: 6,
                           style: TextStyle(
-                              fontSize: 14, color: theme.colorScheme.primary),
+                              fontSize: 14.sp, color: theme.colorScheme.primary),
                           decoration: InputDecoration(
                             counterText: '',
                             hintText: 'HEX',
@@ -629,8 +630,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       ),
                       SizedBox(width: 8),
                       Container(
-                        width: 24,
-                        height: 24,
+                        width: 24.w,
+                        height: 24.w,
                         decoration: BoxDecoration(
                           color: _parseColor(danmuColor),
                           border: Border.all(
@@ -640,7 +641,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 12.w),
                   // 默认颜色两排
                   ...colorRows.map((row) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -664,8 +665,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                                   });
                                 },
                                 child: Container(
-                                  width: 24,
-                                  height: 24,
+                                  width: 24.w,
+                                  height: 24.w,
                                   decoration: BoxDecoration(
                                     color: c,
                                     border: Border.all(
@@ -759,7 +760,7 @@ class _DanmuControlPanelState extends State<DanmuControlPanel> {
               bottom: -8,
               left: -10,
               right: -10,
-              child: Center(child: Text(text, style: TextStyle(fontSize: 12))),
+              child: Center(child: Text(text, style: TextStyle(fontSize: 12.sp))),
             ),
             Positioned(
                 left: -20,
@@ -800,12 +801,12 @@ class _DanmuControlPanelState extends State<DanmuControlPanel> {
                         : theme.dividerColor,
                     width: 1.5,
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16.r),
                 ),
                 child: Text(
                   text,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     color: b.value
                         ? theme.colorScheme.primary
                         : theme.textTheme.bodyMedium?.color,

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'api_service.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 Widget Avatar(
     {String? avatarValue,
@@ -17,31 +18,35 @@ Widget Avatar(
     String? userId}) {
   // 如果avatarValue为空或null，显示默认头像
   // 否则显示网络头像
-  if (avatarValue == null || avatarValue.isEmpty) {
+  avatarValue = avatarValue ?? '';
+  Widget t = CircleAvatar(
+      key: key,
+      radius: radius!.r,
+      backgroundImage: ExtendedNetworkImageProvider(
+        ApiService.baseUrl + ApiAddr.fileGetResourcet + avatarValue,
+      ));
+  if (avatarValue.isEmpty) {
     return CircleAvatar(
       key: key,
-      radius: radius!,
+      radius: radius.r,
       backgroundImage: AssetImage(Constants.defaultAvatar),
     );
   } else {
-    return GestureDetector(
-        onTap: () {
-          if (showOnTap) {
-            final imgUrl =
-                ApiService.baseUrl + ApiAddr.fileGetResourcet + avatarValue;
-            Get.dialog(ImagePreviewDialog(imgUrl: imgUrl));
-          }
-          if (userId != null) {
-            Get.toNamed('${Routes.uhome}/$userId', id: Routes.mainGetId);
-          }
-        },
-        child: CircleAvatar(
-          key: key,
-          radius: radius!,
-          backgroundImage: ExtendedNetworkImageProvider(
-            ApiService.baseUrl + ApiAddr.fileGetResourcet + avatarValue,
-          ),
-        ));
+    if ((showOnTap) || (userId != null)) {
+      return GestureDetector(
+          onTap: () {
+            if (showOnTap) {
+              final imgUrl =
+                  ApiService.baseUrl + ApiAddr.fileGetResourcet + avatarValue!;
+              Get.dialog(ImagePreviewDialog(imgUrl: imgUrl));
+            }
+            if (userId != null) {
+              Get.toNamed('${Routes.uhome}/$userId', id: Routes.mainGetId);
+            }
+          },
+          child: t);
+    }
+    return t;
   }
 }
 
@@ -57,12 +62,12 @@ Widget accountDialogNumWidget(String info, {int? count}) {
           message: '$showCount',
           child: Text(
             showText,
-            style: TextStyle(fontSize: 20, color: Colors.black87),
+            style: TextStyle(fontSize: 20.sp, color: Colors.black87),
           ),
         ),
         Text(
           info,
-          style: TextStyle(fontSize: 12, color: Colors.black54),
+          style: TextStyle(fontSize: 12.sp, color: Colors.black54),
         ),
       ],
     ),
@@ -206,11 +211,11 @@ class AnimatedTabBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: containerHeight,
+      height: containerHeight!.w,
       child: Column(
         children: [
           SizedBox(
-            height: containerHeight! - barHeight! - spacing!,
+            height: (containerHeight! - barHeight! - spacing!).w,
             child: Row(
               children: List.generate(tabLabels.length, (index) {
                 return Expanded(
@@ -240,7 +245,7 @@ class AnimatedTabBarWidget extends StatelessWidget {
                           child: Text.rich(
                             tabLabels[index],
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
                               color: isSelected
                                   ? Theme.of(context).colorScheme.primary
@@ -258,9 +263,9 @@ class AnimatedTabBarWidget extends StatelessWidget {
               }),
             ),
           ),
-          SizedBox(height: spacing),
+          SizedBox(height: spacing!.w),
           SizedBox(
-            height: barHeight,
+            height: barHeight!.w,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return AnimatedBuilder(
@@ -288,7 +293,7 @@ class AnimatedTabBarWidget extends StatelessWidget {
                       children: [
                         Positioned(
                           left: left,
-                          width: lineWidth,
+                          width: lineWidth.w,
                           top: 0,
                           bottom: 0,
                           child: Container(
@@ -296,7 +301,7 @@ class AnimatedTabBarWidget extends StatelessWidget {
                               borderRadius: BorderRadius.circular(2),
                               color: Theme.of(context).colorScheme.primary,
                             ),
-                            height: barHeight,
+                            height: barHeight!.w,
                           ),
                         ),
                       ],
@@ -336,7 +341,7 @@ class ExpandableText extends StatelessWidget {
           maxLines: maxLines,
           textDirection: TextDirection.ltr,
         );
-        textPainter.layout(maxWidth: constraints.maxWidth);
+        textPainter.layout(maxWidth: constraints.maxWidth.w);
 
         final isOverflowing = textPainter.didExceedMaxLines;
 
@@ -364,11 +369,11 @@ class ExpandableText extends StatelessWidget {
   void _showFullTextDialog(BuildContext context) {
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.6,
+          width: (MediaQuery.of(context).size.width * 0.6).w,
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.6,
+            maxHeight: (MediaQuery.of(context).size.height * 0.6).w,
           ),
           padding: const EdgeInsets.all(24),
           child: Flexible(
@@ -377,7 +382,7 @@ class ExpandableText extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
                 border: Border.all(
                   color: Theme.of(context).dividerColor,
                   width: 1,
@@ -385,7 +390,7 @@ class ExpandableText extends StatelessWidget {
               ),
               child: SelectableText(
                 text,
-                style: style ?? const TextStyle(fontSize: 14),
+                style: style ??  TextStyle(fontSize: 14.sp),
               ),
             ),
           ),

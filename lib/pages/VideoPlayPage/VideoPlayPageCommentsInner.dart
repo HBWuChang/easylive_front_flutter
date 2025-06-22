@@ -31,6 +31,7 @@ import 'package:get/get.dart';
 import 'dart:math' as math;
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class VideoPlayPageCommentsInner extends StatefulWidget {
   final int parentCommentId; // 传入父评论id
@@ -84,7 +85,7 @@ class _VideoPlayPageCommentsInnerState
                               avatarValue: parent!.avatar,
                             ))
                       ]),
-                      SizedBox(width: 16),
+                      SizedBox(width: 16.w),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -127,8 +128,8 @@ class _VideoPlayPageCommentsInnerState
                                     ApiService.baseUrl +
                                         ApiAddr.fileGetResourcet +
                                         parent.imgPath!,
-                                    width: 300,
-                                    height: 200,
+                                    width: 300.w,
+                                    height: 200.w,
                                     fit: BoxFit.contain, // 保证图片完整显示且有圆角
                                     cache: true,
                                     alignment: Alignment.centerLeft,
@@ -162,7 +163,7 @@ class _VideoPlayPageCommentsInnerState
                                         },
                                       )),
                                   Text(parent.likeCount.toString()),
-                                  SizedBox(width: 16),
+                                  SizedBox(width: 16.w),
                                   Transform.flip(
                                       flipX: true,
                                       child: Obx(() => IconButton(
@@ -197,7 +198,7 @@ class _VideoPlayPageCommentsInnerState
                             horizontal: 16, vertical: 4),
                         child: Text('共 ${children.length} 条回复',
                             style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 14.sp,
                                 color: Theme.of(context).colorScheme.tertiary)),
                       )),
                   ListView.builder(
@@ -216,7 +217,7 @@ class _VideoPlayPageCommentsInnerState
                                 avatarValue: child.avatar,
                               )
                             ]),
-                            SizedBox(width: 16),
+                            SizedBox(width: 16.w),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -262,8 +263,8 @@ class _VideoPlayPageCommentsInnerState
                                           ApiService.baseUrl +
                                               ApiAddr.fileGetResourcet +
                                               child.imgPath!,
-                                          width: 300,
-                                          height: 200,
+                                          width: 300.w,
+                                          height: 200.w,
                                           fit: BoxFit.contain, // 保证图片完整显示且有圆角
                                           cache: true,
                                           alignment: Alignment.centerLeft,
@@ -298,7 +299,7 @@ class _VideoPlayPageCommentsInnerState
                                               },
                                             )),
                                         Text(child.likeCount.toString() ?? '0'),
-                                        SizedBox(width: 16),
+                                        SizedBox(width: 16.w),
                                         Transform.flip(
                                             flipX: true,
                                             child: Obx(() => IconButton(
@@ -328,7 +329,7 @@ class _VideoPlayPageCommentsInnerState
                                         //         .hateCount
                                         //         .toString() ??
                                         //     '0')),
-                                        SizedBox(width: 16),
+                                        SizedBox(width: 16.w),
                                         IconButton(
                                           icon: Icon(
                                               Icons.messenger_outline_rounded,
@@ -345,7 +346,7 @@ class _VideoPlayPageCommentsInnerState
                                                 : 0;
                                           },
                                         ),
-                                        SizedBox(width: 64),
+                                        SizedBox(width: 64.w),
                                         Builder(
                                             builder: (buttonContext) =>
                                                 IconButton(
@@ -390,7 +391,7 @@ class _VideoPlayPageCommentsInnerState
                                                             RoundedRectangleBorder(
                                                           borderRadius:
                                                               BorderRadius
-                                                                  .circular(12),
+                                                                  .circular(12.r),
                                                         ),
                                                       );
                                                       if (result == 'del') {
@@ -415,10 +416,10 @@ class _VideoPlayPageCommentsInnerState
                                       curve: Curves.easeInOut,
                                       child: ConstrainedBox(
                                         constraints: BoxConstraints(
-                                          minWidth: 300,
-                                          maxWidth: 300,
-                                          minHeight: 40,
-                                          maxHeight: 200,
+                                          minWidth: 300.w,
+                                          maxWidth: 300.w,
+                                          minHeight: 40.w,
+                                          maxHeight: 200.w,
                                         ),
                                         child: TextField(
                                           controller: commentController
@@ -437,12 +438,12 @@ class _VideoPlayPageCommentsInnerState
                                                     vertical: 10,
                                                     horizontal: 12),
                                           ),
-                                          style: TextStyle(fontSize: 15),
+                                          style: TextStyle(fontSize: 15.sp),
                                         ),
                                       ),
                                     ),
                                     SizedBox(
-                                      width: 300,
+                                      width: 300.w,
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -482,8 +483,8 @@ class _VideoPlayPageCommentsInnerState
                                                               commentController
                                                                   .mainImgPath
                                                                   .value,
-                                                          width: 100,
-                                                          height: 100,
+                                                          width: 100.w,
+                                                          height: 100.w,
                                                           fit: BoxFit
                                                               .contain, // 保证图片完整显示且有圆角
                                                           cache: true,

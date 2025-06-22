@@ -17,6 +17,7 @@ import 'package:iconify_flutter/icons/ph.dart';
 import 'UhomeWidgets.dart';
 import 'VideoListPage.dart';
 import 'VideoSeriesPage.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Uhome extends StatefulWidget {
   Uhome({Key? key}) : super(key: key);
@@ -119,7 +120,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
               SizedBox(width: 4),
               Text(
                 '${userInfoController.userInfo[text] ?? '未知'}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
               )
             ]);
       });
@@ -162,7 +163,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                     ),
                     // 个人信息Row
                     Container(
-                      height: 100, // 改回原来的高度
+                      height: 100.w, // 改回原来的高度
                       clipBehavior: Clip.none,
                       padding: EdgeInsets.symmetric(horizontal: 24),
                       decoration: BoxDecoration(),
@@ -170,8 +171,8 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 头像占位，实际头像通过Positioned绝对定位
-                          SizedBox(width: 120, height: 120), // 给头像留出空间
-                          SizedBox(width: 48),
+                          SizedBox(width: 120.w, height: 120.w), // 给头像留出空间
+                          SizedBox(width: 48.w),
                           // 名称及简介
                           Expanded(
                             flex: 2,
@@ -180,14 +181,14 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                               mainAxisAlignment:
                                   MainAxisAlignment.start, // 改为上对齐
                               children: [
-                                SizedBox(height: 12), // 添加上边距
+                                SizedBox(height: 12.w), // 添加上边距
                                 Obx(() => Text(
                                       userInfoController.nickName,
                                       style: TextStyle(
-                                          fontSize: 22,
+                                          fontSize: 22.sp,
                                           fontWeight: FontWeight.bold),
                                     )),
-                                SizedBox(height: 6),
+                                SizedBox(height: 6.w),
                                 // 简介和详情按钮的行
                                 Row(
                                   children: [
@@ -200,12 +201,12 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                                     .personIntroduction
                                                 : '这个人很神秘，什么都没写',
                                             style: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 14.sp,
                                                 color: Colors.grey[700]),
                                             maxLines: 1, // 简介始终只显示一行
                                           )),
                                     ),
-                                    SizedBox(width: 8),
+                                    SizedBox(width: 8.w),
                                     GestureDetector(
                                       onTap: () {
                                         setState(() {
@@ -215,7 +216,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                       child: Text(
                                         showDetailedInfo ? '收起' : '详情',
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                           color: Theme.of(context).primaryColor,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -225,7 +226,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                 ),
                                 // 详细信息（UserId、学校、生日）在一行显示
                                 if (showDetailedInfo) ...[
-                                  SizedBox(height: 8),
+                                  SizedBox(height: 8.w),
                                   Wrap(
                                     spacing: 16,
                                     children: [
@@ -252,7 +253,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                               ],
                             ),
                           ),
-                          SizedBox(width: 48),
+                          SizedBox(width: 48.w),
                           // 关注/粉丝/获赞
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -264,8 +265,8 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                       userInfoController
                                           .userInfo['focusCount'])),
                                   SizedBox(
-                                    width: 65,
-                                    height: 32,
+                                    width: 65.w,
+                                    height: 32.w,
                                     child: DividerWithPaddingVertical(
                                       padding: 0,
                                       color: Colors.grey[300],
@@ -277,8 +278,8 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                       userInfoController
                                           .userInfo['fansCount'])),
                                   SizedBox(
-                                    width: 65,
-                                    height: 32,
+                                    width: 65.w,
+                                    height: 32.w,
                                     child: DividerWithPaddingVertical(
                                       padding: 0,
                                       color: Colors.grey[300],
@@ -288,7 +289,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                       '获赞',
                                       userInfoController
                                           .userInfo['likeCount'])),
-                                  SizedBox(width: 64),
+                                  SizedBox(width: 64.w),
                                   // 关注按钮放在数据右侧
                                   Obx(() =>
                                       _buildFollowButton(userInfoController)),
@@ -296,7 +297,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                               ),
                             ],
                           ),
-                          SizedBox(width: 20),
+                          SizedBox(width: 20.w),
                         ],
                       ),
                     ),
@@ -307,7 +308,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                   left: 48,
                   bottom: 0, // 从个人信息Row底部向上90像素
                   child: Obx(() => Avatar(
-                      radius: 60, avatarValue: userInfoController.avatar,showOnTap: true)),
+                      radius: 60.r, avatarValue: userInfoController.avatar,showOnTap: true)),
                 ),
               ],
             ),
@@ -315,13 +316,13 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
           // 切换按钮行
           SliverToBoxAdapter(
             child: Container(
-              height: 50,
+              height: 50.w,
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
-                  SizedBox(width: 48), // 留出头像空间
+                  SizedBox(width: 48.w), // 留出头像空间
                   SizedBox(
-                      width: 200,
+                      width: 200.w,
                       child: AnimatedTabBarWidget(
                         pageController: pageController,
                         tabLabels: [
@@ -385,7 +386,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                       );
                     },
                   ),
-                  SizedBox(width: 24), // 留出右侧空间
+                  SizedBox(width: 24.w), // 留出右侧空间
                 ],
               ),
             ),
@@ -450,12 +451,12 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
         Text(
           value?.toString() ?? '0',
           style:
-              TextStyle(fontSize: 24, fontWeight: FontWeight.bold), // 从20增加到24
+              TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold), // 从20增加到24
         ),
         SizedBox(height: 2),
         Text(label,
             style:
-                TextStyle(fontSize: 16, color: Colors.grey[600])), // 从14增加到16
+                TextStyle(fontSize: 16.sp, color: Colors.grey[600])), // 从14增加到16
       ],
     );
   }
@@ -469,7 +470,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
         foregroundColor: isFollowed ? Colors.black87 : Colors.white,
         minimumSize: Size(110, 44),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12)), // 从20改为12，更适合矩形
+            borderRadius: BorderRadius.circular(12.r)), // 从20改为12，更适合矩形
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // 添加内边距
       ),
       onPressed: () async {
@@ -488,7 +489,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
       child: Text(
         isFollowed ? '已关注' : '+ 关注',
         style:
-            TextStyle(fontSize: 16, fontWeight: FontWeight.w500), // 增加字体大小和权重
+            TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500), // 增加字体大小和权重
       ),
     );
   }
@@ -535,10 +536,10 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.6,
-        height: MediaQuery.of(context).size.height * 0.7,
+        width: (MediaQuery.of(context).size.width * 0.6).w,
+        height: (MediaQuery.of(context).size.height * 0.7).w,
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
@@ -548,7 +549,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                 Text(
                   '编辑合集列表',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).textTheme.titleLarge?.color,
                   ),
@@ -560,7 +561,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+             SizedBox(height: 24.w),
 
             // 添加合集按钮
             Container(
@@ -572,7 +573,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                   width: 2,
                   style: BorderStyle.solid,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 color: Theme.of(context).primaryColor.withOpacity(0.05),
               ),
               child: InkWell(
@@ -585,7 +586,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                   if (res != null && res)
                     await _sortableSeriesListInit(); // 重新加载合集列表
                 },
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 child: Column(
                   children: [
                     Icon(
@@ -597,7 +598,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                     Text(
                       '添加新合集',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).primaryColor,
                       ),
@@ -606,7 +607,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                     Text(
                       '点击创建一个新的视频合集',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         color: Colors.grey[600],
                       ),
                     ),
@@ -615,17 +616,17 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
               ),
             ),
 
-            const SizedBox(height: 24),
+             SizedBox(height: 24.w),
 
             // 合集列表标题
             Row(
               children: [
                 const Icon(Icons.sort, size: 20),
-                const SizedBox(width: 8),
+                 SizedBox(width: 8.w),
                 Text(
                   '合集排序',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.titleMedium?.color,
                   ),
@@ -634,7 +635,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                 Text(
                   '拖动调整顺序',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     color: Colors.grey[600],
                   ),
                 ),
@@ -650,14 +651,14 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                     color: Theme.of(context).dividerColor,
                     width: 1,
                   ),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: _sortableSeriesList.isEmpty
-                    ? const Center(
+                    ?  Center(
                         child: Text(
                           '暂无合集',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             color: Colors.grey,
                           ),
                         ),
@@ -751,7 +752,7 @@ class DraggableSeriesItem extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
           color: Theme.of(context).dividerColor.withOpacity(0.3),
           width: 1,
@@ -763,18 +764,18 @@ class DraggableSeriesItem extends StatelessWidget {
 
           // 序号
           Container(
-            width: 24,
-            height: 24,
+            width: 24.w,
+            height: 24.w,
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Center(
               child: Text(
                 '${index + 1}',
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
-                  fontSize: 11,
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -784,11 +785,11 @@ class DraggableSeriesItem extends StatelessWidget {
 
           // 合集封面
           Container(
-            width: 80,
-            height: 45,
+            width: 80.w,
+            height: 45.w,
             decoration: BoxDecoration(
               color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(6.r),
             ),
             clipBehavior: Clip.antiAlias,
             child: series.cover.isNotEmpty
@@ -802,10 +803,10 @@ class DraggableSeriesItem extends StatelessWidget {
                         case LoadState.loading:
                           return Container(
                             color: Colors.grey[300],
-                            child: const Center(
+                            child:  Center(
                               child: SizedBox(
-                                width: 16,
-                                height: 16,
+                                width: 16.w,
+                                height: 16.w,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -848,7 +849,7 @@ class DraggableSeriesItem extends StatelessWidget {
                   text: series.seriesName,
                   style: TextStyle(
                     color: Theme.of(context).textTheme.titleMedium?.color,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -866,7 +867,7 @@ class DraggableSeriesItem extends StatelessWidget {
                       _formatDate(series.updateTime),
                       style: TextStyle(
                         color: Colors.grey[600],
-                        fontSize: 11,
+                        fontSize: 11.sp,
                       ),
                     ),
                   ],
@@ -885,13 +886,13 @@ class DraggableSeriesItem extends StatelessWidget {
                 size: 20,
               ),
               tooltip: '删除合集',
-              constraints: const BoxConstraints(
-                minWidth: 32,
-                minHeight: 32,
+              constraints: BoxConstraints(
+                minWidth: 32.w,
+                minHeight: 32.w,
               ),
               padding: const EdgeInsets.all(4),
             ),
-          SizedBox(width: 24),
+          SizedBox(width: 24.w),
         ],
       ),
     );

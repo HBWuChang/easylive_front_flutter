@@ -30,6 +30,7 @@ import 'package:path_provider/path_provider.dart';
 import 'VideoPlayPageCommentsInner.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class VideoPlayPageComments extends StatefulWidget {
   final String videoId;
@@ -73,7 +74,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                   children: [
                                     // 最新/最热 按钮
                                     SizedBox(
-                                      width: 128,
+                                      width: 128.w,
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -113,7 +114,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                           : FontWeight
                                                               .normal)))),
                                           SizedBox(
-                                            height: 32,
+                                            height: 32.w,
                                             width: 2,
                                             child: DividerWithPaddingVertical(
                                                 padding: 8),
@@ -172,7 +173,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                         MainAxisAlignment.start,
                                                     children: [
                                                       Column(children: [
-                                                        SizedBox(height: 16),
+                                                        SizedBox(height: 16.w),
                                                         Hero(
                                                             tag:
                                                                 'commentAvatar${commentController.commentDataList[index].commentId}',
@@ -198,7 +199,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                 .center,
                                                         children: [
                                                           SizedBox(
-                                                              width: 320,
+                                                              width: 320.w,
                                                               child: ListTile(
                                                                 contentPadding:
                                                                     EdgeInsets
@@ -234,7 +235,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                               .tertiary),
                                                                     )),
                                                               )),
-                                                          SizedBox(height: 8),
+                                                          SizedBox(height: 8.w),
                                                           // 评论内容可展开/收起
                                                           Hero(
                                                               tag:
@@ -282,8 +283,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                         commentController
                                                                             .commentDataList[index]
                                                                             .imgPath!,
-                                                                    width: 300,
-                                                                    height: 200,
+                                                                    width: 300.w,
+                                                                    height: 200.w,
                                                                     fit: BoxFit
                                                                         .contain, // 保证图片完整显示且有圆角
                                                                     cache: true,
@@ -294,7 +295,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                         false,
                                                                   ),
                                                                 )),
-                                                          SizedBox(height: 8),
+                                                          SizedBox(height: 8.w),
                                                           // 点赞，点踩，评论
                                                           Hero(
                                                               tag:
@@ -377,7 +378,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                   ),
                                                                   SizedBox(
                                                                       width:
-                                                                          64),
+                                                                          64.w),
                                                                   Builder(
                                                                       builder: (buttonContext) => IconButton(
                                                                           onPressed: () async {
@@ -416,7 +417,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                               ],
                                                                               color: Theme.of(context).colorScheme.surface,
                                                                               shape: RoundedRectangleBorder(
-                                                                                borderRadius: BorderRadius.circular(12),
+                                                                                borderRadius: BorderRadius.circular(12.r),
                                                                               ),
                                                                             );
                                                                             if (result ==
@@ -459,13 +460,13 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                       constraints:
                                                                           BoxConstraints(
                                                                         minWidth:
-                                                                            300,
+                                                                            300.w,
                                                                         maxWidth:
-                                                                            300,
+                                                                            300.w,
                                                                         minHeight:
-                                                                            40,
+                                                                            40.w,
                                                                         maxHeight:
-                                                                            200,
+                                                                            200.w,
                                                                       ),
                                                                       child:
                                                                           TextField(
@@ -495,12 +496,12 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                         ),
                                                                         style: TextStyle(
                                                                             fontSize:
-                                                                                15),
+                                                                                15.sp),
                                                                       ),
                                                                     ),
                                                                   ),
                                                                   SizedBox(
-                                                                    width: 300,
+                                                                    width: 300.w,
                                                                     child: Row(
                                                                       mainAxisAlignment:
                                                                           MainAxisAlignment
@@ -518,8 +519,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                                 child: commentController.mainImgPath.value != ''
                                                                                     ? ExtendedImage.network(
                                                                                         ApiService.baseUrl + ApiAddr.fileGetResourcet + commentController.mainImgPath.value,
-                                                                                        width: 100,
-                                                                                        height: 100,
+                                                                                        width: 100.w,
+                                                                                        height: 100.w,
                                                                                         fit: BoxFit.contain, // 保证图片完整显示且有圆角
                                                                                         cache: true,
                                                                                         alignment: Alignment.centerLeft,
@@ -605,7 +606,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                               },
                                                               child: Card(
                                                                 child: SizedBox(
-                                                                  width: 280,
+                                                                  width: 280.w,
                                                                   child: Column(
                                                                       crossAxisAlignment:
                                                                           CrossAxisAlignment
@@ -642,7 +643,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                                       textAlign: TextAlign.start,
                                                                                       style: TextStyle(
                                                                                         color: Theme.of(context).colorScheme.tertiary,
-                                                                                        fontSize: 14,
+                                                                                        fontSize: 14.sp,
                                                                                       ),
                                                                                     )));
                                                                           },
@@ -739,8 +740,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                           ApiAddr.fileGetResourcet +
                                           commentController
                                               .innerOutterImgPath.value,
-                                      width: 48,
-                                      height: 48,
+                                      width: 48.w,
+                                      height: 48.w,
                                       fit: BoxFit.cover,
                                       cache: true,
                                       enableLoadState: false,
@@ -759,8 +760,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                       ApiService.baseUrl +
                                           ApiAddr.fileGetResourcet +
                                           commentController.outterImgPath.value,
-                                      width: 48,
-                                      height: 48,
+                                      width: 48.w,
+                                      height: 48.w,
                                       fit: BoxFit.cover,
                                       cache: true,
                                       enableLoadState: false,
@@ -774,15 +775,15 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                   )),
                       ),
                     )),
-                SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: AnimatedSize(
                     duration: Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        minHeight: 40,
-                        maxHeight: 200,
+                        minHeight: 40.w,
+                        maxHeight: 200.w,
                       ),
                       child: Obx(() => TextField(
                             controller: commentController.inInnerPage.value
@@ -799,7 +800,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                               contentPadding: EdgeInsets.symmetric(
                                   vertical: 10, horizontal: 12),
                             ),
-                            style: TextStyle(fontSize: 15),
+                            style: TextStyle(fontSize: 15.sp),
                           )),
                     ),
                   ),

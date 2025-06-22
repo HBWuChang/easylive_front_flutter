@@ -14,6 +14,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:dotted_decoration/dotted_decoration.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PlatformPageManage extends StatefulWidget {
   const PlatformPageManage({Key? key}) : super(key: key);
@@ -84,12 +85,12 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
-              width: 360,
+              width: 360.w,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
-                    height: 30,
+                    height: 30.w,
                     child: Row(
                       children: List.generate(3, (index) {
                         final titles = ['已通过', '未通过', '审核中'];
@@ -110,7 +111,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                                 ? '(${videoCountInfo['auditFailCount']})'
                                                 : '(${videoCountInfo['inProgress']})')),
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 16.sp,
                                       fontWeight: FontWeight.bold,
                                       color:
                                           Theme.of(context).colorScheme.primary,
@@ -152,12 +153,12 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                               children: [
                                 Positioned(
                                   left: left,
-                                  width: lineWidth,
+                                  width: lineWidth.w,
                                   top: 0,
                                   bottom: 0,
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(2),
+                                      borderRadius: BorderRadius.circular(2.r),
                                       color:
                                           Theme.of(context).colorScheme.primary,
                                     ),
@@ -175,15 +176,15 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
               ),
             ),
             SizedBox(
-                height: 34,
-                width: 300,
+                height: 34.w,
+                width: 300.w,
                 child: TextField(
                   controller: videoNameFuzzy,
                   decoration: InputDecoration(
                       hintText: '请输入视频名称',
                       border: OutlineInputBorder(),
                       suffixIcon: SizedBox(
-                          width: 80,
+                          width: 80.w,
                           child: Row(
                             children: [
                               IconButton(
@@ -241,7 +242,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                   return Center(
                     child: Text(
                       '暂无数据',
-                      style: TextStyle(fontSize: 20, color: Colors.grey),
+                      style: TextStyle(fontSize: 20.sp, color: Colors.grey),
                     ),
                   );
                 }
@@ -256,9 +257,9 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                             child: ListTile(
                               subtitle: Row(children: [
                                 SizedBox(
-                                    width: 120 *
+                                    width: 120.w *
                                         AspectRatioEnum.VIDEO_COVER.ratio,
-                                    height: 120,
+                                    height: 120.w,
                                     child: Card(
                                         clipBehavior: Clip.hardEdge,
                                         child: video['videoCover'] != null
@@ -338,11 +339,11 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                           child: ConstrainedBox(
                                             constraints: BoxConstraints(
                                                 maxWidth:
-                                                    Get.width - 600), // 限制最大宽度
+                                                    (Get.width - 600).w), // 限制最大宽度
                                             child: Text(
                                               video['videoName'] ?? '',
                                               style: TextStyle(
-                                                fontSize: 18,
+                                                fontSize: 18.sp,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                               maxLines: 1,
@@ -350,20 +351,20 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                             ),
                                           ),
                                         ),
-                                        SizedBox(width: 12),
+                                        SizedBox(width: 12.w),
                                         Container(
-                                          width: 70,
+                                          width: 70.w,
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 8, vertical: 2),
                                           decoration: BoxDecoration(
                                             color: Colors.blue.shade50,
                                             borderRadius:
-                                                BorderRadius.circular(6),
+                                                BorderRadius.circular(6.r),
                                           ),
                                           child: Text(
                                             video['statusName'] ?? '',
                                             style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 12.sp,
                                                 color: Colors.blue),
                                           ),
                                         ),
@@ -429,7 +430,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                         );
                                       },
                                       child: SizedBox(
-                                          width: Get.width - 600,
+                                          width: (Get.width - 600).w,
                                           child: Text(
                                             video['introduction'] ?? '',
                                             maxLines: 2,
@@ -444,22 +445,22 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                       children: [
                                         Text('更新时间',
                                             style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 12.sp,
                                                 color: Colors.grey)),
-                                        SizedBox(width: 2),
+                                        SizedBox(width: 2.w),
                                         Text(video['lastUpdateTime'] ?? '',
                                             style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 12.sp,
                                                 color: Colors.grey)),
-                                        SizedBox(width: 16),
+                                        SizedBox(width: 16.w),
                                         Text('创建时间',
                                             style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 12.sp,
                                                 color: Colors.grey)),
-                                        SizedBox(width: 2),
+                                        SizedBox(width: 2.w),
                                         Text(video['createTime'] ?? '',
                                             style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 12.sp,
                                                 color: Colors.grey)),
                                       ],
                                     ),
@@ -474,7 +475,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                             Chip(
                                               label: Text(tag,
                                                   style:
-                                                      TextStyle(fontSize: 11)),
+                                                      TextStyle(fontSize: 11.sp)),
                                               backgroundColor:
                                                   Colors.green.shade50,
                                             ),
@@ -485,7 +486,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                               ]),
                               onTap: () {},
                               trailing: SizedBox(
-                                  width: 80,
+                                  width: 80.w,
                                   child: Row(children: [
                                     index != 2
                                         ? IconButton(
@@ -512,7 +513,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                                 }
                                               }
                                             })
-                                        : SizedBox(width: 40),
+                                        : SizedBox(width: 40.w),
                                     IconButton(
                                         tooltip: '删除视频',
                                         icon: Icon(Icons.delete),

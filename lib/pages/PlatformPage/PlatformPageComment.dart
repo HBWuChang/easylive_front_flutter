@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:dotted_decoration/dotted_decoration.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PlatformPageComment extends StatefulWidget {
   const PlatformPageComment({Key? key}) : super(key: key);
@@ -28,6 +29,6 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
   Widget build(BuildContext context) {
     return Center(
         child: Text('评论管理',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)));
+            style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.bold)));
   }
 }

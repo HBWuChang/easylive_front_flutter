@@ -9,6 +9,7 @@ import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // 推荐视频区域组件
 class RecommendVideoArea extends StatelessWidget {
@@ -37,8 +38,8 @@ class RecommendVideoArea extends StatelessWidget {
               double width = constraints.maxWidth;
               double height = width / aspectRatio;
               return SizedBox(
-                width: width,
-                height: height,
+                width: width.w,
+                height: height.w,
                 child: AspectRatio(
                   aspectRatio: aspectRatio,
                   child: Row(
@@ -56,7 +57,7 @@ class RecommendVideoArea extends StatelessWidget {
                                   videos: carouselVideos),
                         ),
                       ),
-                      SizedBox(width: 16),
+                      SizedBox(width: 16.w),
                       // 右侧2x3推荐区
                       Expanded(
                         flex: 3,
@@ -179,12 +180,12 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
           final double opaqueHeight = imageHeight * 0.18; // 图片高度的15%
           
           return SizedBox(
-            height: imageHeight + opaqueHeight,
+            height: (imageHeight + opaqueHeight).w,
             child: Stack(
               children: [
                 // 图片滚动区域 - 严格16:9比例
                 SizedBox(
-                  height: imageHeight,
+                  height: imageHeight.w,
                   child: PageView.builder(
                     controller: _pageController,
                     itemCount: widget.videos.length,
@@ -204,11 +205,11 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                           children: [
                             // 图片本体
                             SizedBox(
-                              width: constraints.maxWidth,
-                              height: imageHeight,
+                              width: constraints.maxWidth.w,
+                              height: imageHeight.w,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(8),
+                                  top: Radius.circular(8.r),
                                 ),
                                 child: video.videoCover != null && video.videoCover!.isNotEmpty
                                     ? ExtendedImage.network(
@@ -230,7 +231,7 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                                 builder: (context, snapshot) {
                                   final baseColor = snapshot.data ?? Colors.black;
                                   return Container(
-                                    height: imageHeight * 0.25, // 减小渐变区域到图片高度的25%
+                                    height: (imageHeight * 0.25).w, // 减小渐变区域到图片高度的25%
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
@@ -259,7 +260,7 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                   left: 0,
                   right: 0,
                   top: imageHeight,
-                  height: opaqueHeight,
+                  height: opaqueHeight.w,
                   child: FutureBuilder<Color>(
                     future: _getBottomAverageColor(_currentPage),
                     builder: (context, snapshot) {
@@ -269,13 +270,13 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                         decoration: BoxDecoration(
                           color: baseColor,
                           borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(8),
+                            bottom: Radius.circular(8.r),
                           ),
                           boxShadow: [
                             BoxShadow(
                               color: baseColor.withOpacity(0.4),
-                              blurRadius: 20,
-                              spreadRadius: 2,
+                              blurRadius: 20.r,
+                              spreadRadius: 2.r,
                               offset: Offset(0, 10),
                             ),
                           ],
@@ -312,7 +313,7 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   shadows: [Shadow(color: Colors.black, blurRadius: 4)],
                 ),
               ),
@@ -334,8 +335,8 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                 child: AnimatedContainer(
                   duration: Duration(milliseconds: 200),
                   margin: EdgeInsets.symmetric(horizontal: 3),
-                  width: isActive ? 14 : 6,
-                  height: isActive ? 14 : 6,
+                  width: (isActive ? 14 : 6).w,
+                  height: (isActive ? 14 : 6).w,
                   decoration: BoxDecoration(
                     color: isActive ? Colors.white : Colors.white54,
                     shape: BoxShape.circle,
@@ -347,12 +348,12 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
               );
             }),
           ),
-          SizedBox(width: 8),
+          SizedBox(width: 8.w),
           // 右侧箭头按钮
           Row(
             children: [
               _buildArrowButton(context, false),
-              SizedBox(width: 6),
+              SizedBox(width: 6.w),
               _buildArrowButton(context, true),
             ],
           ),
@@ -463,11 +464,11 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
         }
       },
       child: Container(
-        width: 28,
-        height: 28,
+        width: 28.w,
+        height: 28.w,
         decoration: BoxDecoration(
           color: Colors.black54,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
         ),
         child: Icon(
           isRight ? Icons.arrow_forward_ios : Icons.arrow_back_ios,

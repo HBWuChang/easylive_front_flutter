@@ -5,100 +5,265 @@ import 'package:easylive/Funcs.dart';
 import 'package:easylive/controllers/controllers-class.dart';
 import 'package:get/get.dart';
 import 'package:crypto/crypto.dart';
-import 'package:rhttp/rhttp.dart';
+import 'package:rhttp/rhttp.dart' as rhttp;
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+
+// Platform-specific imports
+import 'package:cronet_http/cronet_http.dart' as cronet;
+import 'package:fetch_client/fetch_client.dart' as fetch;
+import 'package:http/http.dart' as http;
+
+/// 自定义 MultipartItem 类，用于统一不同平台的多部分数据处理
+class CustomMultipartItem {
+  final Uint8List? bytes;
+  final String? text;
+  final String? fileName;
+
+  CustomMultipartItem._({this.bytes, this.text, this.fileName});
+
+  // 静态工厂方法
+  static CustomMultipartItem createBytes({required Uint8List bytes, String? fileName}) {
+    return CustomMultipartItem._(bytes: bytes, fileName: fileName);
+  }
+
+  static CustomMultipartItem createText({required String text}) {
+    return CustomMultipartItem._(text: text);
+  }
+
+  // 转换为 rhttp 的 MultipartItem
+  rhttp.MultipartItem toRhttpMultipartItem() {
+    if (bytes != null) {
+      return rhttp.MultipartItem.bytes(bytes: bytes!, fileName: fileName);
+    } else if (text != null) {
+      return rhttp.MultipartItem.text(text: text!);
+    } else {
+      throw ArgumentError('MultipartItem must have either bytes or text');
+    }
+  }
+}
 
 /// 全局API服务，所有网络请求通过此类实现
 class ApiService {
-  static RhttpClient? _client;
+  static dynamic _client;
   static String _baseUrl = 'http://127.0.0.1:7071';
   static String get baseUrl => _baseUrl;
-
-  /// 初始化rhttp，需在main函数启动时调用
+  /// 初始化HTTP客户端，根据平台选择合适的实现
   static Future<void> init({String? baseUrl}) async {
     _baseUrl = baseUrl ?? 'http://127.0.0.1:7071';
-    await Rhttp.init();
-    _client = await RhttpClient.create(
-      settings: baseUrl != null
-          ? ClientSettings(
-              baseUrl: baseUrl,
-              // proxySettings: ProxySettings.proxy('http://localhost:9000'),
-              cookieSettings: CookieSettings(storeCookies: true),
-            )
-          : const ClientSettings(
-              cookieSettings: CookieSettings(storeCookies: true),
-            ),
-    );
+    
+    if (kIsWeb) {
+      // Web平台使用 fetch_client
+      _client = fetch.FetchClient(mode: fetch.RequestMode.cors);    } else if (Platform.isAndroid) {
+      // Android平台使用 cronet_http
+      final engine = cronet.CronetEngine.build(
+        cacheMode: cronet.CacheMode.memory,
+        cacheMaxSize: 2 * 1024 * 1024, // 2MB cache
+        userAgent: 'EasyLive-Android',
+        enableQuic: true, // 启用 QUIC 协议
+        enableHttp2: true, // 启用 HTTP/2
+        enableBrotli: true, // 启用 Brotli 压缩
+      );
+      _client = cronet.CronetClient.fromCronetEngine(engine);
+    } else {
+      // Windows、iOS、macOS、Linux 使用 rhttp
+      await rhttp.Rhttp.init();
+      _client = await rhttp.RhttpClient.create(
+        settings: baseUrl != null
+            ? rhttp.ClientSettings(
+                baseUrl: baseUrl,
+                cookieSettings: rhttp.CookieSettings(storeCookies: true),
+              )
+            : const rhttp.ClientSettings(
+                cookieSettings: rhttp.CookieSettings(storeCookies: true),
+              ),
+      );
+    }
   }
 
-  /// GET请求
-  static Future<HttpTextResponse> get(String path,
+  /// 统一的GET请求方法
+  static Future<Map<String, dynamic>> get(String path,
       {Map<String, String>? query,
-      Map<HttpHeaderName, String>? headers,
+      Map<String, String>? headers,
       bool useToken = false}) async {
     assert(_client != null, 'ApiService未初始化，请先调用ApiService.init()');
-    final response = await _client!.get(
-      path,
-      query: query,
-      headers: useToken
-          ? HttpHeaders.rawMap(
-              {'token-xuan': Get.find<AccountController>().token ?? ''})
-          : (headers != null ? HttpHeaders.map(headers) : null),
-    );
-    if (response.statusCode == 901) {
-      openLoginDialog();
+
+    final uri = Uri.parse('$_baseUrl$path').replace(queryParameters: query);
+    final requestHeaders = <String, String>{};
+    
+    if (useToken) {
+      requestHeaders['token-xuan'] = Get.find<AccountController>().token ?? '';
     }
-    return response;
+    if (headers != null) {
+      requestHeaders.addAll(headers);
+    }
+
+    http.Response response;
+      if (_client is rhttp.RhttpClient) {
+      // rhttp implementation
+      final rhttpResponse = await (_client as rhttp.RhttpClient).get(
+        path,
+        query: query,
+        headers: useToken || headers != null 
+            ? rhttp.HttpHeaders.rawMap(requestHeaders)
+            : null,
+      );
+      if (rhttpResponse.statusCode == 901) {
+        openLoginDialog();
+      }
+      return rhttpResponse.bodyToJson;
+    } else {
+      // http.Client implementation (cronet_http, fetch_client)
+      response = await (_client as http.Client).get(uri, headers: requestHeaders);
+      if (response.statusCode == 901) {
+        openLoginDialog();
+      }
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
   }
 
-  static Future<HttpBytesResponse> getBytes(String path,
+  /// 统一的GET bytes请求方法
+  static Future<Uint8List> getBytes(String path,
       {Map<String, String>? query,
-      Map<HttpHeaderName, String>? headers,
+      Map<String, String>? headers,
       bool useToken = false}) async {
     assert(_client != null, 'ApiService未初始化，请先调用ApiService.init()');
-    final response = await _client!.getBytes(
-      path,
-      query: query,
-      headers: useToken
-          ? HttpHeaders.rawMap(
-              {'token-xuan': Get.find<AccountController>().token ?? ''})
-          : (headers != null ? HttpHeaders.map(headers) : null),
-    );
-    if (response.statusCode == 901) {
-      openLoginDialog();
-    }
-    return response;
-  }
 
-  /// POST请求（支持json、form等多种body）
-  static Future<HttpTextResponse> post(String path,
+    final uri = Uri.parse('$_baseUrl$path').replace(queryParameters: query);
+    final requestHeaders = <String, String>{};
+    
+    if (useToken) {
+      requestHeaders['token-xuan'] = Get.find<AccountController>().token ?? '';
+    }
+    if (headers != null) {
+      requestHeaders.addAll(headers);
+    }    if (_client is rhttp.RhttpClient) {
+      // rhttp implementation
+      final rhttpResponse = await (_client as rhttp.RhttpClient).getBytes(
+        path,
+        query: query,
+        headers: useToken || headers != null 
+            ? rhttp.HttpHeaders.rawMap(requestHeaders)
+            : null,
+      );
+      if (rhttpResponse.statusCode == 901) {
+        openLoginDialog();
+      }
+      return rhttpResponse.body;
+    } else {
+      // http.Client implementation
+      final response = await (_client as http.Client).get(uri, headers: requestHeaders);
+      if (response.statusCode == 901) {
+        openLoginDialog();
+      }
+      return response.bodyBytes;
+    }
+  }
+  /// 统一的POST请求方法
+  static Future<Map<String, dynamic>> post(String path,
       {Object? data,
-      Map<HttpHeaderName, String>? headers,
+      Map<String, String>? headers,
       bool isJson = true,
       bool ismultipart = false,
       bool useToken = false}) async {
     assert(_client != null, 'ApiService未初始化，请先调用ApiService.init()');
-    final body = data == null
-        ? null
-        : isJson
-            ? HttpBody.json(data)
-            : ismultipart
-                ? HttpBody.multipart(data as Map<String, MultipartItem>)
-                : HttpBody.form((data as Map<String, String>));
-    final response = await _client!.post(
-      path,
-      body: body,
-      headers: useToken
-          ? HttpHeaders.rawMap(
-              {'token-xuan': Get.find<AccountController>().token ?? ''})
-          : (headers != null ? HttpHeaders.map(headers) : null),
-    );
-    return response as HttpTextResponse;
+
+    final uri = Uri.parse('$_baseUrl$path');
+    final requestHeaders = <String, String>{};
+    
+    if (useToken) {
+      requestHeaders['token-xuan'] = Get.find<AccountController>().token ?? '';
+    }
+    if (headers != null) {
+      requestHeaders.addAll(headers);
+    }
+
+    if (_client is rhttp.RhttpClient) {
+      // rhttp implementation
+      final body = data == null
+          ? null
+          : isJson
+              ? rhttp.HttpBody.json(data)
+              : ismultipart
+                  ? rhttp.HttpBody.multipart(_convertToRhttpMultipart(data as Map<String, CustomMultipartItem>))
+                  : rhttp.HttpBody.form((data as Map<String, String>));
+      
+      final rhttpResponse = await (_client as rhttp.RhttpClient).post(
+        path,
+        body: body,
+        headers: useToken || headers != null 
+            ? rhttp.HttpHeaders.rawMap(requestHeaders)
+            : null,
+      );
+      return rhttpResponse.bodyToJson;
+    } else {
+      // http.Client implementation
+      http.Response response;
+      
+      if (ismultipart) {
+        // Multipart request
+        final request = http.MultipartRequest('POST', uri);
+        request.headers.addAll(requestHeaders);
+        
+        if (data != null) {
+          final multipartData = data as Map<String, CustomMultipartItem>;
+          for (final entry in multipartData.entries) {
+            final item = entry.value;
+            if (item.bytes != null) {
+              request.files.add(http.MultipartFile.fromBytes(
+                entry.key,
+                item.bytes!,
+                filename: item.fileName,
+              ));
+            } else if (item.text != null) {
+              request.fields[entry.key] = item.text!;
+            }
+          }
+        }
+        
+        final streamedResponse = await (_client as http.Client).send(request);
+        response = await http.Response.fromStream(streamedResponse);
+      } else if (isJson) {
+        // JSON request
+        requestHeaders['Content-Type'] = 'application/json';
+        response = await (_client as http.Client).post(
+          uri,
+          headers: requestHeaders,
+          body: data != null ? jsonEncode(data) : null,
+        );
+      } else {
+        // Form request
+        requestHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+        response = await (_client as http.Client).post(
+          uri,
+          headers: requestHeaders,
+          body: data != null ? (data as Map<String, String>).entries
+              .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+              .join('&') : null,
+        );
+      }
+      
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
   }
 
-  static Map<String, dynamic> toJson(HttpTextResponse httpTextResponse) {
-    // return jsonDecode(httpTextResponse.body) as Map<String, dynamic>;
-    return httpTextResponse.bodyToJson;
+  /// 辅助方法：将 CustomMultipartItem 转换为 rhttp.MultipartItem
+  static Map<String, rhttp.MultipartItem> _convertToRhttpMultipart(Map<String, CustomMultipartItem> items) {
+    final result = <String, rhttp.MultipartItem>{};
+    for (final entry in items.entries) {
+      result[entry.key] = entry.value.toRhttpMultipartItem();
+    }
+    return result;
+  }
+  /// 辅助方法：将响应转换为JSON（兼容性方法）
+  static Map<String, dynamic> toJson(dynamic response) {
+    if (response is rhttp.HttpTextResponse) {
+      return response.bodyToJson;
+    } else if (response is Map<String, dynamic>) {
+      return response;
+    } else {
+      throw ArgumentError('Unsupported response type');
+    }
   }
 
   static Future<Map<String, dynamic>> accountCheckCode() async {
@@ -172,15 +337,13 @@ class ApiService {
       ApiAddr.categoryLoadAllCategory,
     ));
   }
-
-  static Future<dynamic> fileGetResource(String sourceName) async {
-    return (await getBytes(
+  static Future<Uint8List> fileGetResource(String sourceName) async {
+    return await getBytes(
       ApiAddr.fileGetResource,
       query: {
         'sourceName': sourceName,
       },
-    ))
-        .body;
+    );
   }
 
   static Future<Map<String, dynamic>> filePreUploadVideo(
@@ -194,18 +357,16 @@ class ApiService {
       useToken: true,
     ));
   }
-
   static Future<Map<String, dynamic>> fileUploadVideo(
       {required Uint8List chunkFile,
       required int chunkIndex,
       required String uploadId}) async {
     return toJson(await post(
       ApiAddr.fileUploadVideo,
-      data: {
-        'chunkFile':
-            MultipartItem.bytes(bytes: chunkFile, fileName: 'video.mp4'),
-        'chunkIndex': MultipartItem.text(text: chunkIndex.toString()),
-        'uploadId': MultipartItem.text(text: uploadId),
+      data: {        'chunkFile':
+            CustomMultipartItem.createBytes(bytes: chunkFile, fileName: 'video.mp4'),
+        'chunkIndex': CustomMultipartItem.createText(text: chunkIndex.toString()),
+        'uploadId': CustomMultipartItem.createText(text: uploadId),
       },
       ismultipart: true,
       isJson: false,
@@ -221,28 +382,25 @@ class ApiService {
       useToken: true,
     ));
   }
-
   static Future<Map<String, dynamic>> fileUploadImage(
       {bool createThumbnail = false, required Uint8List file}) async {
     return toJson(await post(
       ApiAddr.fileUploadImage,
       data: {
-        'file': MultipartItem.bytes(bytes: file, fileName: 'image.png'),
-        'createThumbnail': MultipartItem.text(text: createThumbnail.toString()),
+        'file': CustomMultipartItem.createBytes(bytes: file, fileName: 'image.png'),
+        'createThumbnail': CustomMultipartItem.createText(text: createThumbnail.toString()),
       },
       ismultipart: true,
       isJson: false,
       useToken: true,
     ));
   }
-
-  static Future<dynamic> fileVideoResource(
+  static Future<Uint8List> fileVideoResource(
       {required String fileId, String? ts}) async {
-    return (await getBytes(
+    return await getBytes(
       '${ApiAddr.fileVideoResource}/$fileId${ts != null ? '/$ts' : ''}',
       useToken: true,
-    ))
-        .body;
+    );
   }
 
   static Future<Map<String, dynamic>> sysSettingGetSetting() async {

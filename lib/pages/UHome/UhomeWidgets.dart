@@ -6,6 +6,7 @@ import 'package:extended_image/extended_image.dart';
 import '../../controllers/UhomeSeriesController.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // 视频选择弹窗
 class VideoSelectionDialog extends StatefulWidget {
@@ -54,10 +55,10 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.8,
+        width: (MediaQuery.of(context).size.width * 0.8).w,
+        height: (MediaQuery.of(context).size.height * 0.8).w,
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
@@ -67,7 +68,7 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
                 Text(
                   '选择要添加的视频',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).textTheme.titleLarge?.color,
                   ),
@@ -115,11 +116,11 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _allVideos.isEmpty
-                      ? const Center(
+                      ?  Center(
                           child: Text(
                             '没有可选择的视频',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               color: Colors.grey,
                             ),
                           ),
@@ -240,8 +241,8 @@ class _VideoSelectionItemState extends State<VideoSelectionItem> {
             children: [
               // 视频封面
               Container(
-                width: 120,
-                height: 68,
+                width: 120.w,
+                height: 68.w,
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(6),
@@ -258,10 +259,10 @@ class _VideoSelectionItemState extends State<VideoSelectionItem> {
                             case LoadState.loading:
                               return Container(
                                 color: Colors.grey[300],
-                                child: const Center(
+                                child:  Center(
                                   child: SizedBox(
-                                    width: 16,
-                                    height: 16,
+                                    width: 16.w,
+                                    height: 16.w,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
@@ -306,7 +307,7 @@ class _VideoSelectionItemState extends State<VideoSelectionItem> {
                       widget.video.videoName ?? '未知视频',
                       style: TextStyle(
                         color: Theme.of(context).textTheme.titleMedium?.color,
-                        fontSize: 15,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.w500,
                         height: 1.3,
                       ),
@@ -327,7 +328,7 @@ class _VideoSelectionItemState extends State<VideoSelectionItem> {
                           '${_formatPlayCount(widget.video.playCount ?? 0)}次播放',
                           style: TextStyle(
                             color: Colors.grey[600],
-                            fontSize: 12,
+                            fontSize: 12.sp,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -342,7 +343,7 @@ class _VideoSelectionItemState extends State<VideoSelectionItem> {
                               widget.video.createTime ?? DateTime.now()),
                           style: TextStyle(
                             color: Colors.grey[600],
-                            fontSize: 12,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ],
@@ -355,8 +356,8 @@ class _VideoSelectionItemState extends State<VideoSelectionItem> {
 
               // 选择指示器
               Container(
-                width: 24,
-                height: 24,
+                width: 24.w,
+                height: 24.w,
                 decoration: BoxDecoration(
                   color: widget.isSelected
                       ? Theme.of(context).primaryColor
@@ -367,7 +368,7 @@ class _VideoSelectionItemState extends State<VideoSelectionItem> {
                         : Colors.grey[400]!,
                     width: 2,
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: widget.isSelected
                     ? const Icon(
@@ -460,10 +461,10 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.8,
+        width:( MediaQuery.of(context).size.width * 0.8).w,
+        height: (MediaQuery.of(context).size.height * 0.8).w,
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
@@ -475,7 +476,7 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
                       ? '新建合集'
                       : '编辑合集',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).textTheme.titleLarge?.color,
                   ),
@@ -522,7 +523,7 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
                 Text(
                   '视频排序',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.titleMedium?.color,
                   ),
@@ -531,15 +532,15 @@ class _EditSeriesDialogState extends State<EditSeriesDialog> {
                 Text(
                   '拖动调整顺序',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     color: Colors.grey[600],
                   ),
                 ),
                 SizedBox(width: 8),
                 // 添加视频按钮
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 36.w,
+                  height: 36.w,
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor,
                     borderRadius: BorderRadius.circular(18),
@@ -774,18 +775,18 @@ class DraggableVideoItem extends StatelessWidget {
 
           // 序号
           Container(
-            width: 24,
-            height: 24,
+            width: 24.w,
+            height: 24.w,
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Center(
               child: Text(
                 '${index + 1}',
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
-                  fontSize: 11,
+                  fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -795,8 +796,8 @@ class DraggableVideoItem extends StatelessWidget {
 
           // 视频封面
           Container(
-            width: 80,
-            height: 45,
+            width: 80.w,
+            height: 45.w,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(6),
@@ -813,10 +814,10 @@ class DraggableVideoItem extends StatelessWidget {
                         case LoadState.loading:
                           return Container(
                             color: Colors.grey[300],
-                            child: const Center(
+                            child:  Center(
                               child: SizedBox(
-                                width: 16,
-                                height: 16,
+                                width: 16.w,
+                                height: 16.w,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -859,7 +860,7 @@ class DraggableVideoItem extends StatelessWidget {
                   video.videoName,
                   style: TextStyle(
                     color: Theme.of(context).textTheme.titleMedium?.color,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -878,7 +879,7 @@ class DraggableVideoItem extends StatelessWidget {
                       '${_formatPlayCount(video.playCount)}次播放',
                       style: TextStyle(
                         color: Colors.grey[600],
-                        fontSize: 11,
+                        fontSize: 11.sp,
                       ),
                     ),
                   ],
@@ -897,9 +898,9 @@ class DraggableVideoItem extends StatelessWidget {
                 size: 20,
               ),
               tooltip: '删除视频',
-              constraints: const BoxConstraints(
-                minWidth: 32,
-                minHeight: 32,
+              constraints:  BoxConstraints(
+                minWidth: 32.w,
+                minHeight: 32.w,
               ),
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
             ),

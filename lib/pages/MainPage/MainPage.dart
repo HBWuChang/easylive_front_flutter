@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MainPage extends StatefulWidget {
   MainPage({Key? key}) : super(key: key);
@@ -54,7 +55,7 @@ class _MainPageState extends State<MainPage> {
           child: Stack(
             children: [
               SizedBox(
-                height: appBarController.imgHeight,
+                height: appBarController.imgHeight.w,
                 width: double.infinity,
                 child: ExtendedImage.network(
                   Constants.baseUrl +
@@ -114,7 +115,7 @@ class _MainPageState extends State<MainPage> {
                               .selectedCategoryName.value = '热门';
                         },
                       ),
-                      SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       // 分区按钮组
                       Flexible(
                         child: _CategoryWrap(
@@ -161,7 +162,7 @@ class _MainPageState extends State<MainPage> {
             // 轮播推荐视频区
             RecommendVideoArea(),
             // 占位控件
-            SizedBox(height: 24),
+            SizedBox(height: 24.w),
             Obx(() {
               final selected =
                   categoryViewStateController.selectedCategoryName.value;
@@ -171,11 +172,11 @@ class _MainPageState extends State<MainPage> {
                     Card(
                       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Container(
-                        height: 80,
+                        height: 80.w,
                         alignment: Alignment.center,
                         child: Text(
                           selected.isEmpty ? '占位内容 $i' : '$selected $i',
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 20.sp),
                         ),
                       ),
                     ),
@@ -212,8 +213,8 @@ class _HotButtonState extends State<_HotButton> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          width: 100,
-          height: widget.isFloating ? 44 : 48, // 浮动状态下稍小，原始状态下两行高度
+          width: 100.w,
+          height:( widget.isFloating ? 44 : 48).w, // 浮动状态下稍小，原始状态下两行高度
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 18),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -223,20 +224,20 @@ class _HotButtonState extends State<_HotButton> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             boxShadow: _hovered
                 ? [
                     BoxShadow(
                       color: Colors.red.withOpacity(0.3),
-                      blurRadius: 8,
-                      spreadRadius: 2,
+                      blurRadius: 8.r,
+                      spreadRadius: 2.r,
                     )
                   ]
                 : [
                     BoxShadow(
                       color: Colors.red.withOpacity(0.2),
-                      blurRadius: 4,
-                      spreadRadius: 1,
+                      blurRadius: 4.r,
+                      spreadRadius: 1.r,
                     )
                   ],
           ),
@@ -245,7 +246,7 @@ class _HotButtonState extends State<_HotButton> {
               '热门',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 15,
+                fontSize: 15.sp,
                 fontWeight: FontWeight.bold,
                 shadows: [
                   Shadow(
@@ -319,7 +320,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                   controller.selectedCategoryName.value = '热门';
                 },
               ),
-              SizedBox(width: 8),
+              SizedBox(width: 8.w),
               // 第一行分区按钮
               Flexible(
                 child: Wrap(
@@ -383,7 +384,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                                 controller.selectedCategoryName.value = '热门';
                               },
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: 8.w),
                             // 第一行分区按钮
                             Flexible(
                               child: Wrap(
@@ -404,13 +405,13 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                               ),
                             ),
                             // 展开指示器
-                            SizedBox(width: 8),
+                            SizedBox(width: 8.w),
                             Container(
                               padding: EdgeInsets.symmetric(
                                   vertical: 4, horizontal: 8),
                               decoration: BoxDecoration(
                                 color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(6.r),
                                 border: Border.all(color: Colors.grey.shade300),
                               ),
                               child: Row(
@@ -419,9 +420,9 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                                   Text(
                                     '更多',
                                     style: TextStyle(
-                                        fontSize: 12, color: Colors.grey[600]),
+                                        fontSize: 12.sp, color: Colors.grey[600]),
                                   ),
-                                  SizedBox(width: 2),
+                                  SizedBox(width: 2.w),
                                   AnimatedRotation(
                                     turns: isExpanded ? 0.5 : 0,
                                     duration: Duration(milliseconds: 200),
@@ -516,7 +517,7 @@ class _CategoryButtonState extends State<_CategoryButton>
               child: Material(
                 color: Colors.white,
                 elevation: 4,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                   child: Column(
@@ -532,12 +533,12 @@ class _CategoryButtonState extends State<_CategoryButton>
                             _removeChildrenOverlay();
                           },
                           child: Container(
-                            width: 120,
+                            width: 120.w,
                             padding: EdgeInsets.symmetric(
                                 vertical: 6, horizontal: 16),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Text(child['categoryName']),
                           ),
@@ -624,21 +625,21 @@ class _CategoryButtonState extends State<_CategoryButton>
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 18),
           decoration: BoxDecoration(
             color: _hovered ? Colors.pink[50] : Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             border: Border.all(color: Colors.pink.shade200),
             boxShadow: _hovered
                 ? [
                     BoxShadow(
-                        color: Colors.pink.withOpacity(0.08), blurRadius: 6)
+                        color: Colors.pink.withOpacity(0.08), blurRadius: 6.r)
                   ]
                 : [],
           ),
           child: SizedBox(
-              width: 100,
-              height: 20,
+              width: 100.w,
+              height: 20.w,
               child: Center(
                 child: Text(widget.cat['categoryName'],
-                    style: TextStyle(fontSize: 15)),
+                    style: TextStyle(fontSize: 15.sp)),
               )),
         ),
       ),
@@ -662,7 +663,7 @@ class _FloatingCategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
     // 计算当前高度：基于shrinkOffset在minExtent和maxExtent之间插值
 
     return Container(
-      height: 120,
+      height: 120.w,
       child: _FloatingCategoryExpansion(
         categories: categories,
         onSelect: onSelect,

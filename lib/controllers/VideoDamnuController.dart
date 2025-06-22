@@ -16,6 +16,7 @@ import '../Funcs.dart';
 import 'package:media_kit/media_kit.dart';
 import 'controllers-class.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DanmuIdWithHashcode {
   int danmuId;
@@ -128,7 +129,7 @@ class VideoDamnuController extends GetxController {
   void updateDanmuStyle() {
     barrageController.updateOption(
       DanmakuOption(
-        fontSize: fontSize.value,
+        fontSize: fontSize.value.sp,
         area: area.value,
         duration: duration.value.toInt(),
         opacity: opacity.value,
@@ -144,7 +145,7 @@ class VideoDamnuController extends GetxController {
     if (fullscreenBarrageController != null) {
       fullscreenBarrageController!.updateOption(
         DanmakuOption(
-          fontSize: fontSize.value,
+          fontSize: fontSize.value.sp,
           area: area.value,
           duration: duration.value.toInt(),
           opacity: opacity.value,

@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../controllers/controllers-class.dart';
 import '../api_service.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginPage extends StatefulWidget {
   final double? areaWidth;
@@ -149,10 +150,10 @@ class _LoginPageState extends State<LoginPage> {
             child: Row(
               children: [
                 SizedBox(
-                  width: formWidth / 2 - 16,
+                  width: (formWidth / 2 - 16).w,
                 ),
                 SizedBox(
-                    width: formWidth / 2 - 16,
+                    width: (formWidth / 2 - 16).w,
                     child: HeroControllerScope(
                         controller: MaterialApp.createMaterialHeroController(),
                         child: Navigator(
@@ -205,7 +206,7 @@ class _LoginPageState extends State<LoginPage> {
                                                     value,
                                             onSubmitted: (value) => tryLogin(),
                                           )),
-                                      SizedBox(height: 16),
+                                      SizedBox(height: 16.w),
                                       Hero(
                                           tag: Routes.heroTagLoginPagePassword,
                                           child: TextField(
@@ -218,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
                                             obscureText: true,
                                             onSubmitted: (value) => tryLogin(),
                                           )),
-                                      SizedBox(height: 16),
+                                      SizedBox(height: 16.w),
                                       Hero(
                                           tag: Routes.heroTagLoginPageCaptcha,
                                           child: Row(
@@ -232,7 +233,7 @@ class _LoginPageState extends State<LoginPage> {
                                                     tryLogin(),
                                               )),
                                               SizedBox(
-                                                width: 100,
+                                                width: 100.w,
                                                 child: Obx(() {
                                                   final base64 = loginController
                                                       .checkCode.value;
@@ -253,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
                                                               .freshCaptcha(),
                                                       child: Image.memory(
                                                         bytes,
-                                                        height: 40,
+                                                        height: 40.w,
                                                         errorBuilder: (context,
                                                                 error,
                                                                 stackTrace) =>
@@ -269,8 +270,8 @@ class _LoginPageState extends State<LoginPage> {
                                               ),
                                             ],
                                           )),
-                                      SizedBox(height: 16),
-                                      SizedBox(height: 32),
+                                      SizedBox(height: 16.w),
+                                      SizedBox(height: 32.w),
                                       Hero(
                                           tag: Routes.heroTagLoginPageActionBtn,
                                           child: ElevatedButton(
@@ -336,7 +337,7 @@ class _LoginPageState extends State<LoginPage> {
                                             onSubmitted: (value) =>
                                                 tryRegister(),
                                           )),
-                                      SizedBox(height: 16),
+                                      SizedBox(height: 16.w),
                                       TextField(
                                         controller: nickNameController,
                                         decoration: InputDecoration(
@@ -345,7 +346,7 @@ class _LoginPageState extends State<LoginPage> {
                                                 Texts.userNameHelperText),
                                         onSubmitted: (value) => tryRegister(),
                                       ),
-                                      SizedBox(height: 16),
+                                      SizedBox(height: 16.w),
                                       Hero(
                                         tag: Routes.heroTagLoginPagePassword,
                                         child: TextField(
@@ -359,7 +360,7 @@ class _LoginPageState extends State<LoginPage> {
                                           onSubmitted: (value) => tryRegister(),
                                         ),
                                       ),
-                                      SizedBox(height: 16),
+                                      SizedBox(height: 16.w),
                                       Hero(
                                           tag: Routes.heroTagLoginPageCaptcha,
                                           child: Row(
@@ -373,7 +374,7 @@ class _LoginPageState extends State<LoginPage> {
                                                     tryRegister(),
                                               )),
                                               SizedBox(
-                                                width: 100,
+                                                width: 100.w,
                                                 child: Obx(() {
                                                   final base64 = loginController
                                                       .checkCode.value;
@@ -394,7 +395,7 @@ class _LoginPageState extends State<LoginPage> {
                                                               .freshCaptcha(),
                                                       child: Image.memory(
                                                         bytes,
-                                                        height: 40,
+                                                        height: 40.w,
                                                         errorBuilder: (context,
                                                                 error,
                                                                 stackTrace) =>
@@ -410,7 +411,7 @@ class _LoginPageState extends State<LoginPage> {
                                               ),
                                             ],
                                           )),
-                                      SizedBox(height: 16),
+                                      SizedBox(height: 16.w),
                                       Hero(
                                           tag: Routes.heroTagLoginPageActionBtn,
                                           child: ElevatedButton(
@@ -489,8 +490,8 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
   SizedBox btns(
       double widthInCard, VoidCallback onPressed, IconData icon, String label) {
     return SizedBox(
-      width: widthInCard,
-      height: 40,
+      width: widthInCard.w,
+      height: 40.w,
       child: TextButton.icon(
         onPressed: onPressed,
         icon: Icon(icon),
@@ -499,7 +500,7 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
           alignment: Alignment.centerLeft,
           padding: EdgeInsets.symmetric(horizontal: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10.r),
           ),
         ),
       ),
@@ -511,8 +512,8 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
     return MouseRegion(
       onExit: _handleExit,
       child: SizedBox(
-        width: 300,
-        height: 400,
+        width: 300.w,
+        height: 400.w,
         child: HeroControllerScope(
             controller: MaterialApp.createMaterialHeroController(),
             child: Navigator(
@@ -527,23 +528,23 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                       Material(
                         color: Colors.transparent,
                         child: SizedBox(
-                          width: 300,
-                          height: 400,
+                          width: 300.w,
+                          height: 400.w,
                           child: Stack(
                             children: [
                               Positioned(
                                   top: 0,
                                   left: 134,
                                   child: SizedBox(
-                                      width: 32,
-                                      height: 32,
+                                      width: 32.w,
+                                      height: 32.w,
                                       child: Hero(
                                         createRectTween: (begin, end) =>
                                             RectTween(begin: begin, end: end),
                                         tag: Routes.heroTagAvatar,
                                         child: Avatar(
                                           avatarValue: accountController.avatar,
-                                          radius: 16,
+                                          radius: 16.r,
                                         ),
                                       ))),
                             ],
@@ -570,37 +571,37 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                       Material(
                         color: Colors.transparent,
                         child: SizedBox(
-                          width: widthCard,
-                          height: 400,
+                          width: widthCard.w,
+                          height: 400.w,
                           child: Stack(
                             children: [
                               Positioned(
                                 top: 40,
                                 left: 0,
                                 child: SizedBox(
-                                    width: widthCard,
-                                    height: 360,
+                                    width: widthCard.w,
+                                    height: 360.w,
                                     child: Card(
                                         elevation: 4,
                                         shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8)),
+                                            borderRadius: BorderRadius.circular(8.r)),
                                         margin: EdgeInsets.all(8),
                                         child: SizedBox(
-                                            width: widthInCard,
-                                            height: 360,
+                                            width: widthInCard.w,
+                                            height: 360.w,
                                             child: Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
                                               children: [
-                                                SizedBox(height: 50),
+                                                SizedBox(height: 50.w),
                                                 Text(
                                                     accountController.nickName ??
                                                         Texts.unLogin,
                                                     style: TextStyle(
-                                                        fontSize: 20,
+                                                        fontSize: 20.sp,
                                                         fontWeight:
                                                             FontWeight.bold)),
-                                                SizedBox(height: 8),
+                                                SizedBox(height: 8.w),
                                                 // 关注、粉丝、硬币
                                                 Row(
                                                   mainAxisAlignment:
@@ -619,7 +620,7 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                                                         count: accountController.currentCoinCount),
                                                   ],
                                                 ),
-                                                SizedBox(height: 8),
+                                                SizedBox(height: 8.w),
 
                                                 btns(widthInCard, () async {
                                                   showUpdateUserInfoCard();
@@ -646,15 +647,15 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                                   top: 0,
                                   left: 100,
                                   child: SizedBox(
-                                    width: 100,
-                                    height: 100,
+                                    width: 100.w,
+                                    height: 100.w,
                                     child: Hero(
                                       createRectTween: (begin, end) =>
                                           RectTween(begin: begin, end: end),
                                       tag: Routes.heroTagAvatar,
                                       child: Avatar(
                                         avatarValue: accountController.avatar,
-                                        radius: 60,
+                                        radius: 60.r,
                                         userId: accountController.userId,
                                       ),
                                     ),

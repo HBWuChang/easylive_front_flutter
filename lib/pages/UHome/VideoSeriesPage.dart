@@ -10,6 +10,7 @@ import '../../widgets.dart';
 import 'VideoSeriesDetailPage.dart';
 import 'UhomeWidgets.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class VideoSeriesPage extends StatelessWidget {
   final userId;
@@ -26,7 +27,7 @@ class VideoSeriesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // 检查 userId 是否为空
     if (userId == null) {
-      return const Center(
+      return  Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -39,7 +40,7 @@ class VideoSeriesPage extends StatelessWidget {
             Text(
               '404 - 页面不存在',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey,
               ),
@@ -48,7 +49,7 @@ class VideoSeriesPage extends StatelessWidget {
             Text(
               '用户ID不能为空',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 16.sp,
                 color: Colors.grey,
               ),
             ),
@@ -109,7 +110,7 @@ class VideoSeriesPage extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: 12),
+          SizedBox(height: 12.w),
           LayoutBuilder(
             builder: (context, constraints) {
               double spacing = 16; // 水平间距
@@ -141,7 +142,7 @@ class VideoSeriesPage extends StatelessWidget {
                         Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: SizedBox(
-                                width: itemWidth,
+                                width: itemWidth.w,
                                 child: VideoSeriesWidget(
                                   videoSeries: videoSeries,
                                   onTap: () {
@@ -168,7 +169,7 @@ class VideoSeriesPage extends StatelessWidget {
               });
             },
           ),
-          SizedBox(height: 24),
+          SizedBox(height: 24.w),
         ],
       ),
     );
@@ -251,19 +252,19 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                       scale: _scaleAnimation.value,
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(12.r),
                           boxShadow: _isHovered
                               ? [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 15,
+                                    blurRadius: 15.r,
                                     offset: const Offset(0, 8),
                                   )
                                 ]
                               : [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 5,
+                                    blurRadius: 5.r,
                                     offset: const Offset(0, 2),
                                   )
                                 ],
@@ -282,7 +283,7 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: Colors.grey[400],
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(10.r),
                                     ),
                                   ),
                                 )),
@@ -299,7 +300,7 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: Colors.grey[600],
-                                      borderRadius: BorderRadius.circular(11),
+                                      borderRadius: BorderRadius.circular(11.r),
                                     ),
                                   ),
                                 )),
@@ -314,7 +315,7 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                                 width: double.infinity,
                                 height: double.infinity,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(12.r),
                                   color: Colors.grey[300],
                                 ),
                                 clipBehavior: Clip.antiAlias,
@@ -392,9 +393,9 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                   tag: 'videoSeries-${widget.videoSeries.seriesId}-Name',
                   child: ExpandableText(
                     text: widget.videoSeries.seriesName,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: Colors.black87,
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                       height: 1.2,
                     ),
@@ -406,9 +407,9 @@ class _VideoSeriesWidgetState extends State<VideoSeriesWidget>
                   tag: 'videoSeries-${widget.videoSeries.seriesId}-Time',
                   child: Text(
                     _formatDate(widget.videoSeries.updateTime),
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: Colors.black54,
-                      fontSize: 13,
+                      fontSize: 13.sp,
                     ),
                   )),
             ],
@@ -480,7 +481,7 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
         margin: const EdgeInsets.all(8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -497,8 +498,8 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
               children: [
                 // 合集图标
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: 24.w,
+                  height: 24.w,
                   decoration: BoxDecoration(
                     color: Colors.blue[600],
                     borderRadius: BorderRadius.circular(4),
@@ -515,12 +516,12 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
                 Hero(
                   tag: 'videoSeries-${widget.videoSeries.seriesId}-Name',
                   child: ConstrainedBox(
-                    constraints:  BoxConstraints(maxWidth:Get.width - 400),
+                    constraints:  BoxConstraints(maxWidth:(Get.width - 400).w),
                     child: ExpandableText(
                       text: widget.videoSeries.seriesName,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Colors.black87,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
@@ -573,7 +574,7 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
             // 视频横向列表
             if (widget.videoSeries.videoInfoList.isNotEmpty)
               SizedBox(
-                height: 180, // 调整高度以适应16:11比例
+                height: 180.w, // 调整高度以适应16:11比例
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     // 计算可变容器宽度
@@ -593,8 +594,8 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
                       itemBuilder: (context, index) {
                         final video = widget.videoSeries.videoInfoList[index];
                         return ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minWidth: 140.0,
+                          constraints:  BoxConstraints(
+                            minWidth: 140.w,
                             maxWidth: double.infinity, // 最大无限制
                           ),
                           child: AspectRatio(
@@ -602,7 +603,7 @@ class _VideoSeriesListItemState extends State<VideoSeriesListItem> {
                             child: Container(
                                 width: itemWidth
                                     .clamp(140.0, double.infinity)
-                                    .toDouble(),
+                                    .toDouble().w,
                                 margin: EdgeInsets.only(
                                     right: index < itemCount - 1 ? 12 : 0),
                                 child: VideoHorizontalItem(
@@ -661,8 +662,8 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
           children: [
             // 视频封面
             Container(
-              width: 100,
-              height: 60,
+              width: 100.w,
+              height: 60.w,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(6),
@@ -725,9 +726,9 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
                   // 视频标题
                   Text(
                     widget.video.videoName ?? '未知视频',
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: Colors.black87,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                     ),
                     maxLines: 2,
@@ -737,9 +738,9 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
                   // 视频信息（时长、上传时间等）
                   Text(
                     _formatVideoInfo(),
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: Colors.black54,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ],
@@ -748,11 +749,11 @@ class _VideoListItemTileState extends State<VideoListItemTile> {
 
             // 播放按钮
             Container(
-              width: 36,
-              height: 36,
+              width: 36.w,
+              height: 36.w,
               decoration: BoxDecoration(
                 color: _isHovered ? Colors.blue[600] : Colors.grey[400],
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(18.r),
               ),
               child: const Icon(
                 Icons.play_arrow,
@@ -906,7 +907,7 @@ class _VideoHorizontalItemState extends State<VideoHorizontalItem> {
                                     left: 0,
                                     right: 0,
                                     bottom: 0,
-                                    height: 30,
+                                    height: 30.w,
                                     child: Container(
                                       decoration: BoxDecoration(
                                         borderRadius:
@@ -941,7 +942,7 @@ class _VideoHorizontalItemState extends State<VideoHorizontalItem> {
                                           _formatPlayCount(
                                               widget.video.playCount ?? 0),
                                           style: TextStyle(
-                                            fontSize: playCountFontSize,
+                                            fontSize: playCountFontSize.sp,
                                             color: Colors.white,
                                             fontWeight: FontWeight.w500,
                                             shadows: [
@@ -985,7 +986,7 @@ class _VideoHorizontalItemState extends State<VideoHorizontalItem> {
                                   maxLines: 1, // 确保标题只有一行
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: baseFontSize,
+                                    fontSize: baseFontSize.sp,
                                     fontWeight: FontWeight.w500,
                                     color: _isHovered
                                         ? Theme.of(context).colorScheme.primary
@@ -1003,7 +1004,7 @@ class _VideoHorizontalItemState extends State<VideoHorizontalItem> {
                                 child: Text(
                                   _formatDate(widget.video.createTime!),
                                   style: TextStyle(
-                                    fontSize: timeFontSize,
+                                    fontSize: timeFontSize.sp,
                                     color: Colors.grey,
                                   ),
                                 )),
