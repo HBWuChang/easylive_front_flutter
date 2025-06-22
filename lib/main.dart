@@ -114,6 +114,15 @@ class _HomeState extends State<Home> {
         appBarController.appBarOpaque.value) {
       appBarController.appBarOpaque.value = false;
     }
+    final showFloatingCateheight = threshold + 128;
+    if (appBarController.scrollController.offset >= showFloatingCateheight &&
+        !appBarController.showFloatingCate.value) {
+      appBarController.showFloatingCate.value = true;
+    } else if (appBarController.scrollController.offset <
+            showFloatingCateheight &&
+        appBarController.showFloatingCate.value) {
+      appBarController.showFloatingCate.value = false;
+    }
   }
 
   @override

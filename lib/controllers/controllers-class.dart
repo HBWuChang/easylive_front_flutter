@@ -814,6 +814,7 @@ class CategoryLoadAllCategoryController extends GetxController {
 class AppBarController extends GetxController {
   var opacity = 0.0.obs;
   var appBarOpaque = false.obs;
+  var showFloatingCate = false.obs;
   ScrollController scrollController = ScrollController();
   double imgHeight = 180.0;
   var extendBodyBehindAppBar = true.obs;
