@@ -1,3 +1,4 @@
+import 'package:easylive/controllers/controllers-class.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:extended_image/extended_image.dart';
@@ -94,14 +95,17 @@ class VideoSeriesDetailPage extends StatelessWidget {
                 ),
                 const Spacer(),
                 // 编辑按钮
-                IconButton(
-                  onPressed: () => _showEditSeriesDialog(context),
-                  tooltip: '编辑合集内容',
-                  icon: const Icon(Icons.edit),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Theme.of(context).hoverColor,
+                if (uhomeSeriesController
+                        .videoSeriesDetail.value.videoSeries!.userId ==
+                    Get.find<AccountController>().userId)
+                  IconButton(
+                    onPressed: () => _showEditSeriesDialog(context),
+                    tooltip: '编辑合集内容',
+                    icon: const Icon(Icons.edit),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Theme.of(context).hoverColor,
+                    ),
                   ),
-                ),
                 const SizedBox(width: 8),
                 // 最新添加排序按钮
                 Obx(() => TextButton.icon(

@@ -294,6 +294,11 @@ class UserInfoController extends GetxController {
       var res = await ApiService.uhomeGetUserInfo(_userId);
       if (res['code'] == 200) {
         userInfo.value = res['data'];
+        if (userInfo['nickName'] != null && userInfo['nickName'].isNotEmpty) {
+          Get.find<AppBarController>().updateTitleByRouteName(
+              name: '${Routes.uhome}/$_userId',
+              title: userInfo['nickName']);
+        }
         return userInfo;
       } else {
         throw Exception(res['info']);

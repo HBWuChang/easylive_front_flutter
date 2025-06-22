@@ -28,6 +28,8 @@ import 'VideoPlayPageInfoWidgets.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'VideoPlayPageCommentsInner.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 
 class VideoPlayPageComments extends StatefulWidget {
   final String videoId;
@@ -180,6 +182,10 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                       .commentDataList[
                                                                           index]
                                                                       .avatar,
+                                                              userId: commentController
+                                                                  .commentDataList[
+                                                                      index]
+                                                                  .userId,
                                                             ))
                                                       ]),
                                                       SizedBox(width: 16),
@@ -200,11 +206,16 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                 title: Hero(
                                                                     tag:
                                                                         'commentNickName${commentController.commentDataList[index].commentId}',
-                                                                    child: Text(
+                                                                    child:
+                                                                        NickNameTextWidget(
                                                                       commentController
                                                                               .commentDataList[index]
                                                                               .nickName ??
                                                                           '',
+                                                                      userId: commentController
+                                                                          .commentDataList[
+                                                                              index]
+                                                                          .userId,
                                                                       style: TextStyle(
                                                                           fontWeight:
                                                                               FontWeight.bold),
@@ -314,11 +325,10 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                         },
                                                                       )),
                                                                   Obx(() => Text(commentController
-                                                                          .commentDataList[
-                                                                              index]
-                                                                          .likeCount
-                                                                          .toString() ??
-                                                                      '0')),
+                                                                      .commentDataList[
+                                                                          index]
+                                                                      .likeCount
+                                                                      .toString())),
                                                                   SizedBox(
                                                                       width:
                                                                           16),
@@ -515,10 +525,10 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                                         alignment: Alignment.centerLeft,
                                                                                         enableLoadState: false,
                                                                                       )
-                                                                                    : Icon(
-                                                                                        Icons.add_a_photo,
+                                                                                    : Iconify(
+                                                                                        Bx.image_add,
                                                                                         color: Theme.of(context).colorScheme.tertiary,
-                                                                                        size: 24,
+                                                                                        size: 28,
                                                                                       )))),
                                                                         Obx(() =>
                                                                             IconButton(
@@ -611,8 +621,10 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                                   tag: 'commentContent${child.commentId}',
                                                                                   child: ChildCommentItemWidget(
                                                                                     userName: child.nickName ?? '',
+                                                                                    userId: child.userId ?? '',
                                                                                     content: child.content ?? '',
                                                                                     replyNickName: child.replyNickName,
+                                                                                    replyUserId: child.replyUserId,
                                                                                   ));
                                                                             }),
                                                                         Obx(
@@ -734,8 +746,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                       enableLoadState: false,
                                     ),
                                   )
-                                : Icon(
-                                    Icons.add_a_photo,
+                                : Iconify(
+                                    Bx.image_add,
                                     color:
                                         Theme.of(context).colorScheme.tertiary,
                                     size: 28,
@@ -754,8 +766,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                       enableLoadState: false,
                                     ),
                                   )
-                                : Icon(
-                                    Icons.add_a_photo,
+                                : Iconify(
+                                    Bx.image_add,
                                     color:
                                         Theme.of(context).colorScheme.tertiary,
                                     size: 28,

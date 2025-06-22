@@ -29,6 +29,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 
 class VideoPlayPageCommentsInner extends StatefulWidget {
   final int parentCommentId; // 传入父评论id
@@ -90,8 +92,9 @@ class _VideoPlayPageCommentsInnerState
                           SizedBox(height: 8),
                           Hero(
                               tag: 'commentNickName${widget.parentCommentId}',
-                              child: Text(
+                              child: NickNameTextWidget(
                                 parent.nickName ?? '',
+                                userId: parent.userId,
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               )),
                           Hero(
@@ -221,8 +224,9 @@ class _VideoPlayPageCommentsInnerState
                                 SizedBox(height: 8),
                                 Hero(
                                     tag: 'commentNickName${child.commentId}',
-                                    child: Text(
+                                    child: NickNameTextWidget(
                                       child.nickName ?? '',
+                                      userId: child.userId,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     )),
@@ -488,13 +492,13 @@ class _VideoPlayPageCommentsInnerState
                                                           enableLoadState:
                                                               false,
                                                         )
-                                                      : Icon(
-                                                          Icons.add_a_photo,
+                                                      : Iconify(
+                                                          Bx.image_add,
                                                           color:
                                                               Theme.of(context)
                                                                   .colorScheme
                                                                   .tertiary,
-                                                          size: 24,
+                                                          size: 28,
                                                         )))),
                                           Obx(() => IconButton(
                                                 tooltip: '发表评论',

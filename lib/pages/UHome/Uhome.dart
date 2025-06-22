@@ -81,8 +81,8 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final routeName = ModalRoute.of(context)?.settings.name;
     print('当前路由名称: $routeName');
-    var userId = toParameters(routeName!)?['userId'] ??
-        Get.find<AccountController>().userId;
+    var userId =
+        getLastPath(routeName!) ?? Get.find<AccountController>().userId;
 
     if (userId == null) {
       openLoginDialog();
@@ -307,7 +307,7 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                   left: 48,
                   bottom: 0, // 从个人信息Row底部向上90像素
                   child: Obx(() => Avatar(
-                      radius: 60, avatarValue: userInfoController.avatar)),
+                      radius: 60, avatarValue: userInfoController.avatar,showOnTap: true)),
                 ),
               ],
             ),
@@ -350,6 +350,8 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                               ? Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    if (userInfoController.userId ==
+                                        Get.find<AccountController>().userId)
                                     IconButton(
                                       tooltip: '编辑合集列表',
                                       icon: Icon(Icons.edit,

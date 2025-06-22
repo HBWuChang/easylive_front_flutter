@@ -191,7 +191,15 @@ Future<dynamic> showConfirmDialog(String msg, {String title = '提示'}) async {
   );
   return res ?? false;
 }
-
+String? getLastPath(String url) {
+  if (url.isEmpty) return null;
+  // 去掉查询参数
+  if (url.contains('?')) {
+    url = url.substring(0, url.indexOf('?'));
+  }
+  // 获取最后一个斜杠后的部分
+  return url.split('/').last;
+}
 Map<String, String>? toParameters(String name) {
   name = name.substring(name.indexOf('?') + 1);
   Map<String, String> parameters = {};

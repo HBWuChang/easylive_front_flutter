@@ -655,6 +655,7 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                                       child: Avatar(
                                         avatarValue: accountController.avatar,
                                         radius: 60,
+                                        userId: accountController.userId,
                                       ),
                                     ),
                                   )),

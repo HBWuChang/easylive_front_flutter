@@ -37,7 +37,7 @@ class VideoPlayPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final routeName = ModalRoute.of(context)?.settings.name;
     print('当前路由名称: $routeName');
-    final videoId = toParameters(routeName!)?['videoId'];
+    final videoId = getLastPath(routeName!);
     // put 前判断是否已存在对应 tag 的 controller，若存在则不再 put
     CommentController commentController;
     if (Get.isRegistered<CommentController>(

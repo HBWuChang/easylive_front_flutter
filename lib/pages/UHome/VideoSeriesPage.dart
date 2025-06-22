@@ -834,7 +834,7 @@ class _VideoHorizontalItemState extends State<VideoHorizontalItem> {
           if (videoId != null) {
             Get.find<AppBarController>().extendBodyBehindAppBar.value = false;
             Get.toNamed(
-              '${Routes.videoPlayPage}?videoId=$videoId',
+              '${Routes.videoPlayPage}/$videoId',
               id: Routes.mainGetId,
             );
           }

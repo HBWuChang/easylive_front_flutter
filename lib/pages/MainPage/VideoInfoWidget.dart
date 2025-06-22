@@ -50,8 +50,7 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                           Get.find<AppBarController>()
                               .extendBodyBehindAppBar
                               .value = false;
-                          Get.toNamed(
-                              '${Routes.videoPlayPage}?videoId=$videoId',
+                          Get.toNamed('${Routes.videoPlayPage}/$videoId',
                               id: Routes.mainGetId);
                         }
                       },
@@ -128,10 +127,9 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
             )),
         SizedBox(height: 6),
         HoverFollowWidget(
-            child: Text(
-          widget.video.videoName ?? '',
+            child: ExpandableText(
+          text: widget.video.videoName ?? '',
           maxLines: 1,
-          overflow: TextOverflow.ellipsis,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         )),
         SizedBox(height: 2),
@@ -139,22 +137,17 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
             maxOffset: 8,
             child: Row(
               children: [
-                Icon(Icons.person, size: 14, color: Colors.grey),
-                SizedBox(width: 3),
-                TextButton(
+                TextButton.icon(
+                    icon: Icon(Icons.person, size: 14, color: Colors.grey),
                     onPressed: () {
-                      Get.toNamed(
-                          '${Routes.uhome}?userId=${widget.video.userId}',
+                      Get.toNamed('${Routes.uhome}/${widget.video.userId}',
                           id: Routes.mainGetId);
                     },
-                    child: Text(
-                        widget.video.nickName ??
-                            Get.find<UserInfoController>(
-                                    tag:
-                                        '${widget.video.userId}UserInfoController')
-                                .nickName,
-                        style:
-                            TextStyle(fontSize: 13, color: Colors.grey[700]))),
+                    label: Text(
+                      widget.video.nickName ?? '',
+                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                      overflow: TextOverflow.ellipsis,
+                    )),
                 SizedBox(width: 10),
                 Icon(Icons.access_time, size: 14, color: Colors.grey),
                 SizedBox(width: 3),
@@ -198,7 +191,7 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
             final videoId = widget.video.videoId;
             if (videoId != null) {
               Get.find<AppBarController>().needRemove++;
-              Get.toNamed('${Routes.videoPlayPage}?videoId=$videoId',
+              Get.toNamed('${Routes.videoPlayPage}/$videoId',
                   id: Routes.mainGetId);
             }
           },
@@ -318,26 +311,27 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                             SizedBox(height: 4),
                             // up主
                             HoverFollowWidget(
-                                child: Row(
-                              children: [
-                                Icon(Icons.person,
-                                    size: 14, color: Colors.grey),
-                                SizedBox(width: 3),
-                                Expanded(
-                                  child: Text(
-                                    widget.video.nickName ?? '',
-                                    style: TextStyle(
-                                        fontSize: 13, color: Colors.grey[700]),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            )),
+                                child: TextButton.icon(
+                                    icon: Icon(Icons.person,
+                                        size: 14, color: Colors.grey),
+                                    onPressed: () {
+                                      Get.toNamed(
+                                          '${Routes.uhome}/${widget.video.userId}',
+                                          id: Routes.mainGetId);
+                                    },
+                                    label: Text(
+                                      widget.video.nickName ?? '',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey[700]),
+                                      overflow: TextOverflow.ellipsis,
+                                    ))),
                             SizedBox(height: 4),
                             // 播放量和弹幕
                             HoverFollowWidget(
                                 child: Row(
                               children: [
+                                SizedBox(width: 12),
                                 Icon(Icons.play_arrow,
                                     size: 14, color: Colors.grey),
                                 SizedBox(width: 2),

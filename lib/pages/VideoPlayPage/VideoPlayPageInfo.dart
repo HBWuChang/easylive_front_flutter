@@ -46,7 +46,8 @@ class VideoPlayPageInfo extends StatelessWidget {
     } else {
       videoGetVideoRecommendController = Get.put(
           VideoGetVideoRecommendController(),
-          tag: '${videoId}VideoGetVideoRecommendController',permanent: true);
+          tag: '${videoId}VideoGetVideoRecommendController',
+          permanent: true);
     }
     final infoColor1 = Theme.of(context).colorScheme.secondary;
     final infoColor2 = Theme.of(context).colorScheme.tertiary;
@@ -81,6 +82,8 @@ class VideoPlayPageInfo extends StatelessWidget {
                                     SizedBox(
                                         width: 54,
                                         child: Avatar(
+                                            userId: videoGetVideoInfoController
+                                                .videoInfo.value.userId,
                                             avatarValue:
                                                 videoGetVideoInfoController
                                                         .videoInfo
@@ -91,6 +94,13 @@ class VideoPlayPageInfo extends StatelessWidget {
                                     SizedBox(
                                         width: 300,
                                         child: ListTile(
+                                          hoverColor: Colors.transparent,
+                                          onTap: () {
+                                            // 跳转到用户主页
+                                            Get.toNamed(
+                                                '/uhome/${videoGetVideoInfoController.videoInfo.value.userId}',
+                                                id: Routes.mainGetId);
+                                          },
                                           title: Text(
                                             videoGetVideoInfoController
                                                     .videoInfo.value.nickName ??
@@ -136,16 +146,6 @@ class VideoPlayPageInfo extends StatelessWidget {
                                                                   .userId ??
                                                               '');
                                                 },
-                                                child: Text(
-                                                  uhomeGetUserInfoController
-                                                          .userInfo
-                                                          .value
-                                                          .haveFocus
-                                                      ? '已关注'
-                                                      : '关注',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
                                                 style: ElevatedButton.styleFrom(
                                                   padding: EdgeInsets.symmetric(
                                                       horizontal: 16,
@@ -176,6 +176,16 @@ class VideoPlayPageInfo extends StatelessWidget {
                                                               .haveFocus
                                                           ? 0
                                                           : 2,
+                                                ),
+                                                child: Text(
+                                                  uhomeGetUserInfoController
+                                                          .userInfo
+                                                          .value
+                                                          .haveFocus
+                                                      ? '已关注'
+                                                      : '关注',
+                                                  style:
+                                                      TextStyle(fontSize: 16),
                                                 ),
                                               )),
                                         )),

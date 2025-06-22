@@ -644,6 +644,14 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
+                        mouseCursor: SystemMouseCursors.click,
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            // 点击回复用户名跳转到用户主页
+                            Get.toNamed(
+                                '${Routes.uhome}/${widget.comment.replyUserId ?? widget.comment.userId}',
+                                id: Routes.mainGetId);
+                          },
                       ),
                     TextSpan(
                       text: text,
@@ -676,11 +684,15 @@ class ExpandableCommentContentState extends State<ExpandableCommentContent> {
 // 子评论展示组件
 class ChildCommentItemWidget extends StatelessWidget {
   final String userName;
+  final String userId;
   final String? replyNickName;
+  final String? replyUserId;
   final String content;
   const ChildCommentItemWidget(
       {required this.userName,
+      required this.userId,
       this.replyNickName,
+      this.replyUserId,
       required this.content,
       Key? key})
       : super(key: key);
@@ -699,6 +711,12 @@ class ChildCommentItemWidget extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
               ),
+              mouseCursor: SystemMouseCursors.click,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  // 点击用户名跳转到用户主页
+                  Get.toNamed('${Routes.uhome}/$userId', id: Routes.mainGetId);
+                },
             ),
             if (replyNickName != null)
               TextSpan(
@@ -716,6 +734,13 @@ class ChildCommentItemWidget extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                 ),
+                mouseCursor: SystemMouseCursors.click,
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    // 点击回复用户名跳转到用户主页
+                    Get.toNamed('${Routes.uhome}/${replyUserId ?? userId}',
+                        id: Routes.mainGetId);
+                  },
               ),
             TextSpan(
               text: content,

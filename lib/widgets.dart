@@ -1,13 +1,20 @@
 import 'package:easylive/Funcs.dart';
+import 'package:easylive/pages/VideoPlayPage/VideoPlayPageInfoWidgets.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'api_service.dart';
 import 'package:extended_image/extended_image.dart';
 
-Widget Avatar({String? avatarValue, double? radius = 16, Key? key}) {
+Widget Avatar(
+    {String? avatarValue,
+    double? radius = 16,
+    Key? key,
+    bool showOnTap = false,
+    String? userId}) {
   // 如果avatarValue为空或null，显示默认头像
   // 否则显示网络头像
   if (avatarValue == null || avatarValue.isEmpty) {
@@ -17,13 +24,24 @@ Widget Avatar({String? avatarValue, double? radius = 16, Key? key}) {
       backgroundImage: AssetImage(Constants.defaultAvatar),
     );
   } else {
-    return CircleAvatar(
-      key: key,
-      radius: radius!,
-      backgroundImage: ExtendedNetworkImageProvider(
-        ApiService.baseUrl + ApiAddr.fileGetResourcet + avatarValue,
-      ),
-    );
+    return GestureDetector(
+        onTap: () {
+          if (showOnTap) {
+            final imgUrl =
+                ApiService.baseUrl + ApiAddr.fileGetResourcet + avatarValue;
+            Get.dialog(ImagePreviewDialog(imgUrl: imgUrl));
+          }
+          if (userId != null) {
+            Get.toNamed('${Routes.uhome}/$userId', id: Routes.mainGetId);
+          }
+        },
+        child: CircleAvatar(
+          key: key,
+          radius: radius!,
+          backgroundImage: ExtendedNetworkImageProvider(
+            ApiService.baseUrl + ApiAddr.fileGetResourcet + avatarValue,
+          ),
+        ));
   }
 }
 
@@ -327,13 +345,13 @@ class ExpandableText extends StatelessWidget {
           child: Text(
             text,
             style: style?.copyWith(
-                  // color: isOverflowing
-                      // ? Theme.of(context).primaryColor
-                      // : style?.color,
-                ) ??
+                    // color: isOverflowing
+                    // ? Theme.of(context).primaryColor
+                    // : style?.color,
+                    ) ??
                 TextStyle(
-                  // color: isOverflowing ? Theme.of(context).primaryColor : null,
-                ),
+                    // color: isOverflowing ? Theme.of(context).primaryColor : null,
+                    ),
             maxLines: maxLines,
             overflow: TextOverflow.ellipsis,
             textAlign: textAlign,
@@ -374,5 +392,71 @@ class ExpandableText extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// 可点击跳转用户主页的昵称文本组件
+class NickNameTextWidget extends StatelessWidget {
+  final String text;
+  final String? userId;
+  final TextStyle? style;
+  final TextAlign textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
+  final bool? softWrap;
+  final double? textScaleFactor;
+  final String? semanticsLabel;
+  final TextWidthBasis? textWidthBasis;
+  final TextHeightBehavior? textHeightBehavior;
+
+  const NickNameTextWidget(
+    this.text, {
+    Key? key,
+    this.userId,
+    this.style,
+    this.textAlign = TextAlign.start,
+    this.maxLines,
+    this.overflow,
+    this.softWrap,
+    this.textScaleFactor,
+    this.semanticsLabel,
+    this.textWidthBasis,
+    this.textHeightBehavior,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveStyle = style?.copyWith(
+          color: style?.color,
+        ) ??
+        TextStyle();
+
+    return GestureDetector(
+      onTap: userId != null ? () => _onTap() : null,
+      child: MouseRegion(
+        cursor: userId != null
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        child: Text(
+          text,
+          style: effectiveStyle,
+          textAlign: textAlign,
+          maxLines: maxLines,
+          overflow: overflow,
+          softWrap: softWrap,
+          textScaleFactor: textScaleFactor,
+          semanticsLabel: semanticsLabel,
+          textWidthBasis: textWidthBasis,
+          textHeightBehavior: textHeightBehavior,
+        ),
+      ),
+    );
+  }
+
+  void _onTap() {
+    if (userId == null || userId!.isEmpty) return;
+    Get.toNamed('${Routes.uhome}/$userId', id: Routes.mainGetId);
+
+    debugPrint('点击了用户昵称: $text, userId: $userId');
   }
 }
