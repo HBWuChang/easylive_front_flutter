@@ -185,8 +185,8 @@ class VideoPlayPageInfo extends StatelessWidget {
                                                           .haveFocus
                                                       ? '已关注'
                                                       : '关注',
-                                                  style:
-                                                      TextStyle(fontSize: 16.sp),
+                                                  style: TextStyle(
+                                                      fontSize: 16.sp),
                                                 ),
                                               )),
                                         )),
@@ -251,13 +251,20 @@ class VideoPlayPageInfo extends StatelessWidget {
                                             color: infoColor1,
                                             size: 14,
                                           ),
-                                          Text(
-                                            '${(videoGetVideoInfoController.videoInfo.value.createTime ?? '')}'
-                                                .substring(0, 19),
-                                            style: TextStyle(
-                                                fontSize: 12.sp,
-                                                color: infoColor1),
-                                          ),
+                                          if ((videoGetVideoInfoController
+                                                      .videoInfo
+                                                      .value
+                                                      .createTime
+                                                      .toString() ??
+                                                  '')
+                                              .isNotEmpty)
+                                            Text(
+                                              '${(videoGetVideoInfoController.videoInfo.value.createTime ?? '')}'
+                                                  .substring(0, 19),
+                                              style: TextStyle(
+                                                  fontSize: 12.sp,
+                                                  color: infoColor1),
+                                            ),
                                         ],
                                       ),
                                       if (expandInfo.value)
@@ -308,7 +315,7 @@ class VideoPlayPageInfo extends StatelessWidget {
                                       duration: Duration(milliseconds: 200),
                                       child: Icon(
                                         Icons.expand_more,
-                                        size: 20,
+                                        size: 20.sp,
                                       ),
                                     ),
                                   ),
@@ -316,8 +323,7 @@ class VideoPlayPageInfo extends StatelessWidget {
                           ]),
 
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 32.0),
+                            padding: EdgeInsets.symmetric(horizontal: 32.0.w),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -327,6 +333,7 @@ class VideoPlayPageInfo extends StatelessWidget {
                                       isActive:
                                           videoGetVideoInfoController.hasLike,
                                       icon: Icon(Icons.thumb_up,
+                                          size: 26.w,
                                           color: videoGetVideoInfoController
                                                   .hasLike
                                               ? Colors.pink
@@ -354,6 +361,8 @@ class VideoPlayPageInfo extends StatelessWidget {
                                         videoGetVideoInfoController.hasCoin,
                                     icon: Obx(() => SvgPicture.string(
                                           Constants.Coin_svg,
+                                          height: 26.w,
+                                          width: 26.w,
                                           colorFilter:
                                               videoGetVideoInfoController
                                                       .hasCoin
@@ -402,7 +411,7 @@ class VideoPlayPageInfo extends StatelessWidget {
                                       isActive: videoGetVideoInfoController
                                           .hasCollect,
                                       icon: Obx(() => Icon(
-                                            size: 28,
+                                            size: 26.w,
                                             Icons.star_rate_rounded,
                                             color: videoGetVideoInfoController
                                                     .hasCollect
@@ -432,13 +441,13 @@ class VideoPlayPageInfo extends StatelessWidget {
                                         icon: Icon(
                                             Icons
                                                 .switch_access_shortcut_add_rounded,
-                                            size: 24,
+                                            size: 24.w,
                                             color: Colors.grey)),
                                     text: '分享'),
                               ],
                             ),
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: 16.w),
                           if (videoLoadVideoPListController.multi)
                             DividerWithPaddingHorizontal(),
                           if (videoLoadVideoPListController.multi)
@@ -463,7 +472,8 @@ class VideoPlayPageInfo extends StatelessWidget {
                                                   const EdgeInsets.all(14.0),
                                               child: Text(
                                                 '视频选集(${videoLoadVideoPListController.selectFileIndex + 1}/${videoLoadVideoPListController.videoPList.length})',
-                                                style: TextStyle(fontSize: 16.sp),
+                                                style:
+                                                    TextStyle(fontSize: 16.sp),
                                               ),
                                             ),
                                             Obx(() => IconButton(
@@ -558,7 +568,8 @@ class VideoPlayPageInfo extends StatelessWidget {
                                                       child: ClipRRect(
                                                           borderRadius:
                                                               BorderRadius
-                                                                  .circular(8.r),
+                                                                  .circular(
+                                                                      8.r),
                                                           clipBehavior:
                                                               Clip.hardEdge,
                                                           child: InkWell(

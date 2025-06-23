@@ -65,16 +65,16 @@ class VideoListPage extends StatelessWidget {
               if (itemsPerRow < 1) itemsPerRow = 1;
 
               // 计算每个 Widget 的实际宽度
-              double itemWidth =
-                  (availableWidth - (itemsPerRow - 1) * 8) / itemsPerRow; // 8是间距
+              double itemWidth = (availableWidth - (itemsPerRow - 1) * 8) /
+                  itemsPerRow; // 8是间距
 
               return Obx(() => Wrap(
-                    spacing: 16, // 水平间距
-                    runSpacing: 8, // 垂直间距
+                    spacing: 16.w, // 水平间距
+                    runSpacing: 8.w, // 垂直间距
                     children: [
                       for (var video in uHomeLoadVideoListController.videoList)
                         Padding(
-                            padding: const EdgeInsets.all(4.0),
+                            padding: EdgeInsets.all(4.0.w),
                             child: SizedBox(
                                 width: itemWidth.w,
                                 child: VideoInfoWidget(

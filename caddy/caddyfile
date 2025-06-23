@@ -1,0 +1,35 @@
+:7068 {
+	# 对所有 /api 开头的请求，去除 /api 前缀后反代到远程服务器
+	handle_path /api/* {
+		reverse_proxy http://39.105.203.95:7071
+	}
+
+	# 默认将其他所有请求反代到本地 7069 端口
+	handle {
+		reverse_proxy localhost:7069
+	}
+
+	# 启用日志记录
+	log {
+		output file access.log
+	}
+}
+
+# :7068 {
+# 	# 对所有 /api 开头的请求，去除 /api 前缀后反代到远程服务器
+# 	handle_path /api/* {
+# 		reverse_proxy http://39.105.203.95:7071
+# 	}
+
+# 	# 默认将其他所有请求提供静态文件服务
+# 	handle {
+# 		root * "E:\HB_WuChang\easylive-flutter\easylive\build\web"
+# 		try_files {path} /index.html
+# 		file_server
+# 	}
+
+# 	# 启用日志记录
+# 	log {
+# 		output file access_7067.log
+# 	}
+# }

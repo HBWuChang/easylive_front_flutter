@@ -176,7 +176,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
               ),
             ),
             SizedBox(
-                height: 34.w,
+                height: 34,
                 width: 300.w,
                 child: TextField(
                   controller: videoNameFuzzy,
@@ -184,13 +184,14 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                       hintText: '请输入视频名称',
                       border: OutlineInputBorder(),
                       suffixIcon: SizedBox(
-                          width: 80.w,
+                          width: 100.w,
                           child: Row(
                             children: [
                               IconButton(
+                                iconSize: 14.r,
                                 icon: Icon(
                                   Icons.clear,
-                                  size: 14,
+                                  size: 14.r,
                                 ),
                                 onPressed: () {
                                   videoNameFuzzy.clear();
@@ -198,9 +199,10 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                 },
                               ),
                               IconButton(
+                                iconSize: 20.r,
                                 icon: Icon(
                                   Icons.search,
-                                  size: 20,
+                                  size: 20.r,
                                 ),
                                 onPressed: () {
                                   loadData(index: [nowSelectIndex.value]);
@@ -338,8 +340,8 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                           },
                                           child: ConstrainedBox(
                                             constraints: BoxConstraints(
-                                                maxWidth:
-                                                    (Get.width - 600).w), // 限制最大宽度
+                                                maxWidth: (Get.width - 600)
+                                                    .w), // 限制最大宽度
                                             child: Text(
                                               video['videoName'] ?? '',
                                               style: TextStyle(
@@ -474,8 +476,8 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                                   .split(','))
                                             Chip(
                                               label: Text(tag,
-                                                  style:
-                                                      TextStyle(fontSize: 11.sp)),
+                                                  style: TextStyle(
+                                                      fontSize: 11.sp)),
                                               backgroundColor:
                                                   Colors.green.shade50,
                                             ),
@@ -486,10 +488,11 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                               ]),
                               onTap: () {},
                               trailing: SizedBox(
-                                  width: 80.w,
+                                  width: 100.w,
                                   child: Row(children: [
                                     index != 2
                                         ? IconButton(
+                                            iconSize: 20.w,
                                             tooltip: '编辑视频',
                                             icon: Icon(Icons.edit),
                                             onPressed: () async {
@@ -516,6 +519,7 @@ class _PlatformPageManageState extends State<PlatformPageManage> {
                                         : SizedBox(width: 40.w),
                                     IconButton(
                                         tooltip: '删除视频',
+                                        iconSize: 20.w,
                                         icon: Icon(Icons.delete),
                                         onPressed: () async {
                                           bool confirm =

@@ -34,7 +34,7 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         HoverFollowWidget(
-            maxOffset: 12,
+            maxOffset: 12.w,
             child: MouseRegion(
               onEnter: (_) => setState(() => _hovered = true),
               onExit: (_) => setState(() => _hovered = false),
@@ -92,11 +92,11 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                       ),
                     ),
                     Positioned(
-                      left: 8,
-                      bottom: 8,
+                      left: 8.w,
+                      bottom: 8.w,
                       child: Row(
                         children: [
-                          Icon(Icons.play_arrow, color: Colors.white, size: 16),
+                          Icon(Icons.play_arrow, color: Colors.white, size: 16.w),
                           SizedBox(width: 2.w),
                           Text(
                             (widget.video.playCount ?? 0).toString(),
@@ -104,11 +104,11 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                                 color: Colors.white,
                                 fontSize: 13.sp,
                                 shadows: [
-                                  Shadow(color: Colors.black, blurRadius: 2)
+                                  Shadow(color: Colors.black, blurRadius: 2.r)
                                 ]),
                           ),
                           SizedBox(width: 10.w),
-                          Icon(Icons.subtitles, color: Colors.white, size: 16),
+                          Icon(Icons.subtitles, color: Colors.white, size: 16.w),
                           SizedBox(width: 2.w),
                           Text(
                             (widget.video.danmuCount ?? 0).toString(),
@@ -116,7 +116,7 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                                 color: Colors.white,
                                 fontSize: 13.sp,
                                 shadows: [
-                                  Shadow(color: Colors.black, blurRadius: 2)
+                                  Shadow(color: Colors.black, blurRadius: 2.r)
                                 ]),
                           ),
                         ],
@@ -126,20 +126,19 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                 ),
               ),
             )),
-        SizedBox(height: 6.w),
+        SizedBox(height: 4.w),
         HoverFollowWidget(
             child: ExpandableText(
           text: widget.video.videoName ?? '',
           maxLines: 1,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp),
         )),
-        SizedBox(height: 2),
         HoverFollowWidget(
-            maxOffset: 8,
+            maxOffset: 8.w,
             child: Row(
               children: [
                 TextButton.icon(
-                    icon: Icon(Icons.person, size: 14, color: Colors.grey),
+                    icon: Icon(Icons.person, size: 14.w, color: Colors.grey),
                     onPressed: () {
                       Get.toNamed('${Routes.uhome}/${widget.video.userId}',
                           id: Routes.mainGetId);
@@ -150,7 +149,7 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                       overflow: TextOverflow.ellipsis,
                     )),
                 SizedBox(width: 10.w),
-                Icon(Icons.access_time, size: 14, color: Colors.grey),
+                Icon(Icons.access_time, size: 14.w, color: Colors.grey),
                 SizedBox(width: 3.w),
                 Text(
                   widget.video.createTime != null

@@ -74,7 +74,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                   children: [
                                     // 最新/最热 按钮
                                     SizedBox(
-                                      width: 128.w,
+                                      width: 140.w,
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -96,6 +96,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                               },
                                               child: Obx(() => Text('最热',
                                                   style: TextStyle(
+                                                      fontSize: 14.sp,
                                                       color: commentController
                                                                   .orderType
                                                                   .value ==
@@ -115,9 +116,9 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                               .normal)))),
                                           SizedBox(
                                             height: 32.w,
-                                            width: 2,
+                                            width: 2.w,
                                             child: DividerWithPaddingVertical(
-                                                padding: 8),
+                                                padding: 8.w),
                                           ), // 间隔
 
                                           TextButton(
@@ -137,6 +138,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                               },
                                               child: Obx(() => Text('最新',
                                                   style: TextStyle(
+                                                      fontSize: 14.sp,
                                                       color: commentController
                                                                   .orderType
                                                                   .value ==
@@ -158,7 +160,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                       ),
                                     ),
                                     Padding(
-                                        padding: const EdgeInsets.all(16.0),
+                                        padding: EdgeInsets.all(16.0.w),
                                         child: Obx(() => ListView.builder(
                                               shrinkWrap: true,
                                               itemCount: commentController
@@ -189,7 +191,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                   .userId,
                                                             ))
                                                       ]),
-                                                      SizedBox(width: 16),
+                                                      SizedBox(width: 16.w),
                                                       Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
@@ -283,8 +285,10 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                         commentController
                                                                             .commentDataList[index]
                                                                             .imgPath!,
-                                                                    width: 300.w,
-                                                                    height: 200.w,
+                                                                    width:
+                                                                        300.w,
+                                                                    height:
+                                                                        200.w,
                                                                     fit: BoxFit
                                                                         .contain, // 保证图片完整显示且有圆角
                                                                     cache: true,
@@ -317,7 +321,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                               : null,
                                                                         ),
                                                                         iconSize:
-                                                                            16,
+                                                                            16.sp,
                                                                         onPressed:
                                                                             () {
                                                                           commentController.likeComment(commentController
@@ -342,7 +346,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                               color: commentController.isHate(commentController.commentDataList[index].commentId!) ? Theme.of(context).colorScheme.primary : null,
                                                                             ),
                                                                             iconSize:
-                                                                                16,
+                                                                                16.sp,
                                                                             onPressed:
                                                                                 () {
                                                                               commentController.hateComment(commentController.commentDataList[index].commentId!);
@@ -355,13 +359,13 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                   //     '0')),
                                                                   SizedBox(
                                                                       width:
-                                                                          16),
+                                                                          16.w),
                                                                   IconButton(
                                                                     icon: Icon(
                                                                         Icons
                                                                             .messenger_outline_rounded,
-                                                                        size:
-                                                                            16),
+                                                                        size: 16
+                                                                            .sp),
                                                                     onPressed:
                                                                         () {
                                                                       // 回复评论逻辑
@@ -491,8 +495,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                           isDense:
                                                                               true,
                                                                           contentPadding: EdgeInsets.symmetric(
-                                                                              vertical: 10,
-                                                                              horizontal: 12),
+                                                                              vertical: 10.w,
+                                                                              horizontal: 12.w),
                                                                         ),
                                                                         style: TextStyle(
                                                                             fontSize:
@@ -501,7 +505,8 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                                     ),
                                                                   ),
                                                                   SizedBox(
-                                                                    width: 300.w,
+                                                                    width:
+                                                                        300.w,
                                                                     child: Row(
                                                                       mainAxisAlignment:
                                                                           MainAxisAlignment
@@ -658,7 +663,7 @@ class _VideoPlayPageCommentsState extends State<VideoPlayPageComments> {
                                                     ],
                                                   ),
                                                   DividerWithPaddingHorizontal(
-                                                      padding: 8)
+                                                      padding: 8.w)
                                                 ]);
                                               },
                                             ))),

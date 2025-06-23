@@ -207,14 +207,14 @@ class _HotButtonState extends State<_HotButton> {
   bool _hovered = false;
   @override
   Widget build(BuildContext context) {
-    return  MouseRegion(
+    return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
           width: 100.w,
-          height:( widget.isFloating ? 44 : 48).w, // 浮动状态下稍小，原始状态下两行高度
+          height: (widget.isFloating ? 44 : 48).w, // 浮动状态下稍小，原始状态下两行高度
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 18),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -297,9 +297,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
 
     return Obx(() {
       final cats = categories;
-      final width = windowSizeController.width.value;
-      int maxPerRow = ((width - 400) / 138).floor();
-      if (maxPerRow < 1) maxPerRow = 1;
+      int maxPerRow = 9;
 
       // 第一行始终显示的分区
       final firstRowCats = cats.take(maxPerRow).toList();
@@ -309,7 +307,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
       // 如果没有剩余分区，直接显示第一行内容
       if (remainingCats.isEmpty) {
         return Container(
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 16.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -324,8 +322,8 @@ class _FloatingCategoryExpansion extends StatelessWidget {
               // 第一行分区按钮
               Flexible(
                 child: Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
+                  spacing: 4.w,
+                  runSpacing: 4.w,
                   children: List.generate(firstRowCats.length, (index) {
                     final cat = firstRowCats[index];
                     final hasChildren = cat['children'] != null &&
@@ -372,8 +370,8 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                         }
                       },
                       child: Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 8.w, horizontal: 16.w),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -388,8 +386,8 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                             // 第一行分区按钮
                             Flexible(
                               child: Wrap(
-                                spacing: 4,
-                                runSpacing: 4,
+                                spacing: 4.w,
+                                runSpacing: 4.w,
                                 children:
                                     List.generate(firstRowCats.length, (index) {
                                   final cat = firstRowCats[index];
@@ -408,7 +406,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                             SizedBox(width: 8.w),
                             Container(
                               padding: EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 8),
+                                  vertical: 4.w, horizontal: 8.w),
                               decoration: BoxDecoration(
                                 color: Colors.grey[100],
                                 borderRadius: BorderRadius.circular(6.r),
@@ -420,7 +418,8 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                                   Text(
                                     '更多',
                                     style: TextStyle(
-                                        fontSize: 12.sp, color: Colors.grey[600]),
+                                        fontSize: 12.sp,
+                                        color: Colors.grey[600]),
                                   ),
                                   SizedBox(width: 2.w),
                                   AnimatedRotation(
@@ -428,7 +427,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                                     duration: Duration(milliseconds: 200),
                                     child: Icon(
                                       Icons.keyboard_arrow_down,
-                                      size: 14,
+                                      size: 14.sp,
                                       color: Colors.grey[600],
                                     ),
                                   ),
@@ -440,10 +439,11 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                       ));
                 },
                 body: Container(
-                  padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                  padding:
+                      EdgeInsets.only(left: 16.w, right: 16.w, bottom: 8.w),
                   child: Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
+                    spacing: 4.w,
+                    runSpacing: 4.w,
                     children: List.generate(remainingCats.length, (index) {
                       final cat = remainingCats[index];
                       final hasChildren = cat['children'] != null &&
@@ -519,9 +519,9 @@ class _CategoryButtonState extends State<_CategoryButton>
                 elevation: 4,
                 borderRadius: BorderRadius.circular(8.r),
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  padding: EdgeInsets.symmetric(vertical: 4.w, horizontal: 8.w),
                   child: Column(
-                    spacing: 8,
+                    spacing: 8.w,
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -535,7 +535,7 @@ class _CategoryButtonState extends State<_CategoryButton>
                           child: Container(
                             width: 120.w,
                             padding: EdgeInsets.symmetric(
-                                vertical: 6, horizontal: 16),
+                                vertical: 6.w, horizontal: 16.w),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(6.r),
@@ -622,7 +622,7 @@ class _CategoryButtonState extends State<_CategoryButton>
           if (widget.hasChildren) _removeChildrenOverlay();
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+          padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 18.w),
           decoration: BoxDecoration(
             color: _hovered ? Colors.pink[50] : Colors.white,
             borderRadius: BorderRadius.circular(8.r),
@@ -672,10 +672,10 @@ class _FloatingCategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 110.0; // 展开时的最大高度
+  double get maxExtent => 110.0.w; // 展开时的最大高度
 
   @override
-  double get minExtent => 110.0; // 收缩时的最小高度
+  double get minExtent => 110.0.w; // 收缩时的最小高度
 
   @override
   bool shouldRebuild(covariant _FloatingCategoryHeaderDelegate oldDelegate) =>
@@ -701,10 +701,10 @@ class _CategoryWrap extends StatelessWidget {
     final cats = categories;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      padding: EdgeInsets.symmetric(vertical: 4.w, horizontal: 4.w),
       child: Wrap(
-        spacing: 4,
-        runSpacing: 4,
+        spacing: 4.w,
+        runSpacing: 4.w,
         children: List.generate(cats.length, (index) {
           final cat = cats[index];
           final hasChildren =

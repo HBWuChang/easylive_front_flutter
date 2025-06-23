@@ -498,7 +498,7 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
         label: Text(label),
         style: TextButton.styleFrom(
           alignment: Alignment.centerLeft,
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
           ),
@@ -534,7 +534,7 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                             children: [
                               Positioned(
                                   top: 0,
-                                  left: 134,
+                                  left: 134.w,
                                   child: SizedBox(
                                       width: 32.w,
                                       height: 32.w,
@@ -576,7 +576,7 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                           child: Stack(
                             children: [
                               Positioned(
-                                top: 40,
+                                top: 40.w,
                                 left: 0,
                                 child: SizedBox(
                                     width: widthCard.w,
@@ -645,7 +645,7 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                               ),
                               Positioned(
                                   top: 0,
-                                  left: 100,
+                                  left: 100.w,
                                   child: SizedBox(
                                     width: 100.w,
                                     height: 100.w,

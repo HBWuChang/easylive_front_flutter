@@ -19,17 +19,15 @@ class RecommendVideoArea extends StatelessWidget {
   Widget build(BuildContext context) {
     final VideoLoadRecommendVideoController videoLoadRecommendVideoController =
         Get.find<VideoLoadRecommendVideoController>();
-    
+
     return GetBuilder<VideoLoadRecommendVideoController>(
       init: videoLoadRecommendVideoController, // 保证 controller 不为 null
       builder: (videoController) {
         final List<VideoInfo> videos = videoController.recommendVideos;
         final List<VideoInfo> carouselVideos = videos.take(5).toList();
-        final List<VideoInfo> recommendVideos =
-            videos.skip(5).take(6).toList();
+        final List<VideoInfo> recommendVideos = videos.skip(5).take(6).toList();
         return Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
           child: LayoutBuilder(
             builder: (context, constraints) {
               // 设定整体宽高比，例如 16:5
@@ -39,7 +37,7 @@ class RecommendVideoArea extends StatelessWidget {
               double height = width / aspectRatio;
               return SizedBox(
                 width: width.w,
-                height: height.w,
+                height: height,
                 child: AspectRatio(
                   aspectRatio: aspectRatio,
                   child: Row(
@@ -49,12 +47,11 @@ class RecommendVideoArea extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: AspectRatio(
-                          aspectRatio: AspectRatioEnum
-                              .MainPageRecommendVideoLeft.ratio,
+                          aspectRatio:
+                              AspectRatioEnum.MainPageRecommendVideoLeft.ratio,
                           child: carouselVideos.isEmpty
                               ? Center(child: Text('暂无推荐'))
-                              : CarouselVideoWidget(
-                                  videos: carouselVideos),
+                              : CarouselVideoWidget(videos: carouselVideos),
                         ),
                       ),
                       SizedBox(width: 16.w),
@@ -70,11 +67,10 @@ class RecommendVideoArea extends StatelessWidget {
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 3,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12.w,
+                              crossAxisSpacing: 12.w,
                               childAspectRatio: AspectRatioEnum
-                                  .MainPageRecommendVideoRightchild
-                                  .ratio,
+                                  .MainPageRecommendVideoRightchild.ratio,
                             ),
                             itemCount: recommendVideos.length,
                             itemBuilder: (context, idx) {
@@ -138,16 +134,17 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
   void _navigateToVideo(VideoInfo video) {
     // 这里可以根据你的路由系统进行跳转
     // 例如使用 Get.to() 或者 Navigator.push()
-    
+
     // 示例1: 使用Get路由 (如果你使用GetX)
-    Get.toNamed('${Routes.videoPlayPage}/${video.videoId}',id: Routes.mainGetId);
-    
+    Get.toNamed('${Routes.videoPlayPage}/${video.videoId}',
+        id: Routes.mainGetId);
+
     // 示例2: 使用Navigator (Flutter标准路由)
     // Navigator.pushNamed(context, '/video-detail', arguments: video);
-    
+
     // 示例3: 打印视频信息 (临时调试用)
     print('点击了视频: ${video.videoName} (ID: ${video.videoId})');
-    
+
     // 请根据你的具体需求修改这里的跳转逻辑
     // 你可能需要导航到播放页面或详情页面
   }
@@ -178,14 +175,14 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
           final double imageHeight = constraints.maxWidth / (16 / 9);
           // 计算额外的不透明区域高度（用于放置标题和按钮）
           final double opaqueHeight = imageHeight * 0.18; // 图片高度的15%
-          
+
           return SizedBox(
-            height: (imageHeight + opaqueHeight).w,
+            height: (imageHeight + opaqueHeight),
             child: Stack(
               children: [
                 // 图片滚动区域 - 严格16:9比例
                 SizedBox(
-                  height: imageHeight.w,
+                  height: imageHeight,
                   child: PageView.builder(
                     controller: _pageController,
                     itemCount: widget.videos.length,
@@ -205,13 +202,14 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                           children: [
                             // 图片本体
                             SizedBox(
-                              width: constraints.maxWidth.w,
-                              height: imageHeight.w,
+                              width: constraints.maxWidth,
+                              height: imageHeight,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.vertical(
                                   top: Radius.circular(8.r),
                                 ),
-                                child: video.videoCover != null && video.videoCover!.isNotEmpty
+                                child: video.videoCover != null &&
+                                        video.videoCover!.isNotEmpty
                                     ? ExtendedImage.network(
                                         Constants.baseUrl +
                                             ApiAddr.fileGetResourcet +
@@ -229,9 +227,11 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                               child: FutureBuilder<Color>(
                                 future: _getBottomAverageColor(idx),
                                 builder: (context, snapshot) {
-                                  final baseColor = snapshot.data ?? Colors.black;
+                                  final baseColor =
+                                      snapshot.data ?? Colors.black;
                                   return Container(
-                                    height: (imageHeight * 0.25).w, // 减小渐变区域到图片高度的25%
+                                    height: (imageHeight * 0.25)
+                                        , // 减小渐变区域到图片高度的25%
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
@@ -248,7 +248,6 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                                 },
                               ),
                             ),
-                            
                           ],
                         ),
                       );
@@ -260,7 +259,7 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                   left: 0,
                   right: 0,
                   top: imageHeight,
-                  height: opaqueHeight.w,
+                  height: opaqueHeight,
                   child: FutureBuilder<Color>(
                     future: _getBottomAverageColor(_currentPage),
                     builder: (context, snapshot) {
@@ -281,7 +280,8 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                             ),
                           ],
                         ),
-                        child: _buildContentBar(context, widget.videos[_currentPage], _currentPage),
+                        child: _buildContentBar(
+                            context, widget.videos[_currentPage], _currentPage),
                       );
                     },
                   ),
@@ -297,7 +297,7 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
   // 新增：构建不透明区域的内容（标题和按钮）
   Widget _buildContentBar(BuildContext context, VideoInfo video, int idx) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding:  EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -361,7 +361,7 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
       ),
     );
   }
-  
+
   Future<Color> _getBottomAverageColor(int idx) async {
     if (_avgColorCache.containsKey(idx)) return _avgColorCache[idx]!;
     final video = widget.videos[idx];
@@ -405,14 +405,15 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
       final avgR = r ~/ count;
       final avgG = g ~/ count;
       final avgB = b ~/ count;
-      
+
       // 增强颜色深度，避免过于浅色
       final enhancedR = (avgR * 0.8).round().clamp(0, 255);
       final enhancedG = (avgG * 0.8).round().clamp(0, 255);
       final enhancedB = (avgB * 0.8).round().clamp(0, 255);
-      
+
       // 如果颜色太浅，强制使用较深的版本
-      final luminance = (0.299 * enhancedR + 0.587 * enhancedG + 0.114 * enhancedB) / 255;
+      final luminance =
+          (0.299 * enhancedR + 0.587 * enhancedG + 0.114 * enhancedB) / 255;
       if (luminance > 0.6) {
         // 如果亮度太高，进一步压暗
         final finalR = (enhancedR * 0.5).round().clamp(0, 255);
@@ -420,9 +421,10 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
         final finalB = (enhancedB * 0.5).round().clamp(0, 255);
         _avgColorCache[idx] = Color.fromARGB(255, finalR, finalG, finalB);
       } else {
-        _avgColorCache[idx] = Color.fromARGB(255, enhancedR, enhancedG, enhancedB);
+        _avgColorCache[idx] =
+            Color.fromARGB(255, enhancedR, enhancedG, enhancedB);
       }
-      
+
       return _avgColorCache[idx]!;
     } catch (e) {
       _avgColorCache[idx] = Colors.black.withOpacity(0.85);

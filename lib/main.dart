@@ -16,7 +16,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'controllers/controllers-class.dart';
 import 'api_service.dart';
-import 'package:window_manager/window_manager.dart';
+import 'fakePackages/fake_window_manager.dart' if (dart.library.io) 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'pages/PlatformPage/PlatformPage.dart';
 import 'package:media_kit/media_kit.dart';
@@ -144,7 +144,7 @@ class _HomeState extends State<Home> {
         children: [
           // 页面内容
           Positioned.fill(
-            top: kToolbarHeight,
+            top: kToolbarHeight.w,
             child: Navigator(
               key: Get.nestedKey(Routes.mainGetId),
               initialRoute: Routes.mainPage,
@@ -204,7 +204,7 @@ class _HomeState extends State<Home> {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: kToolbarHeight.w,
+                height: kToolbarHeight.w+1,
                 child: Material(
                   color: appBarController.appBarOpaque.value
                       ? Colors.white

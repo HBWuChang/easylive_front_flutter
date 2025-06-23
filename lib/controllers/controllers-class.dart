@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 import '../api_service.dart';
 import '../Funcs.dart';
 import 'package:media_kit/media_kit.dart';
+import '../pages/MainPage/MainPage.dart';
 import 'VideoCommentController.dart';
 import 'dart:async';
 
@@ -36,6 +37,12 @@ class ControllersInitController extends GetxController {
     initVideoLoadRecommendVideoController();
     initLocalSettingsControllerController();
     initVideoNowWatchingCountController();
+    if (!Get.isRegistered<CategoryViewStateController>()) {
+      Get.put(CategoryViewStateController(), permanent: true);
+    }
+    if (!Get.isRegistered<WindowSizeController>()) {
+      Get.put(WindowSizeController(), permanent: true);
+    }
   }
 
   void initLoginController() {
@@ -296,8 +303,7 @@ class UserInfoController extends GetxController {
         userInfo.value = res['data'];
         if (userInfo['nickName'] != null && userInfo['nickName'].isNotEmpty) {
           Get.find<AppBarController>().updateTitleByRouteName(
-              name: '${Routes.uhome}/$_userId',
-              title: userInfo['nickName']);
+              name: '${Routes.uhome}/$_userId', title: userInfo['nickName']);
         }
         return userInfo;
       } else {

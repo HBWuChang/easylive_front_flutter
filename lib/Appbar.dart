@@ -15,7 +15,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'controllers/controllers-class.dart';
 import 'api_service.dart';
-import 'package:window_manager/window_manager.dart';
+import 'fakePackages/fake_window_manager.dart'
+    if (dart.library.io) 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'pages/PlatformPage/PlatformPage.dart';
@@ -46,7 +47,7 @@ class AppBarContent extends StatelessWidget {
               },
               icon: Icon(
                 Icons.home_rounded,
-                size: 13,
+                size: 13.w,
               )),
           Expanded(
             key: tabBarKey,
@@ -105,7 +106,6 @@ class AppBarContent extends StatelessWidget {
                               child: GestureDetector(
                                 key: ValueKey(routes[index].name),
                                 onTap: () {
-                                  // TODO: 标签点击动作
                                   if (routes[index].name != selectedName) {
                                     Get.toNamed(
                                       routes[index].name,
@@ -159,14 +159,15 @@ class AppBarContent extends StatelessWidget {
                                             waitDuration:
                                                 Duration(milliseconds: 400),
                                             child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 8),
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 8.w),
                                                 child: Obx(
                                                   () => SizedBox(
-                                                      width:( appBarController
-                                                              .tabWidth.value -
-                                                          54).w, // 减去关闭按钮和间距
+                                                      width: (appBarController
+                                                                  .tabWidth
+                                                                  .value -
+                                                              54)
+                                                          .w, // 减去关闭按钮和间距
                                                       child: Obx(() => Text(
                                                             routes[index]
                                                                     .title
@@ -211,10 +212,10 @@ class AppBarContent extends StatelessWidget {
                                             appBarController.removeRouteByName(
                                                 routes[index].name),
                                         child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              right: 6, left: 2),
+                                          padding: EdgeInsets.only(
+                                              right: 6.w, left: 2.w),
                                           child: Icon(Icons.close,
-                                              size: 16, color: Colors.grey),
+                                              size: 16.w, color: Colors.grey),
                                         ),
                                       ),
                                     ],
@@ -244,8 +245,8 @@ class AppBarContent extends StatelessWidget {
                       if (overlayInfoEntry != null) return;
                       overlayInfoEntry = OverlayEntry(
                         builder: (context) => Positioned(
-                          left: offset.dx + size.width / 2 - 150, // 300宽度一半
-                          top: offset.dy,
+                          left: offset.dx + size.width / 2 - 150.w, // 300宽度一半
+                          top: offset.dy.w,
                           child: AccountInfoDialog(
                             avatarKey: _avatarKey,
                             onClose: () {
@@ -263,7 +264,7 @@ class AppBarContent extends StatelessWidget {
                             height: 40.w,
                             child: IconButton(
                               tooltip: Texts.login,
-                              iconSize: 40,
+                              iconSize: 40.sp,
                               onPressed: () {
                                 openLoginDialog();
                               },
@@ -280,42 +281,36 @@ class AppBarContent extends StatelessWidget {
                               avatarValue: accountController.avatar,
                             );
                           })),
-                IconButton(
-                  tooltip: Texts.minimize,
-                  icon: Icon(Icons.minimize, size: 13),
-                  onPressed: () {
-                    windowManager.minimize();
-                    windowManager.setSkipTaskbar(false);
-                  },
-                ),
-                IconButton(
-                  tooltip: Texts.minimize,
-                  icon: Icon(Icons.minimize, size: 13),
-                  onPressed: () {
-                    windowManager.minimize();
-                    windowManager.setSkipTaskbar(false);
-                  },
-                ),
+                if (!GetPlatform.isWeb)
+                  IconButton(
+                    tooltip: Texts.minimize,
+                    icon: Icon(Icons.minimize, size: 13.sp),
+                    onPressed: () {
+                      windowManager.minimize();
+                      windowManager.setSkipTaskbar(false);
+                    },
+                  ),
                 HoverFollowWidget(
                     child: IconButton(
                   tooltip: '创作中心',
-                  icon: Icon(Icons.create, size: 13),
+                  icon: Icon(Icons.create, size: 13.sp),
                   onPressed: () {
                     Get.find<AppBarController>().extendBodyBehindAppBar.value =
                         false;
                     Get.toNamed(Routes.platformPage, id: Routes.mainGetId);
                   },
                 )),
-                IconButton(
-                  tooltip: Texts.close,
-                  icon: Icon(
-                    Icons.close,
-                    size: 13,
+                if (!GetPlatform.isWeb)
+                  IconButton(
+                    tooltip: Texts.close,
+                    icon: Icon(
+                      Icons.close,
+                      size: 13.sp,
+                    ),
+                    onPressed: () {
+                      if (!kDebugMode) exit(0);
+                    },
                   ),
-                  onPressed: () {
-                    if (!kDebugMode) exit(0);
-                  },
-                ),
               ],
             ),
           )

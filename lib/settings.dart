@@ -1,5 +1,6 @@
 class Constants {
-  static const String baseUrl = 'http://39.105.203.95:7071';
+  // static const String baseUrl = 'http://39.105.203.95:7071';
+  static const String baseUrl = 'http://localhost:7068/api';
   static const double dialogResizeRate = 0.75;
   static const double loginDialogResizeRate = 0.6;
   static const double loginDialogMinWidth = 590;

@@ -44,9 +44,9 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SizedBox(
-        width: 500.w,
+        width: 500,
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -57,9 +57,9 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                 children: [
                   Text('请选择投币数量',
                       style:
-                          TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(
-                      width: 150.w,
+                      width: 150,
                       child: Row(
                         children: [
                           Checkbox(
@@ -69,12 +69,12 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                                   _checked = value ?? true;
                                 });
                               }),
-                          Text('同时点赞', style: TextStyle(fontSize: 16.sp)),
+                          Text('同时点赞', style: TextStyle(fontSize: 16)),
                         ],
                       ))
                 ],
               ),
-              SizedBox(height: 20.w),
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -88,7 +88,7 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                         decoration: DottedDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           shape: Shape.box,
-                          borderRadius: BorderRadius.all(Radius.circular(16.r)),
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
                           strokeWidth: 2,
                           dash: _hover1 ? [1, 0] : [6, 4], // 实线/虚线
                         ),
@@ -100,19 +100,19 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                               startFrame: 0,
                               frameCount: 24,
                               totalFrames: 24,
-                              frameWidth: 187.w,
-                              frameHeight: 300.w,
+                              frameWidth: 187,
+                              frameHeight: 300,
                               duration: Duration(milliseconds: 1200),
                               scale: 1,
                             ),
                             SizedBox(height: 8),
-                            Text('投1个', style: TextStyle(fontSize: 15.sp)),
+                            Text('投1个', style: TextStyle(fontSize: 15)),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 40.w),
+                  SizedBox(width: 40),
                   GestureDetector(
                     onTap: () =>
                         Get.back(result: {'coins': 2, 'like': _checked}),
@@ -123,7 +123,7 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                         decoration: DottedDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           shape: Shape.box,
-                          borderRadius: BorderRadius.all(Radius.circular(16.r)),
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
                           strokeWidth: 2,
                           dash: _hover2 ? [1, 0] : [6, 4],
                         ),
@@ -135,13 +135,13 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                               startFrame: 0,
                               frameCount: 24,
                               totalFrames: 24,
-                              frameWidth: 187.w,
-                              frameHeight: 300.w,
+                              frameWidth: 187,
+                              frameHeight: 300,
                               duration: Duration(milliseconds: 1200),
                               scale: 1,
                             ),
                             SizedBox(height: 8),
-                            Text('投2个', style: TextStyle(fontSize: 15.sp)),
+                            Text('投2个', style: TextStyle(fontSize: 15)),
                           ],
                         ),
                       ),
@@ -149,7 +149,7 @@ class _CoinDialogWidgetState extends State<_CoinDialogWidget> {
                   ),
                 ],
               ),
-              SizedBox(height: 16.w),
+              SizedBox(height: 16),
               TextButton(
                 onPressed: () => Get.back(result: null),
                 child: Text('取消'),
@@ -228,8 +228,8 @@ class _CoinSpriteAnimationWidgetState extends State<CoinSpriteAnimationWidget>
               top: 0,
               child: Image.asset(
                 widget.imagePath,
-                width: (widget.frameWidth * widget.totalFrames * widget.scale).w,
-                height: (widget.frameHeight * widget.scale).w,
+                width: (widget.frameWidth * widget.totalFrames * widget.scale),
+                height: (widget.frameHeight * widget.scale),
                 fit: BoxFit.none,
                 filterQuality: FilterQuality.high,
               ),
