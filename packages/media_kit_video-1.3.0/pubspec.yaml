@@ -49,3 +49,5 @@ flutter:
         package: com.alexmercerind.media_kit_video
         pluginClass: MediaKitVideoPlugin
       web:
+        pluginClass: MediaKitVideoPlugin
+        fileName: media_kit_video_plugin_web.dart

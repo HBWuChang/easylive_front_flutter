@@ -15,11 +15,12 @@ import 'fakePackages/fake_fetch_client.dart' as fetch
 
 // Android 平台使用 cronet_http，其他平台使用虚假的 cronet_http
 import 'fakePackages/fake_cronet_http.dart' as cronet
-    if (dart.platform.android) 'package:cronet_http/cronet_http.dart';
+    if (dart.library.io) 'package:cronet_http/cronet_http.dart';
 
 // Desktop 平台使用 rhttp，Web 平台使用虚假的 rhttp
-import 'fakePackages/fake_rhttp.dart' as rhttp
-    if (dart.platform.windows) 'package:rhttp/rhttp.dart';
+// import 'fakePackages/fake_rhttp.dart' as rhttp
+//     if (dart.library.io) 'package:rhttp/rhttp.dart';
+import 'package:rhttp/rhttp.dart' as rhttp;
 
 import 'package:http/http.dart' as http;
 
@@ -62,7 +63,6 @@ class ApiService {
   /// 初始化HTTP客户端，根据平台选择合适的实现
   static Future<void> init({String? baseUrl}) async {
     _baseUrl = baseUrl ?? 'http://127.0.0.1:7071';
-
     if (kIsWeb) {
       // Web平台使用 fetch_client
       _client = fetch.FetchClient(mode: fetch.RequestMode.cors);

@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
+import 'hls_helper.dart';
 
 /// {@template web_video_controller}
 ///
@@ -53,6 +54,9 @@ class WebVideoController extends PlatformVideoController {
     final instances = globalContext.getProperty(_kInstances.toJS) as JSObject;
     final element = instances.getProperty(handle.toJS) as web.HTMLVideoElement;
     controller._element = element;
+    // Initialize HLS helper
+    controller._hlsHelper = HlsHelper();
+    
     // Register the [html.VideoElement] as platform view.
     platformViewRegistry.registerViewFactory(
       'com.alexmercerind.media_kit_video.$handle',
@@ -62,6 +66,13 @@ class WebVideoController extends PlatformVideoController {
     // On web implementation, we are having [handle] & [controller.id] same, which in itself is a simple counter based value managed within [Player].
     // Since there is no texture creation or rendering involved.
     controller.id.value = handle;
+
+    // Listen to player state changes for HLS handling
+    player.stream.playlist.listen((playlist) {
+      if (playlist.medias.isNotEmpty) {
+        controller._handleMediaLoad(playlist.medias.first.uri);
+      }
+    });
 
     // Listen to the resize event of the [html.VideoElement].
     controller._resizeStreamSubscription = controller._element?.onResize.listen(
@@ -116,14 +127,34 @@ class WebVideoController extends PlatformVideoController {
     );
   }
 
+  /// Handle media loading with HLS support
+  void _handleMediaLoad(String url) {
+    if (_element == null || _hlsHelper == null) return;
+
+    // Try to initialize HLS for this media
+    final success = _hlsHelper!.initialize(
+      _element!,
+      url,
+      onError: (error) {
+        debugPrint('HLS Error: ${error.type} - ${error.details}');
+      },
+    );
+
+    debugPrint('HLS initialization for $url: ${success ? 'success' : 'fallback to native'}');
+  }
+
   /// Disposes the instance. Releases allocated resources back to the system.
   Future<void> _dispose() async {
     super.dispose();
     await _resizeStreamSubscription?.cancel();
+    _hlsHelper?.dispose();
   }
 
   /// HTML [html.HTMLVideoElement] instance reference.
   web.HTMLVideoElement? _element;
+  
+  /// HLS helper instance for HLS.js integration
+  HlsHelper? _hlsHelper;
 
   StreamSubscription<web.Event>? _resizeStreamSubscription;
 

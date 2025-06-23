@@ -4,6 +4,12 @@
 		reverse_proxy http://39.105.203.95:7071
 	}
 
+	# 对所有 /localfileT 开头的请求，提供本地文件服务
+	handle_path /localfileT/* {
+		root * "E:\Vedio\Apex Legends"
+		file_server
+	}
+
 	# 默认将其他所有请求反代到本地 7069 端口
 	handle {
 		reverse_proxy localhost:7069

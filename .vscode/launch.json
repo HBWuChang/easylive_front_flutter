@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Flutter",
+            "name": "Flutter Web",
             "request": "launch",
             "type": "dart",
             "args": [
@@ -10,6 +10,16 @@
                 "web-server",
                 "--web-port",
                 "7069"
+            ],
+            
+        },
+        {
+            "name": "Flutter Windows",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-d",
+                "windows"
             ],
         }
     ]
