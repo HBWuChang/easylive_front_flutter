@@ -78,8 +78,8 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                       child: Container(
                         height: 38.w,
                         decoration: BoxDecoration(
-                          borderRadius:
-                              BorderRadius.vertical(bottom: Radius.circular(8.r)),
+                          borderRadius: BorderRadius.vertical(
+                              bottom: Radius.circular(8.r)),
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -96,7 +96,8 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                       bottom: 8.w,
                       child: Row(
                         children: [
-                          Icon(Icons.play_arrow, color: Colors.white, size: 16.w),
+                          Icon(Icons.play_arrow,
+                              color: Colors.white, size: 16.w),
                           SizedBox(width: 2.w),
                           Text(
                             (widget.video.playCount ?? 0).toString(),
@@ -108,7 +109,8 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                                 ]),
                           ),
                           SizedBox(width: 10.w),
-                          Icon(Icons.subtitles, color: Colors.white, size: 16.w),
+                          Icon(Icons.subtitles,
+                              color: Colors.white, size: 16.w),
                           SizedBox(width: 2.w),
                           Text(
                             (widget.video.danmuCount ?? 0).toString(),
@@ -145,7 +147,8 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                     },
                     label: Text(
                       widget.video.nickName ?? '',
-                      style: TextStyle(fontSize: 13.sp, color: Colors.grey[700]),
+                      style:
+                          TextStyle(fontSize: 13.sp, color: Colors.grey[700]),
                       overflow: TextOverflow.ellipsis,
                     )),
                 SizedBox(width: 10.w),
@@ -171,7 +174,9 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
 // 横向视频信息组件
 class VideoInfoWidgetHorizon extends StatefulWidget {
   final VideoInfo video;
-  const VideoInfoWidgetHorizon({required this.video, Key? key})
+  final bool big;
+  const VideoInfoWidgetHorizon(
+      {required this.video, this.big = false, Key? key})
       : super(key: key);
 
   @override
@@ -180,7 +185,7 @@ class VideoInfoWidgetHorizon extends StatefulWidget {
 
 class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
   final RxBool hovered = false.obs;
-
+  double get rate => widget.big ? 1.67 : 1;
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -202,10 +207,10 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                   color: hovered.value
                       ? Theme.of(context).colorScheme.primary.withOpacity(0.08)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(10 * rate.r),
                 ),
                 child: SizedBox(
-                  height: 110.w,
+                  height: 110 * rate.w,
                   child: Row(
                     children: [
                       // 左侧封面
@@ -243,11 +248,12 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                         left: 0,
                                         right: 0,
                                         bottom: 0,
-                                        height: 36.w,
+                                        height: 36 * rate.w,
                                         child: Container(
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.vertical(
-                                                bottom: Radius.circular(8.r)),
+                                                bottom: Radius.circular(
+                                                    8 * rate.r)),
                                             gradient: LinearGradient(
                                               begin: Alignment.topCenter,
                                               end: Alignment.bottomCenter,
@@ -261,22 +267,23 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                       ),
                                       // 视频时长，右下角
                                       Positioned(
-                                        right: 8,
-                                        bottom: 8,
+                                        right: 8 * rate.w,
+                                        bottom: 8 * rate.w,
                                         child: Container(
                                           padding: EdgeInsets.symmetric(
-                                              horizontal: 6, vertical: 2),
+                                              horizontal: 6 * rate,
+                                              vertical: 2 * rate),
                                           decoration: BoxDecoration(
                                             color: Colors.black54,
-                                            borderRadius:
-                                                BorderRadius.circular(6.r),
+                                            borderRadius: BorderRadius.circular(
+                                                6 * rate.r),
                                           ),
                                           child: Text(
                                             toShowdurationText(
                                                 widget.video.duration ?? 0),
                                             style: TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 12.sp),
+                                                fontSize: 12 * rate.sp),
                                           ),
                                         ),
                                       ),
@@ -286,7 +293,7 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                               )),
                         )),
                       ),
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 12 * rate.w),
                       // 右侧信息
                       Expanded(
                         flex: 3,
@@ -296,24 +303,24 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                           children: [
                             // 标题，两行
                             HoverFollowWidget(
-                                maxOffset: 4,
+                                maxOffset: 4 * rate,
                                 child: SizedBox(
-                                  height: 40.w,
+                                  height: 40 * rate.w,
                                   child: Text(
                                     widget.video.videoName ?? '',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 15.sp),
+                                        fontSize: 15 * rate.sp),
                                   ),
                                 )),
-                            SizedBox(height: 4.w),
+                            SizedBox(height: 4 * rate.w),
                             // up主
                             HoverFollowWidget(
                                 child: TextButton.icon(
                                     icon: Icon(Icons.person,
-                                        size: 14.w, color: Colors.grey),
+                                        size: 14 * rate.w, color: Colors.grey),
                                     onPressed: () {
                                       Get.toNamed(
                                           '${Routes.uhome}/${widget.video.userId}',
@@ -322,32 +329,34 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                     label: Text(
                                       widget.video.nickName ?? '',
                                       style: TextStyle(
-                                          fontSize: 13.sp,
+                                          fontSize: 13 * rate.sp,
                                           color: Colors.grey[700]),
                                       overflow: TextOverflow.ellipsis,
                                     ))),
-                            SizedBox(height: 4.w),
+                            SizedBox(height: 4 * rate.w),
                             // 播放量和弹幕
                             HoverFollowWidget(
                                 child: Row(
                               children: [
-                                SizedBox(width: 12.w),
+                                SizedBox(width: 12 * rate.w),
                                 Icon(Icons.play_arrow,
-                                    size: 14, color: Colors.grey),
-                                SizedBox(width: 2.w),
+                                    size: 14 * rate.w, color: Colors.grey),
+                                SizedBox(width: 2 * rate.w),
                                 Text(
                                   (widget.video.playCount ?? 0).toString(),
                                   style: TextStyle(
-                                      fontSize: 13.sp, color: Colors.grey[700]),
+                                      fontSize: 13 * rate.sp,
+                                      color: Colors.grey[700]),
                                 ),
-                                SizedBox(width: 10.w),
+                                SizedBox(width: 10 * rate.w),
                                 Icon(Icons.subtitles,
-                                    size: 14, color: Colors.grey),
-                                SizedBox(width: 2.w),
+                                    size: 14 * rate, color: Colors.grey),
+                                SizedBox(width: 2 * rate.w),
                                 Text(
                                   (widget.video.danmuCount ?? 0).toString(),
                                   style: TextStyle(
-                                      fontSize: 13.sp, color: Colors.grey[700]),
+                                      fontSize: 13 * rate.sp,
+                                      color: Colors.grey[700]),
                                 ),
                               ],
                             )),

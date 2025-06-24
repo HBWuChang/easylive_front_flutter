@@ -1,6 +1,6 @@
 class Constants {
-  // static const String baseUrl = 'http://39.105.203.95:7071';
-  static const String baseUrl = 'http://localhost:7068/api';
+  static const String baseUrl = 'http://39.105.203.95:7071';
+  // static const String baseUrl = 'http://localhost:7068/api';
   static const double dialogResizeRate = 0.75;
   static const double loginDialogResizeRate = 0.6;
   static const double loginDialogMinWidth = 590;
@@ -37,6 +37,7 @@ class Routes {
   static const String loginPageRegisterRouteName = '/loginPageRegister';
   static const String homePage = '/home';
   static const String mainPage = '/main';
+  static const String hotPage = '/hot';
   static const String loginPage = '/login';
   static const String platformPage = '/platform';
   static const String videoPlayPage = '/videoPlayPage';

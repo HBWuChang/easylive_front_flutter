@@ -500,12 +500,12 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
         height: 28.w,
         decoration: BoxDecoration(
           color: Colors.black54,
-          borderRadius: BorderRadius.circular(14.r),
+          borderRadius: BorderRadius.circular(14.w),
         ),
         child: Icon(
           isRight ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
           color: Colors.white,
-          size: 14,
+          size: 14.w,
         ),
       ),
     );

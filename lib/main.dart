@@ -3,6 +3,7 @@ import 'dart:ui' show PointerScrollEvent;
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/pages/MainPage/MainPage.dart';
+import 'package:easylive/pages/HotPage/HotPage.dart';
 import 'package:easylive/pages/UHome/Uhome.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPage.dart';
 import 'package:easylive/pages/pages.dart';
@@ -16,7 +17,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'controllers/controllers-class.dart';
 import 'api_service.dart';
-import 'fakePackages/fake_window_manager.dart' if (dart.library.io) 'package:window_manager/window_manager.dart';
+import 'fakePackages/fake_window_manager.dart'
+    if (dart.library.io) 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'pages/PlatformPage/PlatformPage.dart';
 import 'package:media_kit/media_kit.dart';
@@ -103,33 +105,10 @@ class _HomeState extends State<Home> {
   final Controller c = Get.put(Controller());
   final AccountController accountController = Get.find<AccountController>();
   final AppBarController appBarController = Get.find<AppBarController>();
-  final AppBarContent appBarContent = AppBarContent();
-
-  @override
+  final AppBarContent appBarContent = AppBarContent();  @override
   void initState() {
     super.initState();
-    appBarController.scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    // 当图片完全不可见时，AppBar变为不透明
-    final threshold = appBarController.imgHeight;
-    if (appBarController.scrollController.offset >= threshold &&
-        !appBarController.appBarOpaque.value) {
-      appBarController.appBarOpaque.value = true;
-    } else if (appBarController.scrollController.offset < threshold &&
-        appBarController.appBarOpaque.value) {
-      appBarController.appBarOpaque.value = false;
-    }
-    final showFloatingCateheight = threshold + 128;
-    if (appBarController.scrollController.offset >= showFloatingCateheight &&
-        !appBarController.showFloatingCate.value) {
-      appBarController.showFloatingCate.value = true;
-    } else if (appBarController.scrollController.offset <
-            showFloatingCateheight &&
-        appBarController.showFloatingCate.value) {
-      appBarController.showFloatingCate.value = false;
-    }
+    // ScrollController 监听已移至各个页面自行管理
   }
 
   @override
@@ -150,7 +129,7 @@ class _HomeState extends State<Home> {
               initialRoute: Routes.mainPage,
               clipBehavior: Clip.none,
               onGenerateRoute: (settings) {
-                if (settings.name == Routes.mainPage) {
+                if (settings.name!.startsWith(Routes.mainPage)) {
                   var route = GetPageRoute(
                       settings: settings,
                       page: () => MainPage(),
@@ -158,7 +137,17 @@ class _HomeState extends State<Home> {
                       middlewares: [appBarController.listenPopMiddleware]);
                   appBarController.addAndCleanReapeatRoute(
                       route, settings.name!,
-                      title: "狩叶");
+                      title: "狩叶");                  return route;
+                }
+                if (settings.name == Routes.hotPage) {
+                  var route = GetPageRoute(
+                      settings: settings,
+                      page: () => HotPage(),
+                      transition: Transition.fadeIn,
+                      middlewares: [appBarController.listenPopMiddleware]);
+                  appBarController.addAndCleanReapeatRoute(
+                      route, settings.name!,
+                      title: "热门推荐");
                   return route;
                 }
                 if (settings.name == Routes.platformPage) {
@@ -204,7 +193,7 @@ class _HomeState extends State<Home> {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: kToolbarHeight.w+1,
+                height: kToolbarHeight.w + 1,
                 child: Material(
                   color: appBarController.appBarOpaque.value
                       ? Colors.white

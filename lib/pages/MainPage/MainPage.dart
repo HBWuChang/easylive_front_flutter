@@ -21,28 +21,47 @@ class _MainPageState extends State<MainPage> {
       Get.find<CategoryLoadAllCategoryController>();
   final CategoryViewStateController categoryViewStateController =
       Get.put(CategoryViewStateController());
+  late ScrollController _scrollController;
 
   void _minScrollListener() {
-    if (appBarController.scrollController.offset < kToolbarHeight) {
-      appBarController.scrollController.jumpTo(kToolbarHeight);
+    if (_scrollController.offset < kToolbarHeight) {
+      _scrollController.jumpTo(kToolbarHeight);
+    }
+    
+    // 管理 AppBar 透明度状态
+    final threshold = appBarController.imgHeight;
+    if (_scrollController.offset >= threshold &&
+        !appBarController.appBarOpaque.value) {
+      appBarController.appBarOpaque.value = true;
+    } else if (_scrollController.offset < threshold &&
+        appBarController.appBarOpaque.value) {
+      appBarController.appBarOpaque.value = false;
+    }
+    
+    // 更新浮动分区栏显示状态
+    final shouldShowFloating = _scrollController.offset > appBarController.imgHeight;
+    if (appBarController.showFloatingCate.value != shouldShowFloating) {
+      appBarController.showFloatingCate.value = shouldShowFloating;
     }
   }
 
   @override
   void initState() {
     super.initState();
-    appBarController.scrollController.addListener(_minScrollListener);
+    _scrollController = ScrollController();
+    _scrollController.addListener(_minScrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (appBarController.scrollController.hasClients &&
-          appBarController.scrollController.offset < kToolbarHeight) {
-        appBarController.scrollController.jumpTo(kToolbarHeight);
+      if (_scrollController.hasClients &&
+          _scrollController.offset < kToolbarHeight) {
+        _scrollController.jumpTo(kToolbarHeight);
       }
     });
   }
 
   @override
   void dispose() {
-    appBarController.scrollController.removeListener(_minScrollListener);
+    _scrollController.removeListener(_minScrollListener);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -50,7 +69,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return CustomScrollView(
       clipBehavior: Clip.none,
-      controller: appBarController.scrollController,
+      controller: _scrollController,
       slivers: [
         SliverToBoxAdapter(
           child: Stack(
@@ -112,8 +131,7 @@ class _MainPageState extends State<MainPage> {
                       // 热门按钮（两行高）
                       _HotButton(
                         onTap: () {
-                          categoryViewStateController
-                              .selectedCategoryCode.value = '热门';
+                          Get.toNamed(Routes.hotPage, id: Routes.mainGetId);
                         },
                       ),
                       SizedBox(width: 8.w),
@@ -162,7 +180,6 @@ class _MainPageState extends State<MainPage> {
           delegate: SliverChildListDelegate([
             // 轮播推荐视频区
             RecommendVideoArea(),
-            
           ]),
         ),
       ],
@@ -195,7 +212,7 @@ class _HotButtonState extends State<_HotButton> {
         child: Container(
           width: 100.w,
           height: (widget.isFloating ? 44 : 48).w, // 浮动状态下稍小，原始状态下两行高度
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+          padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 18.w),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: _hovered
@@ -243,8 +260,6 @@ class _HotButtonState extends State<_HotButton> {
   }
 }
 
-
-
 // 使用ExpansionPanelList的浮动分区组件
 class _FloatingCategoryExpansion extends StatelessWidget {
   final List categories;
@@ -287,7 +302,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
               _HotButton(
                 isFloating: true,
                 onTap: () {
-                  controller.selectedCategoryCode.value = '热门';
+                  Get.toNamed(Routes.hotPage, id: Routes.mainGetId);
                 },
               ),
               SizedBox(width: 8.w),
@@ -351,7 +366,8 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                             _HotButton(
                               isFloating: true,
                               onTap: () {
-                                controller.selectedCategoryCode.value = '热门';
+                                Get.toNamed(Routes.hotPage,
+                                    id: Routes.mainGetId);
                               },
                             ),
                             SizedBox(width: 8.w),

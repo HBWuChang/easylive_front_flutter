@@ -261,7 +261,8 @@ enum AspectRatioEnum {
   MainPageRecommendVideoArea('MainPageRecommendVideoArea', 1478 / 473),
   MainPageRecommendVideoLeft('MainPageRecommendVideoLeft', 579 / 385),
   MainPageRecommendVideoRightchild(
-      'MainPageRecommendVideoRightchild', 277 / 212);
+      'MainPageRecommendVideoRightchild', 277 / 212),
+  HotPageVideo('HotPageVideo', 477 / 112);
 
   final String type;
   final double ratio;
