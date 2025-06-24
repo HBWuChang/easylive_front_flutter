@@ -146,11 +146,12 @@ class ApiService {
     final requestHeaders = <String, String>{};
 
     if (useToken) {
-      requestHeaders['token-xuan'] = Get.find<AccountController>().token ?? '';    }
+      requestHeaders['token-xuan'] = Get.find<AccountController>().token ?? '';
+    }
     if (headers != null) {
       requestHeaders.addAll(headers);
     }
-    
+
     if (_client is rhttp.RhttpClient) {
       // rhttp implementation
       final rhttpResponse = await (_client as rhttp.RhttpClient).getBytes(
@@ -679,6 +680,14 @@ class ApiService {
     ));
   }
 
+  // static const String videoLoadHotVideoList = '/video/loadHotVideoList';
+  static Future<Map<String, dynamic>> videoLoadHotVideoList(int pageNo) async {
+    return toJson(await get(
+      ApiAddr.videoLoadHotVideoList,
+      query: {'pageNo': pageNo.toString()},
+    ));
+  }
+
   static Future<Map<String, dynamic>> danmuPostDanmu(
       // public ResponseVO postDanmu(@NotEmpty String videoId, @NotEmpty String fileId,
       // 	@NotEmpty @Size(max = 200) String text, @NotNull Integer mode, @NotEmpty String color,
@@ -1134,6 +1143,7 @@ class ApiAddr {
   static const String videoSearch = '/video/search';
   static const String videoGetVideoRecommend = '/video/getVideoRecommend';
   static const String videoGetSearchKeywordTop = '/video/getSearchKeywordTop';
+  static const String videoLoadHotVideoList = '/video/loadHotVideoList';
   static const String danmuPostDanmu = '/danmu/postDanmu';
   static const String danmuLoadDanmu = '/danmu/loadDanmu';
   static const String userActionDoAction = '/userAction/doAction';

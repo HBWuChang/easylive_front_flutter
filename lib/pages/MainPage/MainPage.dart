@@ -3,6 +3,7 @@ import 'package:easylive/pages/MainPage/RecommendVideoArea.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/MainPageController.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
@@ -112,7 +113,7 @@ class _MainPageState extends State<MainPage> {
                       _HotButton(
                         onTap: () {
                           categoryViewStateController
-                              .selectedCategoryName.value = '热门';
+                              .selectedCategoryCode.value = '热门';
                         },
                       ),
                       SizedBox(width: 8.w),
@@ -124,7 +125,7 @@ class _MainPageState extends State<MainPage> {
                           isFloating: false, // 不是浮动状态
                           onSelect: (String displayName) {
                             categoryViewStateController
-                                .selectedCategoryName.value = displayName;
+                                .selectedCategoryCode.value = displayName;
                           },
                         ),
                       ),
@@ -151,7 +152,7 @@ class _MainPageState extends State<MainPage> {
             delegate: _FloatingCategoryHeaderDelegate(
               categories: categoryLoadAllCategoryController.categories,
               onSelect: (String displayName) {
-                categoryViewStateController.selectedCategoryName.value =
+                categoryViewStateController.selectedCategoryCode.value =
                     displayName;
               },
             ),
@@ -161,28 +162,7 @@ class _MainPageState extends State<MainPage> {
           delegate: SliverChildListDelegate([
             // 轮播推荐视频区
             RecommendVideoArea(),
-            // 占位控件
-            SizedBox(height: 24.w),
-            Obx(() {
-              final selected =
-                  categoryViewStateController.selectedCategoryName.value;
-              return Column(
-                children: [
-                  for (int i = 0; i < 20; i++)
-                    Card(
-                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Container(
-                        height: 80.w,
-                        alignment: Alignment.center,
-                        child: Text(
-                          selected.isEmpty ? '占位内容 $i' : '$selected $i',
-                          style: TextStyle(fontSize: 20.sp),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            }),
+            
           ]),
         ),
       ],
@@ -263,15 +243,7 @@ class _HotButtonState extends State<_HotButton> {
   }
 }
 
-// 简化：Getx分区状态控制器
-class CategoryViewStateController extends GetxController {
-  var isExpanded = false.obs; // 控制ExpansionPanel的展开/收缩
-  var selectedCategoryName = ''.obs;
 
-  void setExpanded(bool value) {
-    isExpanded.value = value;
-  }
-}
 
 // 使用ExpansionPanelList的浮动分区组件
 class _FloatingCategoryExpansion extends StatelessWidget {
@@ -315,7 +287,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
               _HotButton(
                 isFloating: true,
                 onTap: () {
-                  controller.selectedCategoryName.value = '热门';
+                  controller.selectedCategoryCode.value = '热门';
                 },
               ),
               SizedBox(width: 8.w),
@@ -379,7 +351,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                             _HotButton(
                               isFloating: true,
                               onTap: () {
-                                controller.selectedCategoryName.value = '热门';
+                                controller.selectedCategoryCode.value = '热门';
                               },
                             ),
                             SizedBox(width: 8.w),

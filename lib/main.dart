@@ -48,7 +48,7 @@ void main() async {
 
   Get.find<ControllersInitController>().initNeedControllers();
   await Get.find<CategoryLoadAllCategoryController>().loadAllCategories();
-  await Get.find<VideoLoadRecommendVideoController>().loadRecommendVideos();
+  // await Get.find<VideoLoadRecommendVideoController>().loadRecommendVideos();
   await Get.find<LocalSettingsController>().loadSettings();
   return runApp(MyApp());
 }

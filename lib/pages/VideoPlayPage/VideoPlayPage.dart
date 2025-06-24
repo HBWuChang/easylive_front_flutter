@@ -45,8 +45,8 @@ class VideoPlayPage extends StatelessWidget {
       commentController =
           Get.find<CommentController>(tag: '${videoId}CommentController');
     } else {
-      commentController =
-          Get.put(CommentController(), tag: '${videoId}CommentController',permanent: true);
+      commentController = Get.put(CommentController(),
+          tag: '${videoId}CommentController', permanent: true);
       commentController.setVideoId(videoId);
       commentController.loadComments();
     }
@@ -57,7 +57,7 @@ class VideoPlayPage extends StatelessWidget {
           tag: '${videoId}VideoGetVideoInfoController');
     } else {
       videoGetVideoInfoController = Get.put(VideoGetVideoInfoController(),
-          tag: '${videoId}VideoGetVideoInfoController',permanent: true);
+          tag: '${videoId}VideoGetVideoInfoController', permanent: true);
       videoGetVideoInfoController.loadVideoInfo(videoId, routeName: routeName);
     }
 
@@ -65,7 +65,7 @@ class VideoPlayPage extends StatelessWidget {
         tag: '${videoId}VideoLoadVideoPListController')) {
     } else {
       Get.put(VideoLoadVideoPListController(videoId),
-          tag: '${videoId}VideoLoadVideoPListController',permanent: true);
+          tag: '${videoId}VideoLoadVideoPListController', permanent: true);
     }
 
     return GetBuilder<VideoLoadVideoPListController>(
@@ -96,24 +96,26 @@ class VideoPlayPage extends StatelessWidget {
                             children: [
                               // 顶部按钮栏和横条
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   SizedBox(
                                     width: 200.w,
                                     child: Obx(() => AnimatedTabBarWidget(
-                                      pageController: pageController,
-                                      tabLabels: [
-                                        TextSpan(text: '简介'),
-                                        TextSpan(
-                                          children: [
-                                            TextSpan(text: '评论 '),
+                                          pageController: pageController,
+                                          tabLabels: [
+                                            TextSpan(text: '简介'),
                                             TextSpan(
-                                              text: '${commentController.commentDataTotalCount.value}',
+                                              children: [
+                                                TextSpan(text: '评论 '),
+                                                TextSpan(
+                                                  text:
+                                                      '${commentController.commentDataTotalCount.value}',
+                                                ),
+                                              ],
                                             ),
                                           ],
-                                        ),
-                                      ],
-                                    )),
+                                        )),
                                   ),
                                   SizedBox(
                                     width: 50.w,
@@ -468,21 +470,22 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: SizedBox(
-                            width: 40.w,
+                            width: 48.w,
                             height: 20.w,
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Obx(() => Icon(
                                       widget.showSidebar.value
                                           ? Icons.chevron_left
                                           : Icons.chevron_right,
-                                      size: 20,
+                                      size: 20.r,
                                     )),
                                 Obx(() => Icon(
                                       widget.showSidebar.value
                                           ? Icons.chevron_right
                                           : Icons.chevron_left,
-                                      size: 20,
+                                      size: 20.r,
                                     )),
                               ],
                             ))),
@@ -607,7 +610,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           controller: colorController,
                           maxLength: 6,
                           style: TextStyle(
-                              fontSize: 14.sp, color: theme.colorScheme.primary),
+                              fontSize: 14.sp,
+                              color: theme.colorScheme.primary),
                           decoration: InputDecoration(
                             counterText: '',
                             hintText: 'HEX',
@@ -759,7 +763,8 @@ class _DanmuControlPanelState extends State<DanmuControlPanel> {
               bottom: -8,
               left: -10,
               right: -10,
-              child: Center(child: Text(text, style: TextStyle(fontSize: 12.sp))),
+              child:
+                  Center(child: Text(text, style: TextStyle(fontSize: 12.sp))),
             ),
             Positioned(
                 left: -20,

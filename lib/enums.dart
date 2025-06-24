@@ -258,7 +258,7 @@ enum VideoStatusEnum {
 enum AspectRatioEnum {
   VIDEO_COVER('cover', 16 / 9),
   VIDEO_PLAY_AREA('VIDEO_PLAY_AREA', 20 / 9),
-  MainPageRecommendVideoArea('MainPageRecommendVideoArea', 1478 / 493),
+  MainPageRecommendVideoArea('MainPageRecommendVideoArea', 1478 / 473),
   MainPageRecommendVideoLeft('MainPageRecommendVideoLeft', 579 / 385),
   MainPageRecommendVideoRightchild(
       'MainPageRecommendVideoRightchild', 277 / 212);

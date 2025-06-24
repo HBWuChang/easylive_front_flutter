@@ -14,6 +14,7 @@ import '../api_service.dart';
 import '../Funcs.dart';
 import 'package:media_kit/media_kit.dart';
 import '../pages/MainPage/MainPage.dart';
+import 'MainPageController.dart';
 import 'VideoCommentController.dart';
 import 'dart:async';
 
@@ -966,10 +967,16 @@ class WindowSizeController extends GetxController {
 
 class VideoLoadRecommendVideoController extends GetxController {
   var recommendVideos = <VideoInfo>[].obs;
+  var mainPageVideos = <VideoInfo>[].obs;
+  int mainPageVideosPageNo = 1;
+  int mainPageVideosPageTotal = 1;
   var isLoading = false.obs;
+  var loadingMore = false.obs;
   @override
   void onInit() {
     super.onInit();
+    loadRecommendVideos();
+    loadMainPageVideo();
   }
 
   Future<void> loadRecommendVideos() async {
@@ -987,6 +994,47 @@ class VideoLoadRecommendVideoController extends GetxController {
       showErrorSnackbar(e.toString());
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> loadMainPageVideo() async {
+    try {
+      var res = await ApiService.videoLoadVideo();
+      if (showResSnackbar(res, notShowIfSuccess: true)) {
+        mainPageVideosPageNo = res['data']['pageNo'] ?? 1;
+        mainPageVideosPageTotal = res['data']['pageTotal'] ?? 1;
+        mainPageVideos.value = (res['data']['list'] as List)
+            .map((item) => VideoInfo(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('加载主页视频失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+    }
+  }
+
+  Future<bool> loadMoreMainPageVideo() async {
+    if (loadingMore.value || mainPageVideosPageNo >= mainPageVideosPageTotal) {
+      return false; // 如果正在加载或已经是最后一页，直接返回
+    }
+    loadingMore.value = true;
+    try {
+      var res = await ApiService.videoLoadVideo(pageNo: ++mainPageVideosPageNo);
+      if (showResSnackbar(res, notShowIfSuccess: true)) {
+        var newVideos = (res['data']['list'] as List)
+            .map((item) => VideoInfo(item as Map<String, dynamic>))
+            .toList();
+        mainPageVideos.addAll(newVideos);
+        return true; // 成功加载更多视频
+      } else {
+        throw Exception('加载更多主页视频失败: ${res['info']}');
+      }
+    } catch (e) {
+      showErrorSnackbar(e.toString());
+      return false; // 加载失败
+    } finally {
+      loadingMore.value = false;
     }
   }
 }

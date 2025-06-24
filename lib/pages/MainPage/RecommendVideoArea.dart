@@ -4,12 +4,15 @@ import 'package:easylive/pages/MainPage/VideoInfoWidget.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/MainPageController.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'MainPage.dart';
 
 // 推荐视频区域组件
 class RecommendVideoArea extends StatelessWidget {
@@ -26,67 +29,94 @@ class RecommendVideoArea extends StatelessWidget {
         final List<VideoInfo> videos = videoController.recommendVideos;
         final List<VideoInfo> carouselVideos = videos.take(5).toList();
         final List<VideoInfo> recommendVideos = videos.skip(5).take(6).toList();
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // 设定整体宽高比，例如 16:5
-              double aspectRatio =
-                  AspectRatioEnum.MainPageRecommendVideoArea.ratio;
-              double width = constraints.maxWidth;
-              double height = width / aspectRatio;
-              return SizedBox(
-                width: width.w,
-                height: height,
-                child: AspectRatio(
-                  aspectRatio: aspectRatio,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 左侧轮播区
-                      Expanded(
-                        flex: 2,
-                        child: AspectRatio(
-                          aspectRatio:
-                              AspectRatioEnum.MainPageRecommendVideoLeft.ratio,
-                          child: carouselVideos.isEmpty
-                              ? Center(child: Text('暂无推荐'))
-                              : CarouselVideoWidget(videos: carouselVideos),
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      // 右侧2x3推荐区
-                      Expanded(
-                        flex: 3,
-                        child: SizedBox(
-                          height: double.infinity,
-                          child: GridView.builder(
-                            padding: EdgeInsets.zero, // 保证顶部无额外间距
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 12.w,
-                              crossAxisSpacing: 12.w,
-                              childAspectRatio: AspectRatioEnum
-                                  .MainPageRecommendVideoRightchild.ratio,
-                            ),
-                            itemCount: recommendVideos.length,
-                            itemBuilder: (context, idx) {
-                              return VideoInfoWidget(
-                                  video: recommendVideos[idx]);
-                            },
+        return Column(children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.w),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // 设定整体宽高比，例如 16:5
+                double aspectRatio =
+                    AspectRatioEnum.MainPageRecommendVideoArea.ratio;
+                double width = constraints.maxWidth - 228.w;
+                double height = width / aspectRatio;
+                return SizedBox(
+                  width: width,
+                  height: height,
+                  child: AspectRatio(
+                    aspectRatio: aspectRatio,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 左侧轮播区
+                        Expanded(
+                          flex: 2,
+                          child: AspectRatio(
+                            aspectRatio: AspectRatioEnum
+                                .MainPageRecommendVideoLeft.ratio,
+                            child: carouselVideos.isEmpty
+                                ? Center(child: Text('暂无推荐'))
+                                : CarouselVideoWidget(videos: carouselVideos),
                           ),
                         ),
-                      ),
-                    ],
+                        SizedBox(width: 16.w),
+                        // 右侧2x3推荐区
+                        Expanded(
+                          flex: 3,
+                          child: SizedBox(
+                            height: double.infinity,
+                            child: GridView.builder(
+                              padding: EdgeInsets.zero, // 保证顶部无额外间距
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 12.w,
+                                crossAxisSpacing: 12.w,
+                                childAspectRatio: AspectRatioEnum
+                                    .MainPageRecommendVideoRightchild.ratio,
+                              ),
+                              itemCount: recommendVideos.length,
+                              itemBuilder: (context, idx) {
+                                return VideoInfoWidget(
+                                    video: recommendVideos[idx]);
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
+                );
+              },
+            ),
+          ), // 占位控件
+          Padding(
+              padding: EdgeInsets.symmetric(horizontal: 114.w),
+              child: Obx(() {
+                return GridView.builder(
+                  padding: EdgeInsets.zero, // 保证顶部无额外间距
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5,
+                    mainAxisSpacing: 12.w,
+                    crossAxisSpacing: 12.w,
+                    childAspectRatio:
+                        AspectRatioEnum.MainPageRecommendVideoRightchild.ratio,
+                  ),
+                  itemCount:
+                      videoLoadRecommendVideoController.mainPageVideos.length,
+                  itemBuilder: (context, index) {
+                    final video =
+                        videoLoadRecommendVideoController.mainPageVideos[index];
+                    return VideoInfoWidget(
+                      video: video,
+                    );
+                  },
+                );
+              })),
+        ]);
       },
     );
   }
@@ -230,8 +260,8 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                                   final baseColor =
                                       snapshot.data ?? Colors.black;
                                   return Container(
-                                    height: (imageHeight * 0.25)
-                                        , // 减小渐变区域到图片高度的25%
+                                    height:
+                                        (imageHeight * 0.25), // 减小渐变区域到图片高度的25%
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
@@ -297,7 +327,7 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
   // 新增：构建不透明区域的内容（标题和按钮）
   Widget _buildContentBar(BuildContext context, VideoInfo video, int idx) {
     return Padding(
-      padding:  EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
