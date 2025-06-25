@@ -130,8 +130,8 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
             )),
         SizedBox(height: 4.w),
         HoverFollowWidget(
-            child: ExpandableText(
-          text: widget.video.videoName ?? '',
+            child: SelectableText(
+          widget.video.videoName ?? '',
           maxLines: 1,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp),
         )),
@@ -149,12 +149,11 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
                       widget.video.nickName ?? '',
                       style:
                           TextStyle(fontSize: 13.sp, color: Colors.grey[700]),
-                      overflow: TextOverflow.ellipsis,
                     )),
                 SizedBox(width: 10.w),
                 Icon(Icons.access_time, size: 14.w, color: Colors.grey),
                 SizedBox(width: 3.w),
-                Text(
+                SelectableText(
                   widget.video.createTime != null
                       ? _formatDate(widget.video.createTime!)
                       : '',
@@ -278,7 +277,7 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                             borderRadius: BorderRadius.circular(
                                                 6 * rate.r),
                                           ),
-                                          child: Text(
+                                          child: SelectableText(
                                             toShowdurationText(
                                                 widget.video.duration ?? 0),
                                             style: TextStyle(
@@ -306,10 +305,9 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                 maxOffset: 4 * rate,
                                 child: SizedBox(
                                   height: 40 * rate.w,
-                                  child: Text(
+                                  child: SelectableText(
                                     widget.video.videoName ?? '',
                                     maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15 * rate.sp),
@@ -326,12 +324,12 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                           '${Routes.uhome}/${widget.video.userId}',
                                           id: Routes.mainGetId);
                                     },
-                                    label: Text(
+                                    label: SelectableText(
                                       widget.video.nickName ?? '',
                                       style: TextStyle(
                                           fontSize: 13 * rate.sp,
                                           color: Colors.grey[700]),
-                                      overflow: TextOverflow.ellipsis,
+                                      // overflow: TextOverflow.ellipsis,
                                     ))),
                             SizedBox(height: 4 * rate.w),
                             // 播放量和弹幕
@@ -342,7 +340,7 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                 Icon(Icons.play_arrow,
                                     size: 14 * rate.w, color: Colors.grey),
                                 SizedBox(width: 2 * rate.w),
-                                Text(
+                                SelectableText(
                                   (widget.video.playCount ?? 0).toString(),
                                   style: TextStyle(
                                       fontSize: 13 * rate.sp,
@@ -352,7 +350,7 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                 Icon(Icons.subtitles,
                                     size: 14 * rate, color: Colors.grey),
                                 SizedBox(width: 2 * rate.w),
-                                Text(
+                                SelectableText(
                                   (widget.video.danmuCount ?? 0).toString(),
                                   style: TextStyle(
                                       fontSize: 13 * rate.sp,

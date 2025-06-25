@@ -54,7 +54,7 @@ class RecommendVideoArea extends StatelessWidget {
                             aspectRatio: AspectRatioEnum
                                 .MainPageRecommendVideoLeft.ratio,
                             child: carouselVideos.isEmpty
-                                ? Center(child: Text('暂无推荐'))
+                                ? Center(child: SelectableText('暂无推荐'))
                                 : CarouselVideoWidget(videos: carouselVideos),
                           ),
                         ),
@@ -335,11 +335,10 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
           Expanded(
             child: AnimatedSwitcher(
               duration: Duration(milliseconds: 400),
-              child: Text(
+              child: SelectableText(
                 video.videoName ?? '',
                 key: ValueKey('${video.videoName}_$idx'),
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

@@ -20,12 +20,12 @@ void openLoginDialog() {
       builder: (context, constraints) {
         return Center(
           child: FractionallySizedBox(
-            widthFactor: max(Get.width * Constants.loginDialogResizeRate,
+            widthFactor: (max(Get.width * Constants.loginDialogResizeRate,
                     Constants.loginDialogMinWidth) /
-                Get.width,
-            heightFactor: max(Get.height * Constants.loginDialogResizeRate,
+                Get.width).w,
+            heightFactor: (max(Get.height * Constants.loginDialogResizeRate,
                     Constants.loginDialogMinHeight) /
-                Get.height,
+                Get.height).w,
             child: Material(
                 borderRadius: BorderRadius.circular(12.r),
                 clipBehavior: Clip.antiAlias,
