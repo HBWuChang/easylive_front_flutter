@@ -155,6 +155,8 @@ class Texts {
   static String get changeAvatar =>
       texts[Texts_mode]["changeAvatar"] ??
       texts[Texts_Default_mode]["changeAvatar"];
+  static String get sex =>
+      texts[Texts_mode]["sex"] ?? texts[Texts_Default_mode]["sex"];
   static Map<String, dynamic> get texts => {
         "zh-CN": {
           "email": "邮箱",
@@ -201,6 +203,7 @@ class Texts {
           'originalRatio': '原图比例',
           'imageProcessingError': '图片处理错误',
           'changeAvatar': '更换头像',
+          'sex': '性别',
         },
         "en-US": {
           "email": "Email",
@@ -215,6 +218,7 @@ class Texts {
           "load_captcha_failed": "Failed to load captcha",
           'minimize': 'Minimize',
           'close': 'Close',
+          'sex': 'Gender',
         },
       };
 }

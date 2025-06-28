@@ -176,7 +176,8 @@ class _LoginPageState extends State<LoginPage> {
                                               barrierColor: Colors.transparent,
                                               pageBuilder: (context, animation,
                                                       secondaryAnimation) =>
-                                                  Column(
+                                                  SingleChildScrollView(
+                                                      child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: [
@@ -322,7 +323,7 @@ class _LoginPageState extends State<LoginPage> {
                                                             Text(Texts.login),
                                                       )),
                                                 ],
-                                              ),
+                                              )),
                                               settings: settings,
                                             );
                                           } else if (settings.name ==
@@ -346,7 +347,8 @@ class _LoginPageState extends State<LoginPage> {
                                               },
                                               pageBuilder: (context, animation,
                                                       secondaryAnimation) =>
-                                                  Column(
+                                                  SingleChildScrollView(
+                                                      child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: [
@@ -502,7 +504,7 @@ class _LoginPageState extends State<LoginPage> {
                                                             Texts.register),
                                                       )),
                                                 ],
-                                              ),
+                                              )),
                                               settings: settings,
                                             );
                                           }

@@ -1,8 +1,8 @@
 import 'package:easylive/Funcs.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
+import 'package:easylive/enums.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
 import 'controllers/controllers-class.dart';
 import 'api_service.dart';
@@ -48,6 +48,9 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
   final TextEditingController noticeInfoController = TextEditingController();
   final TextEditingController schoolController = TextEditingController();
 
+  // 性别选择
+  UserSexEnum? selectedSex;
+
   @override
   void initState() {
     super.initState();
@@ -62,6 +65,11 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
       personIntroductionController.text = userInfo['personIntroduction'] ?? '';
       noticeInfoController.text = userInfo['noticeInfo'] ?? '';
       schoolController.text = userInfo['school'] ?? '';
+
+      // 设置性别
+      int sexValue = userInfo['sex'] ?? 2; // 默认保密
+      selectedSex = UserSexEnum.getByType(sexValue);
+      setState(() {}); // 触发UI更新
     } catch (e) {
       showErrorSnackbar(e.toString());
     }
@@ -78,14 +86,16 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
+          child: SingleChildScrollView(
+              child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 Column(children: [
                   Text(
                     Texts.updateUserInfo,
-                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                    style:
+                        TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16.w),
                 ]),
@@ -94,7 +104,7 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
                   child: GestureDetector(
                       onTap: () async {
                         var res = await showUploadImageCard(
-                            imagePath: userInfoController.avatar!);
+                            imagePath: userInfoController.avatar);
                         if (res != null) {
                           userInfoController.avatar = res;
                         }
@@ -111,6 +121,47 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
                   labelText: Texts.userName,
                 ),
                 maxLength: 20,
+              ),
+              SizedBox(height: 8.w),
+              // 性别选择
+              DropdownButtonFormField<UserSexEnum>(
+                value: selectedSex,
+                decoration: InputDecoration(
+                  labelText: Texts.sex,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surface,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
+                ),
+                dropdownColor: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12.r),
+                items: UserSexEnum.values.map((UserSexEnum sex) {
+                  return DropdownMenuItem<UserSexEnum>(
+                    value: sex,
+                    child: Text(sex.desc),
+                  );
+                }).toList(),
+                onChanged: (UserSexEnum? newValue) {
+                  setState(() {
+                    selectedSex = newValue;
+                  });
+                },
               ),
               SizedBox(height: 8.w),
               TextField(
@@ -141,6 +192,8 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
                           personIntroductionController.text.trim(),
                       'noticeInfo': noticeInfoController.text.trim(),
                       'school': schoolController.text.trim(),
+                      'sex': selectedSex?.type ??
+                          2, // 默                          认保密
                     };
                     var res =
                         await userInfoController.updateUserInfo(updateInfo);
@@ -156,7 +209,7 @@ class _UpdateUserInfoCardState extends State<UpdateUserInfoCard> {
                 child: Text(Texts.update),
               ),
             ],
-          ),
+          )),
         ),
       ),
     );
@@ -177,7 +230,6 @@ class _UploadImageCardState extends State<UploadImageCard> {
   final UserInfoController userInfoController = UserInfoController();
   final ImageDataController imageDataController = ImageDataController();
   final editorKey = GlobalKey<ExtendedImageEditorState>();
-  @override
   final ImageEditorController _imageEditorController = ImageEditorController();
   Map<String, double?> _cropAspectRatios = {
     Texts.unLimit: null,
@@ -331,33 +383,29 @@ class _UploadImageCardState extends State<UploadImageCard> {
                       final Rect cropRect =
                           await editorKey.currentState!.getCropRect()!;
                       var data = editorKey.currentState!.rawImageData;
-                      if (data != null) {
-                        // 裁剪图片
-                        img.Image? image = img.decodeImage(data);
-                        if (image != null) {
-                          img.Image croppedImage = img.copyCrop(
-                            image,
-                            x: cropRect.left.toInt(),
-                            y: cropRect.top.toInt(),
-                            width: cropRect.width.w.toInt(),
-                            height: cropRect.height.w.toInt(),
-                          );
-                          Uint8List croppedData =
-                              Uint8List.fromList(img.encodePng(croppedImage));
-                          // 上传图片
-                          var res = await ApiService.fileUploadImage(
-                            file: croppedData,
-                          );
-                          if (res['code'] == 200) {
-                            Get.back(result: res['data']);
-                          } else {
-                            showErrorSnackbar(res['info']);
-                          }
+                      // 裁剪图片
+                      img.Image? image = img.decodeImage(data);
+                      if (image != null) {
+                        img.Image croppedImage = img.copyCrop(
+                          image,
+                          x: cropRect.left.toInt(),
+                          y: cropRect.top.toInt(),
+                          width: cropRect.width.w.toInt(),
+                          height: cropRect.height.w.toInt(),
+                        );
+                        Uint8List croppedData =
+                            Uint8List.fromList(img.encodePng(croppedImage));
+                        // 上传图片
+                        var res = await ApiService.fileUploadImage(
+                          file: croppedData,
+                        );
+                        if (res['code'] == 200) {
+                          Get.back(result: res['data']);
                         } else {
-                          showErrorSnackbar(Texts.imageProcessingError);
+                          showErrorSnackbar(res['info']);
                         }
                       } else {
-                        showErrorSnackbar(Texts.noImageSelected);
+                        showErrorSnackbar(Texts.imageProcessingError);
                       }
                     }
                   } catch (e) {
