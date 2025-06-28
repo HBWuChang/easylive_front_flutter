@@ -71,6 +71,13 @@ class MyApp extends StatelessWidget {
             ),
             darkTheme: ThemeData.dark(),
             themeMode: ThemeMode.system,
+            builder: (context, widget) {
+              return MediaQuery(
+                ///设置文字大小不随系统设置改变
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: widget!,
+              );
+            },
             getPages: [
               // 你可以在这里定义路由
               GetPage(name: Routes.homePage, page: () => Home()),
@@ -105,7 +112,8 @@ class _HomeState extends State<Home> {
   final Controller c = Get.put(Controller());
   final AccountController accountController = Get.find<AccountController>();
   final AppBarController appBarController = Get.find<AppBarController>();
-  final AppBarContent appBarContent = AppBarContent();  @override
+  final AppBarContent appBarContent = AppBarContent();
+  @override
   void initState() {
     super.initState();
     // ScrollController 监听已移至各个页面自行管理
@@ -137,7 +145,8 @@ class _HomeState extends State<Home> {
                       middlewares: [appBarController.listenPopMiddleware]);
                   appBarController.addAndCleanReapeatRoute(
                       route, settings.name!,
-                      title: "狩叶");                  return route;
+                      title: "狩叶");
+                  return route;
                 }
                 if (settings.name == Routes.hotPage) {
                   var route = GetPageRoute(

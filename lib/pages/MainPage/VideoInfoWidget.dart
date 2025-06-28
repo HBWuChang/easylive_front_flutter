@@ -140,6 +140,8 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
             child: Row(
               children: [
                 TextButton.icon(
+                    style: ButtonStyle(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                     icon: Icon(Icons.person, size: 14.w, color: Colors.grey),
                     onPressed: () {
                       Get.toNamed('${Routes.uhome}/${widget.video.userId}',

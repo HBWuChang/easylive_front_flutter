@@ -230,7 +230,7 @@ class AppBarContent extends StatelessWidget {
             }),
           ),
           Container(
-            width: 200.w,
+            width: 300.w,
             child: Row(
               children: [
                 MouseRegion(
@@ -281,7 +281,24 @@ class AppBarContent extends StatelessWidget {
                               avatarValue: accountController.avatar,
                             );
                           })),
-                if (!GetPlatform.isWeb)
+                HoverFollowWidget(
+                    child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer),
+                  label: Text('创作中心',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: Theme.of(context).colorScheme.primary,
+                      )),
+                  icon: Icon(Icons.create, size: 13.sp),
+                  onPressed: () {
+                    Get.find<AppBarController>().extendBodyBehindAppBar.value =
+                        false;
+                    Get.toNamed(Routes.platformPage, id: Routes.mainGetId);
+                  },
+                )),
+                if (GetPlatform.isWindows)
                   IconButton(
                     tooltip: Texts.minimize,
                     icon: Icon(Icons.minimize, size: 13.sp),
@@ -290,17 +307,7 @@ class AppBarContent extends StatelessWidget {
                       windowManager.setSkipTaskbar(false);
                     },
                   ),
-                HoverFollowWidget(
-                    child: IconButton(
-                  tooltip: '创作中心',
-                  icon: Icon(Icons.create, size: 13.sp),
-                  onPressed: () {
-                    Get.find<AppBarController>().extendBodyBehindAppBar.value =
-                        false;
-                    Get.toNamed(Routes.platformPage, id: Routes.mainGetId);
-                  },
-                )),
-                if (!GetPlatform.isWeb)
+                if (GetPlatform.isWindows)
                   IconButton(
                     tooltip: Texts.close,
                     icon: Icon(
