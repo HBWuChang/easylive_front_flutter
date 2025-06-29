@@ -4,6 +4,7 @@ import 'package:easylive/Funcs.dart';
 import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/pages/MainPage/MainPage.dart';
 import 'package:easylive/pages/HotPage/HotPage.dart';
+import 'package:easylive/pages/CategoryPage/CategoryPage.dart';
 import 'package:easylive/pages/UHome/Uhome.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPage.dart';
 import 'package:easylive/pages/pages.dart';
@@ -157,6 +158,17 @@ class _HomeState extends State<Home> {
                   appBarController.addAndCleanReapeatRoute(
                       route, settings.name!,
                       title: "热门推荐");
+                  return route;
+                }
+                if (settings.name!.startsWith(Routes.categoryPage)) {
+                  var route = GetPageRoute(
+                      settings: settings,
+                      page: () => CategoryPage(),
+                      transition: Transition.fadeIn,
+                      middlewares: [appBarController.listenPopMiddleware]);
+                  appBarController.addAndCleanReapeatRoute(
+                      route, settings.name!,
+                      title: "分区");
                   return route;
                 }
                 if (settings.name == Routes.platformPage) {

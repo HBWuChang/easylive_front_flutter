@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:easylive/pages/MainPage/RecommendVideoArea.dart';
 import 'package:easylive/settings.dart';
+import 'package:easylive/widgets/HotButton.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/MainPageController.dart';
@@ -129,7 +130,7 @@ class _MainPageState extends State<MainPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 热门按钮（两行高）
-                      _HotButton(
+                      HotButton(
                         onTap: () {
                           Get.toNamed(Routes.hotPage, id: Routes.mainGetId);
                         },
@@ -142,8 +143,52 @@ class _MainPageState extends State<MainPage> {
                           showAll: true, // 默认状态显示所有分区
                           isFloating: false, // 不是浮动状态
                           onSelect: (String displayName) {
-                            categoryViewStateController
-                                .selectedCategoryCode.value = displayName;
+                            print('MainPage onSelect 被调用，displayName: $displayName');
+                            // 跳转到CategoryPage，使用URL参数传递
+                            if (displayName.contains('-')) {
+                              // 二级分区：格式为 "一级分区名-二级分区名"
+                              final firstDashIndex = displayName.indexOf('-');
+                              if (firstDashIndex > 0 && firstDashIndex < displayName.length - 1) {
+                                final pCategoryName = displayName.substring(0, firstDashIndex);
+                                final categoryName = displayName.substring(firstDashIndex + 1);
+                                print('跳转到二级分区: $pCategoryName - $categoryName');
+                                // 需要找到对应的分区ID
+                                final categories = categoryLoadAllCategoryController.categories;
+                                final parentCategory = categories.firstWhere(
+                                  (cat) => cat['categoryName'] == pCategoryName,
+                                  orElse: () => <String, dynamic>{},
+                                );
+                                if (parentCategory.isNotEmpty) {
+                                  final children = List<Map<String, dynamic>>.from(parentCategory['children'] ?? []);
+                                  final childCategory = children.firstWhere(
+                                    (child) => child['categoryName'] == categoryName,
+                                    orElse: () => <String, dynamic>{},
+                                  );
+                                  if (childCategory.isNotEmpty) {
+                                    final url = '${Routes.categoryPage}?pCategoryId=${parentCategory['categoryId']}&categoryId=${childCategory['categoryId']}';
+                                    print('跳转URL: $url');
+                                    Get.toNamed(url, id: Routes.mainGetId);
+                                  } else {
+                                    print('未找到子分区: $categoryName');
+                                  }
+                                } else {
+                                  print('未找到父分区: $pCategoryName');
+                                }
+                              }
+                            } else {
+                              // 一级分区
+                              print('跳转到一级分区: $displayName');
+                              final categories = categoryLoadAllCategoryController.categories;
+                              final category = categories.firstWhere(
+                                (cat) => cat['categoryName'] == displayName,
+                                orElse: () => <String, dynamic>{},
+                              );
+                              if (category.isNotEmpty) {
+                                final url = '${Routes.categoryPage}?pCategoryId=${category['categoryId']}';
+                                print('跳转URL: $url');
+                                Get.toNamed(url, id: Routes.mainGetId);
+                              }
+                            }
                           },
                         ),
                       ),
@@ -170,8 +215,46 @@ class _MainPageState extends State<MainPage> {
             delegate: _FloatingCategoryHeaderDelegate(
               categories: categoryLoadAllCategoryController.categories,
               onSelect: (String displayName) {
-                categoryViewStateController.selectedCategoryCode.value =
-                    displayName;
+                print('浮动分区栏 onSelect 被调用，displayName: $displayName');
+                // 浮动分区栏同样跳转到CategoryPage，使用URL参数传递
+                if (displayName.contains('-')) {
+                  // 二级分区
+                  final parts = displayName.split('-');
+                  if (parts.length == 2) {
+                    print('浮动分区栏跳转到二级分区: ${parts[0]} - ${parts[1]}');
+                    // 需要找到对应的分区ID
+                    final categories = categoryLoadAllCategoryController.categories;
+                    final parentCategory = categories.firstWhere(
+                      (cat) => cat['categoryName'] == parts[0],
+                      orElse: () => <String, dynamic>{},
+                    );
+                    if (parentCategory.isNotEmpty) {
+                      final children = List<Map<String, dynamic>>.from(parentCategory['children'] ?? []);
+                      final childCategory = children.firstWhere(
+                        (child) => child['categoryName'] == parts[1],
+                        orElse: () => <String, dynamic>{},
+                      );
+                      if (childCategory.isNotEmpty) {
+                        final url = '${Routes.categoryPage}?pCategoryId=${parentCategory['categoryId']}&categoryId=${childCategory['categoryId']}';
+                        print('浮动分区栏跳转URL: $url');
+                        Get.toNamed(url, id: Routes.mainGetId);
+                      }
+                    }
+                  }
+                } else {
+                  // 一级分区
+                  print('浮动分区栏跳转到一级分区: $displayName');
+                  final categories = categoryLoadAllCategoryController.categories;
+                  final category = categories.firstWhere(
+                    (cat) => cat['categoryName'] == displayName,
+                    orElse: () => <String, dynamic>{},
+                  );
+                  if (category.isNotEmpty) {
+                    final url = '${Routes.categoryPage}?pCategoryId=${category['categoryId']}';
+                    print('浮动分区栏跳转URL: $url');
+                    Get.toNamed(url, id: Routes.mainGetId);
+                  }
+                }
               },
             ),
           );
@@ -183,79 +266,6 @@ class _MainPageState extends State<MainPage> {
           ]),
         ),
       ],
-    );
-  }
-}
-
-// 新增：热门按钮组件
-class _HotButton extends StatefulWidget {
-  final VoidCallback onTap;
-  final bool isFloating;
-  const _HotButton({
-    required this.onTap,
-    this.isFloating = false,
-  });
-
-  @override
-  State<_HotButton> createState() => _HotButtonState();
-}
-
-class _HotButtonState extends State<_HotButton> {
-  bool _hovered = false;
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          width: 100.w,
-          height: (widget.isFloating ? 44 : 48).w, // 浮动状态下稍小，原始状态下两行高度
-          padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 18.w),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: _hovered
-                  ? [Colors.red.shade400, Colors.red.shade600]
-                  : [Colors.red.shade300, Colors.red.shade500],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(8.r),
-            boxShadow: _hovered
-                ? [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(0.3),
-                      blurRadius: 8.r,
-                      spreadRadius: 2.r,
-                    )
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(0.2),
-                      blurRadius: 4.r,
-                      spreadRadius: 1.r,
-                    )
-                  ],
-          ),
-          child: Center(
-            child: Text(
-              '热门',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 15.sp,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 2,
-                  )
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -299,7 +309,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // 热门按钮
-              _HotButton(
+              HotButton(
                 isFloating: true,
                 onTap: () {
                   Get.toNamed(Routes.hotPage, id: Routes.mainGetId);
@@ -344,7 +354,9 @@ class _FloatingCategoryExpansion extends StatelessWidget {
             dividerColor: Colors.transparent,
             animationDuration: Duration(milliseconds: 300),
             expandedHeaderPadding: EdgeInsets.zero,
-            expansionCallback: null, // 禁用点击展开，只使用鼠标悬停
+            expansionCallback: (panelIndex, isExpanded) {
+              controller.setExpanded(isExpanded);
+            },
             children: [
               ExpansionPanel(
                 headerBuilder: (context, isExpanded) {
@@ -363,7 +375,7 @@ class _FloatingCategoryExpansion extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // 热门按钮
-                            _HotButton(
+                            HotButton(
                               isFloating: true,
                               onTap: () {
                                 Get.toNamed(Routes.hotPage,
@@ -516,6 +528,7 @@ class _CategoryButtonState extends State<_CategoryButton>
                       for (var child in widget.cat['children'])
                         GestureDetector(
                           onTap: () {
+                            print('MainPage 点击子分区: ${widget.cat['categoryName']}-${child['categoryName']}');
                             widget.onSelect(
                                 '${widget.cat['categoryName']}-${child['categoryName']}');
                             _removeChildrenOverlay();
@@ -606,6 +619,8 @@ class _CategoryButtonState extends State<_CategoryButton>
       },
       child: GestureDetector(
         onTap: () {
+          print('_CategoryButton onTap 被调用，分区名: ${widget.cat['categoryName']}');
+          // 不管是否有子分区，点击都直接跳转到CategoryPage显示该一级分区
           widget.onSelect(widget.cat['categoryName']);
           if (widget.hasChildren) _removeChildrenOverlay();
         },

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/controllers/controllers-class2.dart';
+import 'package:easylive/controllers/SearchController.dart' as AppSearchController;
 import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/widgets.dart';
@@ -38,6 +39,7 @@ class ControllersInitController extends GetxController {
     initVideoLoadRecommendVideoController();
     initLocalSettingsControllerController();
     initVideoNowWatchingCountController();
+    initSearchController();
     if (!Get.isRegistered<CategoryViewStateController>()) {
       Get.put(CategoryViewStateController(), permanent: true);
     }
@@ -111,6 +113,12 @@ class ControllersInitController extends GetxController {
   void initVideoNowWatchingCountController() {
     if (!Get.isRegistered<VideoNowWatchingCountController>()) {
       Get.put(VideoNowWatchingCountController());
+    }
+  }
+
+  void initSearchController() {
+    if (!Get.isRegistered<AppSearchController.SearchController>()) {
+      Get.put(AppSearchController.SearchController(), permanent: true);
     }
   }
 }

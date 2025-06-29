@@ -1,28 +1,17 @@
-import 'dart:math';
-import 'dart:ui' show PointerScrollEvent;
-
 import 'package:easylive/Funcs.dart';
-import 'package:easylive/pages/MainPage/MainPage.dart';
-import 'package:easylive/pages/VideoPlayPage/VideoPlayPage.dart';
 import 'package:easylive/pages/pages.dart';
-import 'package:easylive/pages/PlatformPage/PlatformPageSubmit.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
-import 'package:extended_image/extended_image.dart';
+import 'package:easylive/widgets/SearchDialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
 import 'controllers/controllers-class.dart';
-import 'api_service.dart';
 import 'fakePackages/fake_window_manager.dart'
     if (dart.library.io) 'package:window_manager/window_manager.dart';
 import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'pages/PlatformPage/PlatformPage.dart';
-
-import 'package:media_kit/media_kit.dart';
-import 'package:flutter/gestures.dart';
 
 class AppBarContent extends StatelessWidget {
   const AppBarContent({Key? key}) : super(key: key);
@@ -229,6 +218,63 @@ class AppBarContent extends StatelessWidget {
               );
             }),
           ),
+          // 搜索框
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                barrierColor: Colors.transparent, // 去掉全屏阴影
+                builder: (context) => Stack(
+                  children: [
+                    Positioned(
+                      top: MediaQuery.of(context).size.height * 0.15, // 在屏幕上部15%的位置
+                      left: (MediaQuery.of(context).size.width - 600.w) / 2, // 水平居中
+                      child: SearchDialog(),
+                    ),
+                  ],
+                ),
+              );
+            },
+            child: Container(
+              width: 200.w,
+              height: 36.h,
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withOpacity(0.3), // 主题色半透明背景
+                borderRadius: BorderRadius.circular(18.r),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withOpacity(0.5), // 主题色半透明边框
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(width: 12.w),
+                  Icon(
+                    Icons.search,
+                    size: 18.w,
+                    color: Colors.white.withOpacity(0.9), // 图标保持白色以确保可见性
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      '搜索',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9), // 文字保持白色以确保可见性
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(width: 16.w),
           Container(
             width: 300.w,
             child: Row(
@@ -281,6 +327,7 @@ class AppBarContent extends StatelessWidget {
                               avatarValue: accountController.avatar,
                             );
                           })),
+                SizedBox(width: 16.w),
                 HoverFollowWidget(
                     child: TextButton.icon(
                   style: TextButton.styleFrom(
