@@ -39,6 +39,7 @@ class Routes {
   static const String mainPage = '/main';
   static const String hotPage = '/hot';
   static const String categoryPage = '/category';
+  static const String searchPage = '/search';
   static const String loginPage = '/login';
   static const String platformPage = '/platform';
   static const String videoPlayPage = '/videoPlayPage';

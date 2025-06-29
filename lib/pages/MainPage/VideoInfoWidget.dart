@@ -3,6 +3,7 @@ import 'package:easylive/Funcs.dart';
 import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
+import 'package:easylive/widgets/HighlightText.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/controllers-class.dart';
@@ -130,10 +131,15 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
             )),
         SizedBox(height: 4.w),
         HoverFollowWidget(
-            child: SelectableText(
-          widget.video.videoName ?? '',
+            child: HighlightText(
+          text: widget.video.videoName ?? '',
           maxLines: 1,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp),
+          highlightStyle: TextStyle(
+            fontWeight: FontWeight.bold, 
+            fontSize: 15.sp,
+            color: Theme.of(context).primaryColor,
+          ),
         )),
         HoverFollowWidget(
             maxOffset: 8.w,
@@ -307,12 +313,17 @@ class _VideoInfoWidgetHorizonState extends State<VideoInfoWidgetHorizon> {
                                 maxOffset: 4 * rate,
                                 child: SizedBox(
                                   height: 40 * rate.w,
-                                  child: SelectableText(
-                                    widget.video.videoName ?? '',
+                                  child: HighlightText(
+                                    text: widget.video.videoName ?? '',
                                     maxLines: 2,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15 * rate.sp),
+                                    highlightStyle: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15 * rate.sp,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
                                   ),
                                 )),
                             SizedBox(height: 4 * rate.w),

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../api_service.dart';
+import '../settings.dart';
 
 class SearchController extends GetxController {
   // 搜索关键词
@@ -41,8 +42,9 @@ class SearchController extends GetxController {
     searchKeyword.value = keyword.trim();
     print('搜索关键词: ${searchKeyword.value}');
     
-    // TODO: 实现搜索逻辑
-    // 这里可以跳转到搜索结果页面或执行其他搜索操作
+    // 跳转到搜索结果页面
+    final url = '${Routes.searchPage}?keyword=${Uri.encodeQueryComponent(keyword.trim())}';
+    Get.toNamed(url, id: Routes.mainGetId);
   }
   
   /// 清空搜索关键词

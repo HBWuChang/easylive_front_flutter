@@ -5,6 +5,7 @@ import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/pages/MainPage/MainPage.dart';
 import 'package:easylive/pages/HotPage/HotPage.dart';
 import 'package:easylive/pages/CategoryPage/CategoryPage.dart';
+import 'package:easylive/pages/SearchPage/SearchPage.dart';
 import 'package:easylive/pages/UHome/Uhome.dart';
 import 'package:easylive/pages/VideoPlayPage/VideoPlayPage.dart';
 import 'package:easylive/pages/pages.dart';
@@ -169,6 +170,17 @@ class _HomeState extends State<Home> {
                   appBarController.addAndCleanReapeatRoute(
                       route, settings.name!,
                       title: "分区");
+                  return route;
+                }
+                if (settings.name!.startsWith(Routes.searchPage)) {
+                  var route = GetPageRoute(
+                      settings: settings,
+                      page: () => SearchPage(),
+                      transition: Transition.fadeIn,
+                      middlewares: [appBarController.listenPopMiddleware]);
+                  appBarController.addAndCleanReapeatRoute(
+                      route, settings.name!,
+                      title: "搜索");
                   return route;
                 }
                 if (settings.name == Routes.platformPage) {
