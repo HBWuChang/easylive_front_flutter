@@ -29,7 +29,7 @@ class TopHeaderSection extends StatelessWidget {
           ExtendedImage.network(
             Constants.baseUrl +
                 ApiAddr.fileGetResourcet +
-                ApiAddr.LoginBackGround,
+                ApiAddr.MainPageHeadImage,
             fit: BoxFit.cover,
             cache: true,
             enableLoadState: true,

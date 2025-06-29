@@ -100,7 +100,7 @@ class _HotPageState extends State<HotPage> {
                 child: ExtendedImage.network(
                   Constants.baseUrl +
                       ApiAddr.fileGetResourcet +
-                      ApiAddr.LoginBackGround,
+                      ApiAddr.MainPageHeadImage,
                   fit: BoxFit.cover,
                   cache: true,
                   enableLoadState: true,

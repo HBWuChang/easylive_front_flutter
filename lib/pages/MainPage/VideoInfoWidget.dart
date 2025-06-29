@@ -134,9 +134,12 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
             child: HighlightText(
           text: widget.video.videoName ?? '',
           maxLines: 1,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp),
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15.sp,
+              color: Theme.of(context).colorScheme.tertiary),
           highlightStyle: TextStyle(
-            fontWeight: FontWeight.bold, 
+            fontWeight: FontWeight.bold,
             fontSize: 15.sp,
             color: Theme.of(context).primaryColor,
           ),

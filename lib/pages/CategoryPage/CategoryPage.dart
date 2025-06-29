@@ -6,10 +6,9 @@ import '../../controllers/controllers-class.dart';
 import '../../enums.dart';
 import '../../settings.dart';
 import '../../api_service.dart';
-import '../../widgets/HotButton.dart';
+import '../../widgets/CategoryButtonsWidget.dart';
 import '../MainPage/VideoInfoWidget.dart';
 import 'package:extended_image/extended_image.dart';
-import 'dart:async';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({Key? key}) : super(key: key);
@@ -98,7 +97,6 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       body: CustomScrollView(
         clipBehavior: Clip.none,
         controller: _scrollController,
@@ -145,7 +143,7 @@ class _CategoryPageState extends State<CategoryPage> {
           child: ExtendedImage.network(
             Constants.baseUrl +
                 ApiAddr.fileGetResourcet +
-                ApiAddr.LoginBackGround,
+                ApiAddr.MainPageHeadImage,
             fit: BoxFit.cover,
             cache: true,
             enableLoadState: true,
@@ -179,41 +177,22 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 
-  /// 构建分区按钮区域（与MainPage相同样式）
+  /// 构建分区按钮区域（使用共用组件）
   Widget _buildCategoryButtons() {
     return GetBuilder<CategoryLoadAllCategoryController>(
       init: categoryController,
       builder: (_) {
         final categories = categoryController.categories;
-        return Container(
-          color: Colors.white,
+        return CategoryButtonsWidget(
+          categories: categories,
+          showAll: true,
+          isFloating: false,
           padding: EdgeInsets.symmetric(vertical: 8),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 热门按钮（与MainPage一致）
-                HotButton(
-                  onTap: () {
-                    Get.toNamed(Routes.hotPage, id: Routes.mainGetId);
-                  },
-                ),
-                SizedBox(width: 8.w),
-                // 分区按钮组
-                Flexible(
-                  child: _CategoryWrap(
-                    categories: categories,
-                    onSelect: (String displayName) {
-                      // 在CategoryPage中只更新数据，不跳转
-                      print('CategoryPage分区按钮点击: $displayName');
-                      controller.setCategoryAndLoadVideos(displayName);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+          onSelect: (String displayName) {
+            // 在CategoryPage中只更新数据，不跳转
+            print('CategoryPage分区按钮点击: $displayName');
+            controller.setCategoryAndLoadVideos(displayName);
+          },
         );
       },
     );
@@ -222,7 +201,6 @@ class _CategoryPageState extends State<CategoryPage> {
   /// 构建分区选择 Row 区域
   Widget _buildCategorySelectRow() {
     return Container(
-      color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
       child: Row(
         children: [
@@ -358,226 +336,6 @@ class _CategoryPageState extends State<CategoryPage> {
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-// 分区按钮组件（从MainPage复制过来）
-class _CategoryWrap extends StatelessWidget {
-  final List categories;
-  final void Function(String) onSelect;
-
-  const _CategoryWrap({
-    required this.categories,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cats = categories;
-
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 4.w, horizontal: 4.w),
-      child: Wrap(
-        spacing: 4.w,
-        runSpacing: 4.w,
-        children: List.generate(cats.length, (index) {
-          final cat = cats[index];
-          final hasChildren =
-              cat['children'] != null && (cat['children'] as List).isNotEmpty;
-          return _CategoryButton(
-            cat: cat,
-            hasChildren: hasChildren,
-            onSelect: onSelect,
-            index: index,
-          );
-        }),
-      ),
-    );
-  }
-}
-
-// 分区按钮组件（从MainPage复制过来）
-class _CategoryButton extends StatefulWidget {
-  final Map cat;
-  final bool hasChildren;
-  final void Function(String) onSelect;
-  final int index;
-
-  const _CategoryButton({
-    required this.cat,
-    required this.hasChildren,
-    required this.onSelect,
-    required this.index,
-  });
-
-  @override
-  State<_CategoryButton> createState() => _CategoryButtonState();
-}
-
-class _CategoryButtonState extends State<_CategoryButton>
-    with TickerProviderStateMixin {
-  OverlayEntry? _childrenOverlay;
-  AnimationController? _fadeController;
-  Timer? _fadeTimer;
-  bool _hovered = false;
-
-  void _showChildrenOverlay(BuildContext context) {
-    _cancelFadeTimer();
-    if (_childrenOverlay != null) return;
-    final overlayState = Overlay.of(context);
-    _fadeController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
-    final renderBox = context.findRenderObject() as RenderBox?;
-    final overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox?;
-    if (renderBox == null || overlay == null) return;
-    final target = renderBox.localToGlobal(Offset.zero, ancestor: overlay);
-    final rect = Rect.fromLTWH(
-        target.dx, target.dy, renderBox.size.width, renderBox.size.height);
-    _childrenOverlay = OverlayEntry(
-      builder: (context) {
-        return Positioned(
-          left: rect.left,
-          top: rect.bottom + 4, // 在按钮下方显示，添加4像素间距
-          child: MouseRegion(
-            onEnter: (_) => _cancelFadeTimer(),
-            onExit: (_) => _startFadeTimer(),
-            child: FadeTransition(
-              opacity:
-                  _fadeController!.drive(CurveTween(curve: Curves.easeInOut)),
-              child: Material(
-                color: Colors.white,
-                elevation: 4,
-                borderRadius: BorderRadius.circular(8.r),
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 4.w, horizontal: 8.w),
-                  child: Column(
-                    spacing: 8.w,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (var child in widget.cat['children'])
-                        GestureDetector(
-                          onTap: () {
-                            print(
-                                'CategoryPage 点击子分区: ${widget.cat['categoryName']}-${child['categoryName']}');
-                            widget.onSelect(
-                                '${widget.cat['categoryName']}-${child['categoryName']}');
-                            _removeChildrenOverlay();
-                          },
-                          child: Container(
-                            width: 120.w,
-                            padding: EdgeInsets.symmetric(
-                                vertical: 6.w, horizontal: 16.w),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(6.r),
-                            ),
-                            child: Text(child['categoryName']),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-    overlayState.insert(_childrenOverlay!);
-    _fadeController!.forward();
-  }
-
-  void _removeChildrenOverlay({bool immediate = false}) {
-    _cancelFadeTimer();
-    if (_childrenOverlay != null && _fadeController != null) {
-      if (immediate) {
-        _fadeController!.dispose();
-        _childrenOverlay!.remove();
-      } else {
-        if (_fadeController!.status == AnimationStatus.dismissed ||
-            _fadeController!.status == AnimationStatus.reverse) return;
-        _fadeController!.reverse().then((_) {
-          if (mounted && _childrenOverlay != null) {
-            _fadeController!.dispose();
-            _childrenOverlay!.remove();
-            _childrenOverlay = null;
-            _fadeController = null;
-            _fadeTimer = null;
-          }
-        });
-        return;
-      }
-    }
-    _childrenOverlay = null;
-    _fadeController = null;
-    _fadeTimer = null;
-  }
-
-  void _startFadeTimer() {
-    _cancelFadeTimer();
-    _fadeTimer = Timer(Duration(milliseconds: 100), () {
-      if (mounted) _removeChildrenOverlay();
-    });
-  }
-
-  void _cancelFadeTimer() {
-    _fadeTimer?.cancel();
-    _fadeTimer = null;
-  }
-
-  @override
-  void dispose() {
-    _removeChildrenOverlay(immediate: true);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (event) {
-        if (widget.hasChildren) _showChildrenOverlay(context);
-        setState(() {
-          _hovered = true;
-        });
-        _cancelFadeTimer();
-      },
-      onExit: (event) {
-        setState(() {
-          _hovered = false;
-        });
-        if (widget.hasChildren) _startFadeTimer();
-      },
-      child: GestureDetector(
-        onTap: () {
-          print('CategoryPage 点击一级分区: ${widget.cat['categoryName']}');
-          widget.onSelect(widget.cat['categoryName']);
-          if (widget.hasChildren) _removeChildrenOverlay();
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 18.w),
-          decoration: BoxDecoration(
-            color: _hovered ? Colors.pink[50] : Colors.white,
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(color: Colors.pink.shade200),
-            boxShadow: _hovered
-                ? [
-                    BoxShadow(
-                        color: Colors.pink.withOpacity(0.08), blurRadius: 6.r)
-                  ]
-                : [],
-          ),
-          child: SizedBox(
-              width: 100.w,
-              height: 20.w,
-              child: Center(
-                child: Text(widget.cat['categoryName'],
-                    style: TextStyle(fontSize: 15.sp)),
-              )),
-        ),
       ),
     );
   }

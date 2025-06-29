@@ -140,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
             child: ExtendedImage.network(
               ApiService.baseUrl +
                   ApiAddr.fileGetResourcet +
-                  ApiAddr.LoginBackGround,
+                  ApiAddr.LoginBackground,
               fit: BoxFit.cover,
             ),
           ),

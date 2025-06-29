@@ -1101,7 +1101,9 @@ class ApiService {
 }
 
 class ApiAddr {
-  static const String LoginBackGround =
+  static const String MainPageHeadImage =
+      'cover/202506/GVxi8ftxMmg1OobcrzYnAIAez7tVNz.avif';
+  static const String LoginBackground =
       'cover/202506/VrTlLrAokaMhyOk8rjqMuV2VCCkltH.webp';
   static const String accountLogin = '/account/login';
   static const String accountCheckCode = '/account/checkCode';
