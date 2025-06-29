@@ -18,14 +18,14 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    
+
     // 获取路由参数
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final route = ModalRoute.of(context);
       if (route != null && route.settings.name != null) {
         final uri = Uri.parse(route.settings.name!);
         final keyword = uri.queryParameters['keyword'];
-        
+
         if (keyword != null && keyword.isNotEmpty) {
           print('SearchPage 接收到的搜索关键词: $keyword');
           controller.initWithKeyword(keyword);
@@ -37,7 +37,6 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       body: CustomScrollView(
         controller: controller.scrollController,
         slivers: [
@@ -45,21 +44,22 @@ class _SearchPageState extends State<SearchPage> {
           SliverPersistentHeader(
             pinned: true,
             delegate: _SearchHeaderDelegate(
-              onSearchChanged: (keyword) => controller.updateKeywordAndSearch(keyword),
+              onSearchChanged: (keyword) =>
+                  controller.updateKeywordAndSearch(keyword),
               currentKeyword: controller.searchKeyword,
             ),
           ),
-          
+
           // 排序方式Row
           SliverToBoxAdapter(
             child: _buildOrderTypeRow(),
           ),
-          
+
           // 搜索结果视频区域
           SliverToBoxAdapter(
             child: Obx(() => _buildVideoGrid()),
           ),
-          
+
           // 底部占位控件
           SliverToBoxAdapter(
             child: Container(
@@ -75,7 +75,6 @@ class _SearchPageState extends State<SearchPage> {
   /// 构建排序方式Row
   Widget _buildOrderTypeRow() {
     return Container(
-      color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
       child: Row(
         children: [
@@ -88,22 +87,28 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           SizedBox(width: 12.w),
-          
+
           // 排序选项按钮
           ...VideoOrderTypeEnum.values.map((orderType) {
             return Obx(() {
-              final isSelected = controller.selectedOrderType.value == orderType;
+              final isSelected =
+                  controller.selectedOrderType.value == orderType;
               return Padding(
                 padding: EdgeInsets.only(right: 8.w),
                 child: GestureDetector(
                   onTap: () => controller.changeOrderType(orderType),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.w),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.w),
                     decoration: BoxDecoration(
-                      color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(16.r),
                       border: Border.all(
-                        color: isSelected ? Theme.of(context).primaryColor : Colors.grey[300]!,
+                        color: isSelected
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey[300]!,
                         width: 1,
                       ),
                     ),
@@ -112,7 +117,8 @@ class _SearchPageState extends State<SearchPage> {
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: isSelected ? Colors.white : Colors.grey[700],
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -148,9 +154,7 @@ class _SearchPageState extends State<SearchPage> {
               ),
               SizedBox(height: 16.h),
               Text(
-                controller.searchKeyword.value.isEmpty 
-                    ? '请输入搜索关键词' 
-                    : '未找到相关视频',
+                controller.searchKeyword.value.isEmpty ? '请输入搜索关键词' : '未找到相关视频',
                 style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
               ),
             ],
@@ -176,7 +180,7 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ),
             ),
-          
+
           // 视频网格（使用CategoryPage的5列布局）
           GridView.builder(
             shrinkWrap: true,
@@ -186,7 +190,8 @@ class _SearchPageState extends State<SearchPage> {
               crossAxisCount: 5,
               mainAxisSpacing: 12.w,
               crossAxisSpacing: 12.w,
-              childAspectRatio: AspectRatioEnum.MainPageRecommendVideoRightchild.ratio,
+              childAspectRatio:
+                  AspectRatioEnum.MainPageRecommendVideoRightchild.ratio,
             ),
             itemCount: controller.videos.length,
             itemBuilder: (context, index) {
@@ -194,16 +199,16 @@ class _SearchPageState extends State<SearchPage> {
               return VideoInfoWidget(video: video);
             },
           ),
-          
+
           // 加载更多指示器
           if (controller.loadingMore.value)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 32.w),
               child: Center(child: CircularProgressIndicator()),
             ),
-          
+
           // 没有更多数据提示
-          if (!controller.loadingMore.value && 
+          if (!controller.loadingMore.value &&
               controller.pageNo > controller.pageTotal &&
               controller.videos.isNotEmpty)
             Padding(
@@ -215,6 +220,7 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ),
             ),
+            SizedBox(height: 1.sh),
         ],
       ),
     );
@@ -232,7 +238,8 @@ class _SearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   });
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return _SearchHeaderWidget(
       onSearchChanged: onSearchChanged,
       currentKeyword: currentKeyword,
@@ -240,10 +247,10 @@ class _SearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 60.0.w;
+  double get maxExtent => 80.0;
 
   @override
-  double get minExtent => 60.0.w;
+  double get minExtent => 80.0;
 
   @override
   bool shouldRebuild(covariant _SearchHeaderDelegate oldDelegate) =>
@@ -271,7 +278,7 @@ class _SearchHeaderWidgetState extends State<_SearchHeaderWidget> {
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.currentKeyword.value);
-    
+
     // 监听外部keyword变化
     widget.currentKeyword.listen((keyword) {
       if (_textController.text != keyword) {
@@ -289,66 +296,108 @@ class _SearchHeaderWidgetState extends State<_SearchHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
+      height: 80.0,
+      padding: EdgeInsets.symmetric(horizontal: 500.w, vertical: 12.w),
       child: Row(
         children: [
-          // 返回按钮
-          IconButton(
-            onPressed: () => Get.back(),
-            icon: Icon(Icons.arrow_back, size: 20.w),
-          ),
-          
-          SizedBox(width: 12.w),
-          
           // 搜索框
           Expanded(
-            child: TextField(
-              controller: _textController,
-              decoration: InputDecoration(
-                hintText: '搜索视频',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 清除按钮
-                    if (_textController.text.isNotEmpty)
-                      IconButton(
-                        onPressed: () {
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: Colors.grey[200]!, width: 1),
+              ),
+              child: Row(
+                children: [
+                  // 搜索图标
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.w, right: 8.w),
+                    child: Icon(
+                      Icons.search,
+                      size: 20.w,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+
+                  // 搜索输入框
+                  Expanded(
+                    child: TextField(
+                      controller: _textController,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '搜索视频',
+                        hintStyle: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.grey[500],
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      onSubmitted: widget.onSearchChanged,
+                      onChanged: (value) {
+                        setState(() {}); // 触发重建以显示/隐藏清除按钮
+                      },
+                    ),
+                  ),
+
+                  // 清除按钮
+                  if (_textController.text.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.only(right: 8.w),
+                      child: GestureDetector(
+                        onTap: () {
                           _textController.clear();
                           setState(() {});
                         },
-                        icon: Icon(Icons.clear, size: 18.w, color: Colors.grey),
+                        child: Container(
+                          padding: EdgeInsets.all(4.w),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[400],
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            size: 12.w,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    // 搜索按钮
-                    IconButton(
-                      onPressed: () {
-                        final text = _textController.text.trim();
-                        if (text.isNotEmpty) {
-                          widget.onSearchChanged(text);
-                        }
-                      },
-                      icon: Icon(Icons.search, size: 20.w),
                     ),
-                  ],
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(width: 12.w),
+
+          // 搜索按钮
+          GestureDetector(
+            onTap: () {
+              final text = _textController.text.trim();
+              if (text.isNotEmpty) {
+                widget.onSearchChanged(text);
+              }
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                '搜索',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              onSubmitted: widget.onSearchChanged,
-              onChanged: (value) {
-                setState(() {}); // 触发重建以显示/隐藏清除按钮
-              },
             ),
           ),
         ],
