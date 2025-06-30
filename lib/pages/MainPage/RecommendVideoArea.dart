@@ -4,15 +4,12 @@ import 'package:easylive/pages/MainPage/VideoInfoWidget.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/MainPageController.dart';
 import '../../controllers/controllers-class.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'MainPage.dart';
 
 // 推荐视频区域组件
 class RecommendVideoArea extends StatelessWidget {
@@ -213,75 +210,82 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
                 // 图片滚动区域 - 严格16:9比例
                 SizedBox(
                   height: imageHeight,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: widget.videos.length,
-                    onPageChanged: (idx) {
-                      setState(() {
-                        _currentPage = idx;
-                      });
-                    },
-                    itemBuilder: (context, idx) {
-                      final video = widget.videos[idx];
-                      return GestureDetector(
-                        onTap: () {
-                          // 跳转到视频详情页面
-                          _navigateToVideo(video);
-                        },
-                        child: Stack(
-                          children: [
-                            // 图片本体
-                            SizedBox(
-                              width: constraints.maxWidth,
-                              height: imageHeight,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(8.r),
-                                ),
-                                child: video.videoCover != null &&
-                                        video.videoCover!.isNotEmpty
-                                    ? ExtendedImage.network(
-                                        Constants.baseUrl +
-                                            ApiAddr.fileGetResourcet +
-                                            video.videoCover!,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Container(color: Colors.grey[200]),
-                              ),
-                            ),
-                            // 图片内部的渐变阴影
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              child: FutureBuilder<Color>(
-                                future: _getBottomAverageColor(idx),
-                                builder: (context, snapshot) {
-                                  final baseColor =
-                                      snapshot.data ?? Colors.black;
-                                  return Container(
-                                    height:
-                                        (imageHeight * 0.25), // 减小渐变区域到图片高度的25%
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Colors.transparent,
-                                          baseColor.withOpacity(0.3),
-                                          baseColor, // 完全不透明
-                                        ],
-                                        stops: [0.0, 0.3, 1.0], // 加快变深速度
-                                      ),
+                  child: ExcludeSemantics(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: widget.videos.length,
+                      onPageChanged: (idx) {
+                        setState(() {
+                          _currentPage = idx;
+                        });
+                      },
+                      itemBuilder: (context, idx) {
+                        final video = widget.videos[idx];
+                        return GestureDetector(
+                          onTap: () {
+                            // 跳转到视频详情页面
+                            _navigateToVideo(video);
+                          },
+                          child: Semantics(
+                            label: '视频: ${video.videoName ?? "未知标题"}',
+                            button: true,
+                            child: Stack(
+                              key: ValueKey('carousel_item_$idx'),
+                              children: [
+                                // 图片本体
+                                SizedBox(
+                                  width: constraints.maxWidth,
+                                  height: imageHeight,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(8.r),
                                     ),
-                                  );
-                                },
-                              ),
+                                    child: video.videoCover != null &&
+                                            video.videoCover!.isNotEmpty
+                                        ? ExtendedImage.network(
+                                            Constants.baseUrl +
+                                                ApiAddr.fileGetResourcet +
+                                                video.videoCover!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Container(color: Colors.grey[200]),
+                                  ),
+                                ),
+                                // 图片内部的渐变阴影
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  bottom: 0,
+                                  child: FutureBuilder<Color>(
+                                    future: _getBottomAverageColor(idx),
+                                    builder: (context, snapshot) {
+                                      final baseColor =
+                                          snapshot.data ?? Colors.black;
+                                      return Container(
+                                        height: (imageHeight *
+                                            0.25), // 减小渐变区域到图片高度的25%
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Colors.transparent,
+                                              baseColor.withOpacity(0.3),
+                                              baseColor, // 完全不透明
+                                            ],
+                                            stops: [0.0, 0.3, 1.0], // 加快变深速度
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
                 // 固定的不透明区域（放置标题和按钮）
@@ -333,49 +337,66 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
         children: [
           // 左侧标题
           Expanded(
-            child: AnimatedSwitcher(
-              duration: Duration(milliseconds: 400),
-              child: SelectableText(
-                video.videoName ?? '',
-                key: ValueKey('${video.videoName}_$idx'),
-                maxLines: 1,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.sp,
-                  shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+            child: Semantics(
+              label: '当前视频标题',
+              child: AnimatedSwitcher(
+                duration: Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  );
+                },
+                child: Text(
+                  video.videoName ?? '',
+                  key: ValueKey('title_$idx'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
+                    shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                  ),
                 ),
               ),
             ),
           ),
           // 圆点指示器
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(widget.videos.length, (dotIdx) {
-              final bool isActive = dotIdx == _currentPage;
-              return GestureDetector(
-                onTap: () {
-                  _pageController.animateToPage(
-                    dotIdx,
-                    duration: Duration(milliseconds: 400),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 200),
-                  margin: EdgeInsets.symmetric(horizontal: 3),
-                  width: (isActive ? 14 : 6).w,
-                  height: (isActive ? 14 : 6).w,
-                  decoration: BoxDecoration(
-                    color: isActive ? Colors.white : Colors.white54,
-                    shape: BoxShape.circle,
-                    boxShadow: isActive
-                        ? [BoxShadow(color: Colors.black26, blurRadius: 4)]
-                        : [],
+          Semantics(
+            label: '轮播指示器',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(widget.videos.length, (dotIdx) {
+                final bool isActive = dotIdx == _currentPage;
+                return Semantics(
+                  label: '第${dotIdx + 1}个视频${isActive ? "，当前选中" : ""}',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () {
+                      _pageController.animateToPage(
+                        dotIdx,
+                        duration: Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 200),
+                      margin: EdgeInsets.symmetric(horizontal: 3),
+                      width: (isActive ? 14 : 6).w,
+                      height: (isActive ? 14 : 6).w,
+                      decoration: BoxDecoration(
+                        color: isActive ? Colors.white : Colors.white54,
+                        shape: BoxShape.circle,
+                        boxShadow: isActive
+                            ? [BoxShadow(color: Colors.black26, blurRadius: 4)]
+                            : [],
+                      ),
+                    ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
           SizedBox(width: 8.w),
           // 右侧箭头按钮
@@ -463,48 +484,52 @@ class _CarouselVideoWidgetState extends State<CarouselVideoWidget> {
 
   // 新增方法：构建箭头按钮
   Widget _buildArrowButton(BuildContext context, bool isRight) {
-    return GestureDetector(
-      onTap: () {
-        int next = isRight ? _currentPage + 1 : _currentPage - 1;
-        if (isRight && next < widget.videos.length) {
-          _pageController.animateToPage(
-            next,
-            duration: Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        } else if (!isRight && next >= 0) {
-          _pageController.animateToPage(
-            next,
-            duration: Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        } else if (isRight && next >= widget.videos.length) {
-          // 循环到第一页
-          _pageController.animateToPage(
-            0,
-            duration: Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        } else if (!isRight && next < 0) {
-          // 循环到最后一页
-          _pageController.animateToPage(
-            widget.videos.length - 1,
-            duration: Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        }
-      },
-      child: Container(
-        width: 28.w,
-        height: 28.w,
-        decoration: BoxDecoration(
-          color: Colors.black54,
-          borderRadius: BorderRadius.circular(14.w),
-        ),
-        child: Icon(
-          isRight ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
-          color: Colors.white,
-          size: 14.w,
+    return Semantics(
+      label: isRight ? '下一个视频' : '上一个视频',
+      button: true,
+      child: GestureDetector(
+        onTap: () {
+          int next = isRight ? _currentPage + 1 : _currentPage - 1;
+          if (isRight && next < widget.videos.length) {
+            _pageController.animateToPage(
+              next,
+              duration: Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+            );
+          } else if (!isRight && next >= 0) {
+            _pageController.animateToPage(
+              next,
+              duration: Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+            );
+          } else if (isRight && next >= widget.videos.length) {
+            // 循环到第一页
+            _pageController.animateToPage(
+              0,
+              duration: Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+            );
+          } else if (!isRight && next < 0) {
+            // 循环到最后一页
+            _pageController.animateToPage(
+              widget.videos.length - 1,
+              duration: Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+            );
+          }
+        },
+        child: Container(
+          width: 28.w,
+          height: 28.w,
+          decoration: BoxDecoration(
+            color: Colors.black54,
+            borderRadius: BorderRadius.circular(14.w),
+          ),
+          child: Icon(
+            isRight ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+            color: Colors.white,
+            size: 14.w,
+          ),
         ),
       ),
     );

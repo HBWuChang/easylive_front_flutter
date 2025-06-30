@@ -44,9 +44,7 @@ class _SearchPageState extends State<SearchPage> {
           SliverPersistentHeader(
             pinned: true,
             delegate: _SearchHeaderDelegate(
-              onSearchChanged: (keyword) =>
-                  controller.updateKeywordAndSearch(keyword),
-              currentKeyword: controller.searchKeyword,
+              controller: controller,
             ),
           ),
 
@@ -229,20 +227,17 @@ class _SearchPageState extends State<SearchPage> {
 
 // 搜索头部的SliverPersistentHeaderDelegate
 class _SearchHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final void Function(String) onSearchChanged;
-  final RxString currentKeyword;
+  final SearchPageController controller;
 
   _SearchHeaderDelegate({
-    required this.onSearchChanged,
-    required this.currentKeyword,
+    required this.controller,
   });
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return _SearchHeaderWidget(
-      onSearchChanged: onSearchChanged,
-      currentKeyword: currentKeyword,
+      controller: controller,
     );
   }
 
@@ -254,17 +249,15 @@ class _SearchHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _SearchHeaderDelegate oldDelegate) =>
-      currentKeyword != oldDelegate.currentKeyword;
+      controller != oldDelegate.controller;
 }
 
 // 搜索头部Widget
 class _SearchHeaderWidget extends StatefulWidget {
-  final void Function(String) onSearchChanged;
-  final RxString currentKeyword;
+  final SearchPageController controller;
 
   const _SearchHeaderWidget({
-    required this.onSearchChanged,
-    required this.currentKeyword,
+    required this.controller,
   });
 
   @override
@@ -272,24 +265,14 @@ class _SearchHeaderWidget extends StatefulWidget {
 }
 
 class _SearchHeaderWidgetState extends State<_SearchHeaderWidget> {
-  late TextEditingController _textController;
 
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController(text: widget.currentKeyword.value);
-
-    // 监听外部keyword变化
-    widget.currentKeyword.listen((keyword) {
-      if (_textController.text != keyword) {
-        _textController.text = keyword;
-      }
-    });
   }
 
   @override
   void dispose() {
-    _textController.dispose();
     super.dispose();
   }
 
@@ -323,7 +306,7 @@ class _SearchHeaderWidgetState extends State<_SearchHeaderWidget> {
                   // 搜索输入框
                   Expanded(
                     child: TextField(
-                      controller: _textController,
+                      controller: widget.controller.textController,
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: Colors.black87,
@@ -339,7 +322,11 @@ class _SearchHeaderWidgetState extends State<_SearchHeaderWidget> {
                         focusedBorder: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                       ),
-                      onSubmitted: widget.onSearchChanged,
+                      onSubmitted: (text) {
+                        if (text.trim().isNotEmpty) {
+                          widget.controller.updateKeywordAndSearch(text);
+                        }
+                      },
                       onChanged: (value) {
                         setState(() {}); // 触发重建以显示/隐藏清除按钮
                       },
@@ -347,12 +334,12 @@ class _SearchHeaderWidgetState extends State<_SearchHeaderWidget> {
                   ),
 
                   // 清除按钮
-                  if (_textController.text.isNotEmpty)
+                  if (widget.controller.textController.text.isNotEmpty)
                     Padding(
                       padding: EdgeInsets.only(right: 8.w),
                       child: GestureDetector(
                         onTap: () {
-                          _textController.clear();
+                          widget.controller.textController.clear();
                           setState(() {});
                         },
                         child: Container(
@@ -379,9 +366,9 @@ class _SearchHeaderWidgetState extends State<_SearchHeaderWidget> {
           // 搜索按钮
           GestureDetector(
             onTap: () {
-              final text = _textController.text.trim();
+              final text = widget.controller.textController.text.trim();
               if (text.isNotEmpty) {
-                widget.onSearchChanged(text);
+                widget.controller.updateKeywordAndSearch(text);
               }
             },
             child: Container(

@@ -8,6 +8,9 @@ class SearchPageController extends GetxController {
   // 搜索关键词
   final searchKeyword = ''.obs;
   
+  // 文本输入控制器
+  late TextEditingController textController;
+  
   // 当前选中的排序方式
   final selectedOrderType = VideoOrderTypeEnum.CREATE_TIME.obs;
   
@@ -28,14 +31,23 @@ class SearchPageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    textController = TextEditingController();
     scrollController = ScrollController();
     scrollController.addListener(_scrollListener);
+    
+    // 监听搜索关键词变化，同步到文本控制器
+    searchKeyword.listen((keyword) {
+      if (textController.text != keyword) {
+        textController.text = keyword;
+      }
+    });
   }
   
   @override
   void onClose() {
     scrollController.removeListener(_scrollListener);
     scrollController.dispose();
+    textController.dispose();
     super.onClose();
   }
   
@@ -50,6 +62,7 @@ class SearchPageController extends GetxController {
   /// 初始化搜索页面
   void initWithKeyword(String keyword) {
     searchKeyword.value = keyword;
+    textController.text = keyword;
     searchVideos(isRefresh: true);
   }
   

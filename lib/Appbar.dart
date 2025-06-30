@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
 import 'controllers/controllers-class.dart';
+import 'controllers/MessageController.dart';
+import 'enums.dart';
 import 'fakePackages/fake_window_manager.dart'
     if (dart.library.io) 'package:window_manager/window_manager.dart';
 import 'dart:io';
@@ -227,8 +229,10 @@ class AppBarContent extends StatelessWidget {
                 builder: (context) => Stack(
                   children: [
                     Positioned(
-                      top: MediaQuery.of(context).size.height * 0.15, // 在屏幕上部15%的位置
-                      left: (MediaQuery.of(context).size.width - 600.w) / 2, // 水平居中
+                      top: MediaQuery.of(context).size.height *
+                          0.15, // 在屏幕上部15%的位置
+                      left: (MediaQuery.of(context).size.width - 600.w) /
+                          2, // 水平居中
                       child: SearchDialog(),
                     ),
                   ],
@@ -276,7 +280,7 @@ class AppBarContent extends StatelessWidget {
           ),
           SizedBox(width: 16.w),
           Container(
-            width: 300.w,
+            width: 400.w,
             child: Row(
               children: [
                 MouseRegion(
@@ -328,6 +332,11 @@ class AppBarContent extends StatelessWidget {
                             );
                           })),
                 SizedBox(width: 16.w),
+
+                // 消息按钮
+                _MessageButton(),
+
+                SizedBox(width: 16.w),
                 HoverFollowWidget(
                     child: TextButton.icon(
                   style: TextButton.styleFrom(
@@ -371,5 +380,376 @@ class AppBarContent extends StatelessWidget {
         ],
       );
     });
+  }
+}
+
+// 消息按钮组件
+class _MessageButton extends StatefulWidget {
+  @override
+  State<_MessageButton> createState() => _MessageButtonState();
+}
+
+class _MessageButtonState extends State<_MessageButton>
+    with TickerProviderStateMixin {
+  final GlobalKey _messageKey = GlobalKey();
+  OverlayEntry? _messageOverlay;
+  bool _isHovered = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+  late MessageController _messageController;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // 初始化或获取MessageController
+    if (Get.isRegistered<MessageController>()) {
+      _messageController = Get.find<MessageController>();
+    } else {
+      _messageController = Get.put(MessageController());
+    }
+    
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 200),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
+    
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, -0.05),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
+  }
+
+  void _showMessageDropdown() {
+    if (_messageOverlay != null) return;
+
+    final overlay = Overlay.of(context);
+    final renderBox =
+        _messageKey.currentContext?.findRenderObject() as RenderBox?;
+    final offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+    final size = renderBox?.size ?? Size.zero;
+
+    _messageOverlay = OverlayEntry(
+      builder: (context) => Positioned(
+        left: offset.dx + size.width / 2 - 150.w, // 居中对齐
+        top: offset.dy + size.height + 8.h, // 在按钮下方
+        child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) => FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Material(
+                color: Colors.transparent,
+                child: MouseRegion(
+                  onEnter: (_) => setState(() => _isHovered = true),
+                  onExit: (_) => _hideMessageDropdown(),
+                  child: Container(
+                    width: 300.w,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      borderRadius: BorderRadius.circular(12.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20.r,
+                          offset: Offset(0, 8.h),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 消息头部
+                        Container(
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(color: Colors.grey[200]!, width: 1),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.notifications,
+                                  size: 20.w, color: Colors.grey[600]),
+                              SizedBox(width: 8.w),
+                              Text(
+                                '消息通知',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              Spacer(),
+                              // 使用Obx显示实时总未读数量
+                              Obx(() {
+                                final totalCount = _messageController.totalUnreadCount.value;
+                                if (totalCount == 0) return SizedBox.shrink();
+                                
+                                return Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8.w, vertical: 2.h),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(10.r),
+                                  ),
+                                  child: Text(
+                                    totalCount > 99 ? '99+' : totalCount.toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+
+                        // 消息列表 - 使用Obx显示实时消息数据
+                        Container(
+                          constraints: BoxConstraints(maxHeight: 300.h),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            padding: EdgeInsets.zero,
+                            itemCount: 4, // 固定4种消息类型
+                            itemBuilder: (context, index) {
+                              // 构建消息类型列表
+                              final messageTypes = [
+                                MessageTypeEnum.SYS,
+                                MessageTypeEnum.LIKE,
+                                MessageTypeEnum.COMMENT,
+                                MessageTypeEnum.COLLECT,
+                              ];
+                              
+                              final messageType = messageTypes[index];
+                              final typeInfo = _messageController.getMessageTypeInfo(messageType);
+                              
+                              return Obx(() {
+                                final unreadCount = _messageController.getUnreadCountByType(messageType);
+                                
+                                return _buildMessageTypeItem(
+                                  icon: typeInfo['icon'],
+                                  iconColor: typeInfo['color'],
+                                  title: typeInfo['title'],
+                                  unreadCount: unreadCount,
+                                  onTap: () {
+                                    _hideMessageDropdown();
+                                    // TODO: 跳转到对应消息类型页面
+                                    print('点击了${typeInfo['title']}，未读数量：$unreadCount');
+                                  },
+                                );
+                              });
+                            },
+                          ),
+                        ),
+
+                        // 查看全部按钮
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: Colors.grey[200]!, width: 1),
+                            ),
+                          ),
+                          child: TextButton(
+                            onPressed: () {
+                              _hideMessageDropdown();
+                              // TODO: 跳转到消息页面
+                            },
+                            style: TextButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).primaryColor.withOpacity(0.1),
+                              foregroundColor: Theme.of(context).primaryColor,
+                            ),
+                            child: Text(
+                              '查看全部消息',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(_messageOverlay!);
+    _animationController.forward();
+  }
+
+  Widget _buildMessageTypeItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required int unreadCount,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: unreadCount > 0 ? Colors.blue.withOpacity(0.05) : Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32.w,
+              height: 32.w,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              child: Icon(icon, size: 16.w, color: iconColor),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: unreadCount > 0 ? FontWeight.w600 : FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            if (unreadCount > 0) ...[
+              SizedBox(width: 8.w),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  unreadCount > 99 ? '99+' : unreadCount.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ] else ...[
+              SizedBox(width: 8.w),
+              Icon(Icons.chevron_right, size: 16.w, color: Colors.grey[400]),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _hideMessageDropdown() async {
+    if (_messageOverlay == null) return;
+    
+    await _animationController.reverse();
+    _messageOverlay?.remove();
+    _messageOverlay = null;
+    setState(() => _isHovered = false);
+  }
+
+  @override
+  void dispose() {
+    _hideMessageDropdown();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      key: _messageKey,
+      onEnter: (_) {
+        setState(() => _isHovered = true);
+        _showMessageDropdown();
+      },
+      onExit: (_) {
+        // 延迟隐藏，给用户时间移动到弹窗
+        Future.delayed(Duration(milliseconds: 150), () {
+          if (!_isHovered) {
+            _hideMessageDropdown();
+          }
+        });
+      },
+      child: Container(
+        width: 40.w,
+        height: 40.w,
+        decoration: BoxDecoration(
+          color: _isHovered
+              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        child: Stack(
+          children: [
+            Center(
+              child: Icon(
+                Icons.notifications_outlined,
+                size: 20.w,
+                color: _isHovered
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey[600],
+              ),
+            ),
+            // 消息数量小红点 - 使用Obx监听数据变化
+            Obx(() {
+              final totalCount = _messageController.totalUnreadCount.value;
+              if (totalCount == 0) return SizedBox.shrink();
+              
+              return Positioned(
+                top: 6.h,
+                right: 6.w,
+                child: Container(
+                  constraints: BoxConstraints(
+                    minWidth: 12.w,
+                    minHeight: 12.w,
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 2.w),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Center(
+                    child: Text(
+                      totalCount > 99 ? '99+' : totalCount.toString(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 8.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
   }
 }
