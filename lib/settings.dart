@@ -44,6 +44,7 @@ class Routes {
   static const String platformPage = '/platform';
   static const String videoPlayPage = '/videoPlayPage';
   static const String uhome = '/uhome';
+  static const String messagePage = '/message'; // 新增消息页面路由
 }
 
 class Texts {

@@ -27,6 +27,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:flutter/gestures.dart';
 import 'Appbar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'pages/MessagePage/MessagePage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -214,6 +215,18 @@ class _HomeState extends State<Home> {
                       middlewares: [appBarController.listenPopMiddleware]);
                   appBarController.addAndCleanReapeatRoute(
                       route, settings.name!);
+                  return route;
+                }
+                if (settings.name!.startsWith(Routes.messagePage)) {
+                  var route = GetPageRoute(
+                      settings: settings,
+                      routeName: settings.name,
+                      page: () => MessagePage(),
+                      transition: Transition.fadeIn,
+                      middlewares: [appBarController.listenPopMiddleware]);
+                  appBarController.addAndCleanReapeatRoute(
+                      route, settings.name!,
+                      title: "消息中心");
                   return route;
                 }
                 // 可扩展更多页面

@@ -206,7 +206,10 @@ class AppBarContent extends StatelessWidget {
                                           padding: EdgeInsets.only(
                                               right: 6.w, left: 2.w),
                                           child: Icon(Icons.close,
-                                              size: 16.w, color: Colors.grey),
+                                              size: 16.w,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary),
                                         ),
                                       ),
                                     ],
@@ -402,19 +405,19 @@ class _MessageButtonState extends State<_MessageButton>
   @override
   void initState() {
     super.initState();
-    
+
     // 初始化或获取MessageController
     if (Get.isRegistered<MessageController>()) {
       _messageController = Get.find<MessageController>();
     } else {
-      _messageController = Get.put(MessageController());
+      _messageController = Get.put(MessageController(), permanent: true);
     }
-    
+
     _animationController = AnimationController(
       duration: Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -422,7 +425,7 @@ class _MessageButtonState extends State<_MessageButton>
       parent: _animationController,
       curve: Curves.easeOut,
     ));
-    
+
     _slideAnimation = Tween<Offset>(
       begin: Offset(0, -0.05),
       end: Offset.zero,
@@ -463,7 +466,7 @@ class _MessageButtonState extends State<_MessageButton>
                       borderRadius: BorderRadius.circular(12.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Theme.of(context).shadowColor.withOpacity(0.1),
                           blurRadius: 20.r,
                           offset: Offset(0, 8.h),
                         ),
@@ -477,28 +480,34 @@ class _MessageButtonState extends State<_MessageButton>
                           padding: EdgeInsets.all(16.w),
                           decoration: BoxDecoration(
                             border: Border(
-                              bottom: BorderSide(color: Colors.grey[200]!, width: 1),
+                              bottom: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                  width: 1),
                             ),
                           ),
                           child: Row(
                             children: [
                               Icon(Icons.notifications,
-                                  size: 20.w, color: Colors.grey[600]),
+                                  size: 20.w,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary),
                               SizedBox(width: 8.w),
                               Text(
                                 '消息通知',
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                               Spacer(),
                               // 使用Obx显示实时总未读数量
                               Obx(() {
-                                final totalCount = _messageController.totalUnreadCount.value;
+                                final totalCount =
+                                    _messageController.totalUnreadCount.value;
                                 if (totalCount == 0) return SizedBox.shrink();
-                                
+
                                 return Container(
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 8.w, vertical: 2.h),
@@ -507,7 +516,9 @@ class _MessageButtonState extends State<_MessageButton>
                                     borderRadius: BorderRadius.circular(10.r),
                                   ),
                                   child: Text(
-                                    totalCount > 99 ? '99+' : totalCount.toString(),
+                                    totalCount > 99
+                                        ? '99+'
+                                        : totalCount.toString(),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 12.sp,
@@ -535,13 +546,15 @@ class _MessageButtonState extends State<_MessageButton>
                                 MessageTypeEnum.COMMENT,
                                 MessageTypeEnum.COLLECT,
                               ];
-                              
+
                               final messageType = messageTypes[index];
-                              final typeInfo = _messageController.getMessageTypeInfo(messageType);
-                              
+                              final typeInfo = _messageController
+                                  .getMessageTypeInfo(messageType);
+
                               return Obx(() {
-                                final unreadCount = _messageController.getUnreadCountByType(messageType);
-                                
+                                final unreadCount = _messageController
+                                    .getUnreadCountByType(messageType);
+
                                 return _buildMessageTypeItem(
                                   icon: typeInfo['icon'],
                                   iconColor: typeInfo['color'],
@@ -549,8 +562,11 @@ class _MessageButtonState extends State<_MessageButton>
                                   unreadCount: unreadCount,
                                   onTap: () {
                                     _hideMessageDropdown();
-                                    // TODO: 跳转到对应消息类型页面
-                                    print('点击了${typeInfo['title']}，未读数量：$unreadCount');
+                                    // 跳转到对应消息类型页面
+                                    Get.toNamed(
+                                      '${Routes.messagePage}/${messageType.type}',
+                                      id: Routes.mainGetId,
+                                    );
                                   },
                                 );
                               });
@@ -564,22 +580,31 @@ class _MessageButtonState extends State<_MessageButton>
                           padding: EdgeInsets.all(16.w),
                           decoration: BoxDecoration(
                             border: Border(
-                              top: BorderSide(color: Colors.grey[200]!, width: 1),
+                              top: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                  width: 1),
                             ),
                           ),
                           child: TextButton(
                             onPressed: () {
                               _hideMessageDropdown();
-                              // TODO: 跳转到消息页面
+                              // 跳转到消息页面（默认显示系统消息）
+                              Get.toNamed(
+                                '${Routes.messagePage}/1',
+                                id: Routes.mainGetId,
+                              );
                             },
                             style: TextButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).primaryColor.withOpacity(0.1),
+                              backgroundColor: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.1),
                               foregroundColor: Theme.of(context).primaryColor,
                             ),
                             child: Text(
                               '查看全部消息',
                               style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                // backgroundColor: ,
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -613,7 +638,9 @@ class _MessageButtonState extends State<_MessageButton>
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: unreadCount > 0 ? Colors.blue.withOpacity(0.05) : Colors.transparent,
+          color: unreadCount > 0
+              ? Theme.of(context).primaryColor.withOpacity(0.05)
+              : Colors.transparent,
         ),
         child: Row(
           children: [
@@ -632,8 +659,9 @@ class _MessageButtonState extends State<_MessageButton>
                 title,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  fontWeight: unreadCount > 0 ? FontWeight.w600 : FontWeight.w500,
-                  color: Colors.black87,
+                  fontWeight:
+                      unreadCount > 0 ? FontWeight.w600 : FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -656,7 +684,8 @@ class _MessageButtonState extends State<_MessageButton>
               ),
             ] else ...[
               SizedBox(width: 8.w),
-              Icon(Icons.chevron_right, size: 16.w, color: Colors.grey[400]),
+              Icon(Icons.chevron_right,
+                  size: 16.w, color: Theme.of(context).colorScheme.secondary),
             ],
           ],
         ),
@@ -666,7 +695,7 @@ class _MessageButtonState extends State<_MessageButton>
 
   void _hideMessageDropdown() async {
     if (_messageOverlay == null) return;
-    
+
     await _animationController.reverse();
     _messageOverlay?.remove();
     _messageOverlay = null;
@@ -720,7 +749,7 @@ class _MessageButtonState extends State<_MessageButton>
             Obx(() {
               final totalCount = _messageController.totalUnreadCount.value;
               if (totalCount == 0) return SizedBox.shrink();
-              
+
               return Positioned(
                 top: 6.h,
                 right: 6.w,
