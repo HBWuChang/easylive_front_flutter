@@ -64,6 +64,7 @@ dependencies:
   iconify_flutter_plus: ^1.0.4
   iconify_flutter: ^0.0.7
   flutter_screenutil:
+  fl_chart: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
