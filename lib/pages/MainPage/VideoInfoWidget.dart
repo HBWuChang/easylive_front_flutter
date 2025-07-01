@@ -31,149 +31,165 @@ class _VideoInfoWidgetState extends State<VideoInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        HoverFollowWidget(
-            maxOffset: 12.w,
-            child: MouseRegion(
-              onEnter: (_) => setState(() => _hovered = true),
-              onExit: (_) => setState(() => _hovered = false),
-              child: AnimatedScale(
-                scale: _hovered ? 1.05 : 1.0,
-                duration: Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                child: Stack(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        final videoId = widget.video.videoId;
-                        if (videoId != null) {
-                          Get.find<AppBarController>()
-                              .extendBodyBehindAppBar
-                              .value = false;
-                          Get.toNamed('${Routes.videoPlayPage}/$videoId',
-                              id: Routes.mainGetId);
-                        }
-                      },
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.r),
-                          child: widget.video.videoCover != null &&
-                                  widget.video.videoCover!.isNotEmpty
-                              ? ExtendedImage.network(
-                                  Constants.baseUrl +
-                                      ApiAddr.fileGetResourcet +
-                                      widget.video.videoCover!,
-                                  fit: BoxFit.cover,
-                                )
-                              : Container(color: Colors.grey[200]),
+    return AspectRatio(
+        aspectRatio: AspectRatioEnum.MainPageRecommendVideoRightchild.ratio,
+        child: Stack(
+          children: [
+            HoverFollowWidget(
+                maxOffset: 12.w,
+                child: MouseRegion(
+                  onEnter: (_) => setState(() => _hovered = true),
+                  onExit: (_) => setState(() => _hovered = false),
+                  child: AnimatedScale(
+                    scale: _hovered ? 1.05 : 1.0,
+                    duration: Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    child: Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            final videoId = widget.video.videoId;
+                            if (videoId != null) {
+                              Get.find<AppBarController>()
+                                  .extendBodyBehindAppBar
+                                  .value = false;
+                              Get.toNamed('${Routes.videoPlayPage}/$videoId',
+                                  id: Routes.mainGetId);
+                            }
+                          },
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.r),
+                              child: widget.video.videoCover != null &&
+                                      widget.video.videoCover!.isNotEmpty
+                                  ? ExtendedImage.network(
+                                      Constants.baseUrl +
+                                          ApiAddr.fileGetResourcet +
+                                          widget.video.videoCover!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(color: Colors.grey[200]),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        height: 38.w,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.vertical(
-                              bottom: Radius.circular(8.r)),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(0.7)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            height: 38.w,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                  bottom: Radius.circular(8.r)),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7)
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: 8.w,
+                          bottom: 8.w,
+                          child: Row(
+                            children: [
+                              Icon(Icons.play_arrow,
+                                  color: Colors.white, size: 16.w),
+                              SizedBox(width: 2.w),
+                              Text(
+                                (widget.video.playCount ?? 0).toString(),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13.sp,
+                                    shadows: [
+                                      Shadow(
+                                          color: Colors.black, blurRadius: 2.r)
+                                    ]),
+                              ),
+                              SizedBox(width: 10.w),
+                              Icon(Icons.subtitles,
+                                  color: Colors.white, size: 16.w),
+                              SizedBox(width: 2.w),
+                              Text(
+                                (widget.video.danmuCount ?? 0).toString(),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13.sp,
+                                    shadows: [
+                                      Shadow(
+                                          color: Colors.black, blurRadius: 2.r)
+                                    ]),
+                              ),
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    Positioned(
-                      left: 8.w,
-                      bottom: 8.w,
-                      child: Row(
-                        children: [
-                          Icon(Icons.play_arrow,
-                              color: Colors.white, size: 16.w),
-                          SizedBox(width: 2.w),
-                          Text(
-                            (widget.video.playCount ?? 0).toString(),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13.sp,
-                                shadows: [
-                                  Shadow(color: Colors.black, blurRadius: 2.r)
-                                ]),
-                          ),
-                          SizedBox(width: 10.w),
-                          Icon(Icons.subtitles,
-                              color: Colors.white, size: 16.w),
-                          SizedBox(width: 2.w),
-                          Text(
-                            (widget.video.danmuCount ?? 0).toString(),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13.sp,
-                                shadows: [
-                                  Shadow(color: Colors.black, blurRadius: 2.r)
-                                ]),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )),
-        SizedBox(height: 4.w),
-        HoverFollowWidget(
-            child: HighlightText(
-          text: widget.video.videoName ?? '',
-          maxLines: 1,
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15.sp,
-              color: Theme.of(context).colorScheme.tertiary),
-          highlightStyle: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15.sp,
-            color: Theme.of(context).primaryColor,
-          ),
-        )),
-        HoverFollowWidget(
-            maxOffset: 8.w,
-            child: Row(
-              children: [
-                TextButton.icon(
-                    style: ButtonStyle(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                    icon: Icon(Icons.person, size: 14.w, color: Colors.grey),
-                    onPressed: () {
-                      Get.toNamed('${Routes.uhome}/${widget.video.userId}',
-                          id: Routes.mainGetId);
-                    },
-                    label: Text(
-                      widget.video.nickName ?? '',
-                      style:
-                          TextStyle(fontSize: 13.sp, color: Colors.grey[700]),
-                    )),
-                SizedBox(width: 10.w),
-                Icon(Icons.access_time, size: 14.w, color: Colors.grey),
-                SizedBox(width: 3.w),
-                SelectableText(
-                  widget.video.createTime != null
-                      ? _formatDate(widget.video.createTime!)
-                      : '',
-                  style: TextStyle(fontSize: 13.sp, color: Colors.grey[700]),
-                ),
-              ],
-            )),
-      ],
-    );
+                  ),
+                )),
+            Positioned(
+                right: 0,
+                left: 0,
+                bottom: 40.w,
+                child: HoverFollowWidget(
+                    child: HighlightText(
+                  text: widget.video.videoName ?? '',
+                  maxLines: 1,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15.sp,
+                      color: Theme.of(context).colorScheme.tertiary),
+                  highlightStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15.sp,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ))),
+            Positioned(
+                right: 0,
+                left: 0,
+                bottom: 0,
+                child: HoverFollowWidget(
+                    maxOffset: 8.w,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        if (widget.video.nickName != null)
+                          TextButton.icon(
+                              style: ButtonStyle(
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap),
+                              icon: Icon(Icons.person,
+                                  size: 14.w, color: Colors.grey),
+                              onPressed: () {
+                                Get.toNamed(
+                                    '${Routes.uhome}/${widget.video.userId}',
+                                    id: Routes.mainGetId);
+                              },
+                              label: Text(
+                                widget.video.nickName!,
+                                style: TextStyle(
+                                    fontSize: 13.sp, color: Colors.grey[700]),
+                              )),
+                        SizedBox(width: 10.w),
+                        Icon(Icons.access_time, size: 14.w, color: Colors.grey),
+                        SizedBox(width: 3.w),
+                        SelectableText(
+                          widget.video.createTime != null
+                              ? _formatDate(widget.video.createTime!)
+                              : '',
+                          style: TextStyle(
+                              fontSize: 13.sp, color: Colors.grey[700]),
+                        ),
+                      ],
+                    ))),
+          ],
+        ));
   }
 
   String _formatDate(DateTime date) {

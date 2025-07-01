@@ -32,10 +32,9 @@ class HighlightText extends StatelessWidget {
     // 解析HTML高亮标签
     final spans = _parseHighlightText(text, defaultStyle, defaultHighlightStyle);
     
-    return RichText(
+    return SelectableText.rich(
+      TextSpan(children: spans),
       maxLines: maxLines,
-      overflow: overflow ?? TextOverflow.ellipsis,
-      text: TextSpan(children: spans),
     );
   }
 
