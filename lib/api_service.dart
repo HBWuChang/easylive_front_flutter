@@ -554,7 +554,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> ucenterLoadComment(
-      {required String? videoId, required int? pageNo}) async {
+      {String? videoId, int? pageNo}) async {
     return toJson(await get(
       ApiAddr.ucenterLoadComment,
       query: {'videoId': videoId ?? '', 'pageNo': pageNo?.toString() ?? ''},

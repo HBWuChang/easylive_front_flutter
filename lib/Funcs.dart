@@ -5,6 +5,7 @@ import 'package:easylive/pages/pages.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'api_service.dart';
 import 'cards1.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'dart:typed_data';
@@ -21,19 +22,23 @@ void openLoginDialog() {
         return Center(
           child: FractionallySizedBox(
             widthFactor: (max(Get.width * Constants.loginDialogResizeRate,
-                    Constants.loginDialogMinWidth) /
-                Get.width).w,
+                        Constants.loginDialogMinWidth) /
+                    Get.width)
+                .w,
             heightFactor: (max(Get.height * Constants.loginDialogResizeRate,
-                    Constants.loginDialogMinHeight) /
-                Get.height).w,
+                        Constants.loginDialogMinHeight) /
+                    Get.height)
+                .w,
             child: Material(
                 borderRadius: BorderRadius.circular(12.r),
                 clipBehavior: Clip.antiAlias,
                 child: LoginPage(
                   areaWidth: max(Get.width * Constants.loginDialogResizeRate,
-                      Constants.loginDialogMinWidth).w,
+                          Constants.loginDialogMinWidth)
+                      .w,
                   areaHeight: max(Get.height * Constants.loginDialogResizeRate,
-                      Constants.loginDialogMinHeight).w,
+                          Constants.loginDialogMinHeight)
+                      .w,
                 )),
           ),
         );
@@ -192,6 +197,7 @@ Future<dynamic> showConfirmDialog(String msg, {String title = '提示'}) async {
   );
   return res ?? false;
 }
+
 String? getLastPath(String url) {
   if (url.isEmpty) return null;
   // 去掉查询参数
@@ -201,6 +207,7 @@ String? getLastPath(String url) {
   // 获取最后一个斜杠后的部分
   return url.split('/').last;
 }
+
 Map<String, String>? toParameters(String name) {
   name = name.substring(name.indexOf('?') + 1);
   Map<String, String> parameters = {};
@@ -213,6 +220,7 @@ Map<String, String>? toParameters(String name) {
   }
   return parameters.isNotEmpty ? parameters : null;
 }
+
 Future<String> getDownloadDirectory() async {
   if (GetPlatform.isDesktop) {
     final downloads = await getDownloadsDirectory();
@@ -226,4 +234,12 @@ Future<File> saveBytesToFile(
   final file = File('$dir/$fileName');
   await file.writeAsBytes(bytes);
   return file;
+}
+
+/// 获取完整图片URL
+String getFullImageUrl(String imagePath) {
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  }
+  return Constants.baseUrl + ApiAddr.fileGetResourcet + imagePath;
 }
