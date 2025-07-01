@@ -1,4 +1,5 @@
 import 'package:easylive/Funcs.dart';
+import 'package:easylive/controllers/MessageController.dart';
 import 'package:easylive/settings.dart';
 import 'package:easylive/widgets.dart';
 import 'package:flutter/material.dart';
@@ -76,6 +77,7 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         loginController.email.value = emailController.text;
         await accountController.saveAccountInfo(ret['data']);
+        Get.find<MessageController>().initializeData();
         Get.back();
         Get.closeAllSnackbars();
         Get.snackbar(
@@ -723,6 +725,12 @@ class _AccountInfoDialogState extends State<AccountInfoDialog> {
                                                 Get.closeAllSnackbars();
                                                 var res = await ApiService
                                                     .accountLogout();
+                                                try {
+                                                  Get.find<MessageController>()
+                                                      .resetData();
+                                                } catch (e) {
+                                                  print(e);
+                                                }
                                                 if (showResSnackbar(res)) {
                                                   accountController
                                                       .saveAccountInfo({});

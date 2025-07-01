@@ -207,9 +207,10 @@ class _MessagePageState extends State<MessagePage> {
                                   final unreadCount = messageController
                                       .getUnreadCountByType(messageType);
                                   if (unreadCount > 0) {
-                                    await messageController.markAsRead(messageType);
+                                    await messageController
+                                        .markAsRead(messageType);
                                   }
-                                  
+
                                   // 切换消息类型
                                   messageController
                                       .switchMessageType(messageType);
@@ -235,66 +236,67 @@ class _MessagePageState extends State<MessagePage> {
                                       width: isSelected ? 2 : 1,
                                     ),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        typeInfo['icon'],
-                                        size: 20.w,
-                                        color: isSelected
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            : typeInfo['color'],
-                                      ),
-                                      SizedBox(width: 12.w),
-                                      Expanded(
-                                        child: Text(
-                                          typeInfo['title'],
-                                          style: TextStyle(
-                                            fontSize: 16.sp,
-                                            fontWeight: isSelected
-                                                ? FontWeight.w600
-                                                : FontWeight.w500,
+                                  child: Obx(() => Row(
+                                        children: [
+                                          Icon(
+                                            typeInfo['icon'],
+                                            size: 20.w,
                                             color: isSelected
                                                 ? Theme.of(context)
                                                     .colorScheme
                                                     .primary
-                                                : Colors.black87,
+                                                : typeInfo['color'],
                                           ),
-                                        ),
-                                      ),
-                                      // 未读数量标识
-                                      if (messageController
-                                              .getUnreadCountByType(
-                                                  messageType) >
-                                          0)
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 8.w, vertical: 4.h),
-                                          decoration: BoxDecoration(
-                                            color: Colors.red,
-                                            borderRadius:
-                                                BorderRadius.circular(12.r),
-                                          ),
-                                          child: Text(
-                                            messageController
-                                                        .getUnreadCountByType(
-                                                            messageType) >
-                                                    99
-                                                ? '99+'
-                                                : messageController
-                                                    .getUnreadCountByType(
-                                                        messageType)
-                                                    .toString(),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.w600,
+                                          SizedBox(width: 12.w),
+                                          Expanded(
+                                            child: Text(
+                                              typeInfo['title'],
+                                              style: TextStyle(
+                                                fontSize: 16.sp,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w600
+                                                    : FontWeight.w500,
+                                                color: isSelected
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .primary
+                                                    : Colors.black87,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                    ],
-                                  ),
+                                          // 未读数量标识
+                                          if (messageController
+                                                  .getUnreadCountByType(
+                                                      messageType) >
+                                              0)
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 8.w,
+                                                  vertical: 4.h),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius:
+                                                    BorderRadius.circular(12.r),
+                                              ),
+                                              child: Text(
+                                                messageController
+                                                            .getUnreadCountByType(
+                                                                messageType) >
+                                                        99
+                                                    ? '99+'
+                                                    : messageController
+                                                        .getUnreadCountByType(
+                                                            messageType)
+                                                        .toString(),
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      )),
                                 ),
                               ),
                             );

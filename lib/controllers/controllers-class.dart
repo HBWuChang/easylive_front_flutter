@@ -4,7 +4,8 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:easylive/controllers/LocalSettingsController.dart';
 import 'package:easylive/controllers/controllers-class2.dart';
-import 'package:easylive/controllers/SearchController.dart' as AppSearchController;
+import 'package:easylive/controllers/SearchController.dart'
+    as AppSearchController;
 import 'package:easylive/enums.dart';
 import 'package:easylive/settings.dart';
 import 'package:flutter/widgets.dart';
@@ -16,6 +17,7 @@ import '../Funcs.dart';
 import 'package:media_kit/media_kit.dart';
 import '../pages/MainPage/MainPage.dart';
 import 'MainPageController.dart';
+import 'MessageController.dart';
 import 'VideoCommentController.dart';
 import 'dart:async';
 
@@ -46,6 +48,7 @@ class ControllersInitController extends GetxController {
     if (!Get.isRegistered<WindowSizeController>()) {
       Get.put(WindowSizeController(), permanent: true);
     }
+    Get.put(MessageController(), permanent: true);
   }
 
   void initLoginController() {

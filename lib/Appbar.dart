@@ -337,7 +337,7 @@ class AppBarContent extends StatelessWidget {
                 SizedBox(width: 16.w),
 
                 // 消息按钮
-                _MessageButton(),
+                if (accountController.userId != null) _MessageButton(),
 
                 SizedBox(width: 16.w),
                 HoverFollowWidget(
@@ -407,11 +407,7 @@ class _MessageButtonState extends State<_MessageButton>
     super.initState();
 
     // 初始化或获取MessageController
-    if (Get.isRegistered<MessageController>()) {
-      _messageController = Get.find<MessageController>();
-    } else {
-      _messageController = Get.put(MessageController(), permanent: true);
-    }
+    _messageController = Get.find<MessageController>();
 
     _animationController = AnimationController(
       duration: Duration(milliseconds: 200),

@@ -46,6 +46,10 @@ class MessageController extends GetxController {
       if (response['code'] == 200) {
         // final data = response['data'] as Map<String, dynamic>? ?? {};
         var data = response['data'] as List<dynamic>? ?? [];
+        likeUnreadCount.value = 0;
+        sysUnreadCount.value = 0;
+        collectUnreadCount.value = 0;
+        commentUnreadCount.value = 0;
         for (var item in data) {
           var messageCountDto = UserMessageCountDto.fromJson(item);
           if (messageCountDto.messageType == MessageTypeEnum.SYS.type) {
@@ -76,6 +80,7 @@ class MessageController extends GetxController {
         loadTotalUnreadCount(),
         loadGroupUnreadCounts(),
       ]);
+      update(); // 通知UI更新
     } finally {
       isLoading.value = false;
     }
@@ -238,6 +243,39 @@ class MessageController extends GetxController {
     Stream.periodic(Duration(seconds: 30)).listen((_) {
       loadUnreadCounts();
     });
+  }
+
+  /// 重置所有数据（用于退出登录时调用）
+  void resetData() {
+    // 重置未读消息数量
+    totalUnreadCount.value = 0;
+    sysUnreadCount.value = 0;
+    likeUnreadCount.value = 0;
+    collectUnreadCount.value = 0;
+    commentUnreadCount.value = 0;
+
+    // 重置消息列表
+    messages.clear();
+    currentMessageType.value = MessageTypeEnum.SYS;
+    pageNo.value = 1;
+    pageTotal.value = 1;
+    totalCount.value = 0;
+
+    // 重置加载状态
+    isLoading.value = false;
+    isLoadingMessages.value = false;
+  }
+
+  /// 初始化数据（用于登录时调用）
+  void initializeData() {
+    // 先重置数据
+    resetData();
+    
+    // 重新加载未读消息数量
+    loadUnreadCounts();
+    
+    // 重新启动定时刷新
+    _startPeriodicRefresh();
   }
 
   @override
