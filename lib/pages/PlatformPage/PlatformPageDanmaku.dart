@@ -19,7 +19,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
   final DanmuController controller = Get.put(DanmuController());
   final ScrollController scrollController = ScrollController();
   late UhomeSeriesController _uhomeSeriesController;
-  
+
   var selectedVideoId = ''.obs;
   var selectedVideoName = ''.obs;
 
@@ -27,13 +27,13 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
   void initState() {
     super.initState();
     print('PlatformPageDanmaku initState');
-    
+
     // 初始化控制器
     if (!Get.isRegistered<UhomeSeriesController>()) {
       Get.put(UhomeSeriesController(userId: "1"));
     }
     _uhomeSeriesController = Get.find<UhomeSeriesController>();
-    
+
     // 监听滚动事件，实现无限滚动
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
@@ -85,33 +85,35 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
         children: [
           Expanded(
             child: Obx(() => Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 12.sp),
-              decoration: BoxDecoration(
-                border: Border.all(color: Theme.of(context).colorScheme.outline),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.video_library_outlined, 
-                       color: Theme.of(context).colorScheme.outline),
-                  SizedBox(width: 8.sp),
-                  Expanded(
-                    child: Text(
-                      selectedVideoName.value.isEmpty 
-                          ? '选择视频查看弹幕' 
-                          : selectedVideoName.value,
-                      style: TextStyle(
-                        color: selectedVideoName.value.isEmpty 
-                            ? Theme.of(context).colorScheme.outline
-                            : Theme.of(context).colorScheme.onSurface,
-                        fontSize: 14.sp,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.sp, vertical: 12.sp),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Theme.of(context).colorScheme.outline),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
-                ],
-              ),
-            )),
+                  child: Row(
+                    children: [
+                      Icon(Icons.video_library_outlined,
+                          color: Theme.of(context).colorScheme.outline),
+                      SizedBox(width: 8.sp),
+                      Expanded(
+                        child: Text(
+                          selectedVideoName.value.isEmpty
+                              ? '选择视频查看弹幕'
+                              : selectedVideoName.value,
+                          style: TextStyle(
+                            color: selectedVideoName.value.isEmpty
+                                ? Theme.of(context).colorScheme.outline
+                                : Theme.of(context).colorScheme.onSurface,
+                            fontSize: 14.sp,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
           ),
           SizedBox(width: 12.sp),
           ElevatedButton(
@@ -126,7 +128,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
                   selectButtonText: '确定',
                 ),
               );
-              
+
               if (selectedVideos != null && selectedVideos.isNotEmpty) {
                 final video = selectedVideos.first;
                 selectedVideoId.value = video.videoId ?? '';
@@ -536,8 +538,8 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
                 controller.deleteDanmu(danmu.danmuId);
+                Navigator.of(context).pop();
               },
               style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error),
