@@ -7,7 +7,6 @@ import '../Funcs.dart';
 class DanmuController extends GetxController {
   // 弹幕列表
   var danmus = <VideoDanmu>[].obs;
-  var allDanmus = <VideoDanmu>[]; // 存储所有弹幕，用于搜索过滤
   
   // 分页相关
   var currentPage = 1.obs;
@@ -15,8 +14,8 @@ class DanmuController extends GetxController {
   var pageSize = 15.obs;
   var hasMoreData = true.obs;
   
-  // 搜索条件
-  var videoNameFuzzy = ''.obs;
+  // 视频筛选条件
+  var selectedVideoId = ''.obs;
   
   // 加载状态
   var isLoading = false.obs;
@@ -41,7 +40,7 @@ class DanmuController extends GetxController {
     
     try {
       final response = await ApiService.ucenterLoadDanmu(
-        videoId: '', // 传入空字符串，希望服务器返回所有弹幕
+        videoId: selectedVideoId.value, // 使用选中的视频ID
         pageNo: currentPage.value,
       );
       
@@ -56,18 +55,16 @@ class DanmuController extends GetxController {
         
         // 更新数据
         if (isRefresh) {
-          allDanmus = newDanmus;
-          _applySearchFilter();
+          danmus.value = newDanmus;
         } else {
-          allDanmus.addAll(newDanmus);
-          _applySearchFilter();
+          danmus.addAll(newDanmus);
         }
         
         // 更新分页信息
-        if (isRefresh) {
-          hasMoreData.value = newDanmus.length >= pageSize.value;
-        } else {
-          hasMoreData.value = newDanmus.length >= pageSize.value;
+        totalCount.value = data['totalCount'] ?? 0;
+        hasMoreData.value = newDanmus.length >= pageSize.value;
+        
+        if (!isRefresh) {
           currentPage.value++;
         }
       } else {
@@ -88,7 +85,6 @@ class DanmuController extends GetxController {
       
       if (response['code'] == 200) {
         // 从列表中移除弹幕
-        allDanmus.removeWhere((danmu) => danmu.danmuId == danmuId);
         danmus.removeWhere((danmu) => danmu.danmuId == danmuId);
         totalCount.value--;
         Get.snackbar(
@@ -107,9 +103,10 @@ class DanmuController extends GetxController {
   }
   
   /// 搜索弹幕
-  Future<void> searchDanmus(String keyword) async {
-    videoNameFuzzy.value = keyword;
-    _applySearchFilter();
+  /// 按视频ID筛选弹幕
+  Future<void> filterByVideoId(String videoId) async {
+    selectedVideoId.value = videoId;
+    await loadDanmus(isRefresh: true);
   }
   
   /// 刷新弹幕列表
@@ -122,10 +119,10 @@ class DanmuController extends GetxController {
     await loadDanmus();
   }
   
-  /// 清空搜索条件
-  void clearSearch() {
-    videoNameFuzzy.value = '';
-    _applySearchFilter();
+  /// 清空筛选条件
+  void clearFilter() {
+    selectedVideoId.value = '';
+    loadDanmus(isRefresh: true);
   }
   
   /// 获取弹幕模式显示文本
@@ -153,25 +150,5 @@ class DanmuController extends GetxController {
   String formatDateTime(DateTime dateTime) {
     return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
         '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
-  
-  /// 应用搜索过滤
-  void _applySearchFilter() {
-    if (videoNameFuzzy.value.isEmpty) {
-      danmus.value = List.from(allDanmus);
-    } else {
-      danmus.value = allDanmus.where((danmu) {
-        final videoName = danmu.videoName ?? '';
-        final text = danmu.text;
-        final nickName = danmu.nickName ?? '';
-        final keyword = videoNameFuzzy.value.toLowerCase();
-        
-        return videoName.toLowerCase().contains(keyword) ||
-               text.toLowerCase().contains(keyword) ||
-               nickName.toLowerCase().contains(keyword);
-      }).toList();
-    }
-    
-    totalCount.value = danmus.length;
   }
 }

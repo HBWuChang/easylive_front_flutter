@@ -2,6 +2,9 @@ import 'package:easylive/Funcs.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/DanmuController.dart';
+import '../../controllers/UhomeSeriesController.dart';
+import '../../controllers/controllers-class.dart';
+import '../UHome/UhomeWidgets.dart';
 import '../../classes.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,13 +17,23 @@ class PlatformPageDanmaku extends StatefulWidget {
 
 class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
   final DanmuController controller = Get.put(DanmuController());
-  final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
+  late UhomeSeriesController _uhomeSeriesController;
+  
+  var selectedVideoId = ''.obs;
+  var selectedVideoName = ''.obs;
 
   @override
   void initState() {
     super.initState();
     print('PlatformPageDanmaku initState');
+    
+    // 初始化控制器
+    if (!Get.isRegistered<UhomeSeriesController>()) {
+      Get.put(UhomeSeriesController(userId: "1"));
+    }
+    _uhomeSeriesController = Get.find<UhomeSeriesController>();
+    
     // 监听滚动事件，实现无限滚动
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
@@ -32,7 +45,6 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
 
   @override
   void dispose() {
-    searchController.dispose();
     scrollController.dispose();
     super.dispose();
   }
@@ -40,18 +52,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('弹幕管理'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () => controller.refreshDanmus(),
-          ),
-        ],
-      ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
         children: [
           // 搜索区域
@@ -69,12 +70,12 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
 
   Widget _buildSearchArea() {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 4,
             offset: Offset(0, 2),
           ),
@@ -83,37 +84,75 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: '请输入视频名称进行搜索',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            child: Obx(() => Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 12.sp),
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).colorScheme.outline),
+                borderRadius: BorderRadius.circular(8.r),
               ),
-              onSubmitted: (value) => controller.searchDanmus(value),
-            ),
+              child: Row(
+                children: [
+                  Icon(Icons.video_library_outlined, 
+                       color: Theme.of(context).colorScheme.outline),
+                  SizedBox(width: 8.sp),
+                  Expanded(
+                    child: Text(
+                      selectedVideoName.value.isEmpty 
+                          ? '选择视频查看弹幕' 
+                          : selectedVideoName.value,
+                      style: TextStyle(
+                        color: selectedVideoName.value.isEmpty 
+                            ? Theme.of(context).colorScheme.outline
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontSize: 14.sp,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            )),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 12.sp),
           ElevatedButton(
-            onPressed: () => controller.searchDanmus(searchController.text),
+            onPressed: () async {
+              final selectedVideos = await Get.dialog<List<VideoInfo>>(
+                VideoSelectionDialog(
+                  excludeVideoIds: [],
+                  seriesId: null,
+                  uhomeSeriesController: _uhomeSeriesController,
+                  singleSelection: true,
+                  title: '选择要查看弹幕的视频',
+                  selectButtonText: '确定',
+                ),
+              );
+              
+              if (selectedVideos != null && selectedVideos.isNotEmpty) {
+                final video = selectedVideos.first;
+                selectedVideoId.value = video.videoId ?? '';
+                selectedVideoName.value = video.videoName ?? '';
+                await controller.filterByVideoId(selectedVideoId.value);
+              }
+            },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              padding: EdgeInsets.symmetric(horizontal: 24.sp, vertical: 12.sp),
             ),
-            child: Text('搜索'),
+            child: Text('选择视频'),
           ),
-          SizedBox(width: 8.w),
+          SizedBox(width: 8.sp),
           OutlinedButton(
             onPressed: () {
-              searchController.clear();
-              controller.clearSearch();
+              _clearFilter();
             },
             child: Text('清空'),
+          ),
+          SizedBox(width: 8.sp),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => controller.refreshDanmus(),
+            tooltip: '刷新',
           ),
         ],
       ),
@@ -122,8 +161,8 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
 
   Widget _buildStatisticsArea() {
     return Obx(() => Container(
-          padding: EdgeInsets.all(16.w),
-          color: Colors.grey[50],
+          padding: EdgeInsets.all(16.sp),
+          color: Theme.of(context).colorScheme.surfaceVariant,
           child: Row(
             children: [
               Text(
@@ -131,14 +170,19 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16.sp,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               Spacer(),
-              if (controller.videoNameFuzzy.value.isNotEmpty)
+              if (selectedVideoName.value.isNotEmpty)
                 Chip(
-                  label: Text('搜索: ${controller.videoNameFuzzy.value}'),
-                  onDeleted: () => controller.clearSearch(),
-                  backgroundColor: Colors.blue[50],
+                  label: Text('视频: ${selectedVideoName.value}'),
+                  onDeleted: () => _clearFilter(),
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  labelStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                 ),
             ],
           ),
@@ -156,11 +200,14 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.chat_bubble_outline, size: 64.sp, color: Colors.grey),
+              Icon(Icons.chat_bubble_outline,
+                  size: 64.sp, color: Theme.of(context).colorScheme.outline),
               SizedBox(height: 16.h),
               Text(
                 '暂无弹幕数据',
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                style: TextStyle(
+                    fontSize: 16.sp,
+                    color: Theme.of(context).colorScheme.outline),
               ),
             ],
           ),
@@ -189,13 +236,14 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
     return Card(
       margin: EdgeInsets.only(bottom: 12.h),
       elevation: 2,
+      color: Theme.of(context).cardColor,
       child: Padding(
         padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 视频信息
-            if (danmu.videoName != null && danmu.videoName!.isNotEmpty || 
+            if (danmu.videoName != null && danmu.videoName!.isNotEmpty ||
                 danmu.videoCover != null && danmu.videoCover!.isNotEmpty)
               _buildVideoInfo(danmu),
 
@@ -218,7 +266,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
@@ -236,15 +284,21 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
                     return Container(
                       width: 60.w,
                       height: 40.h,
-                      color: Colors.grey[300],
-                      child: Icon(Icons.broken_image, size: 16.sp),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.3),
+                      child: Icon(Icons.broken_image,
+                          size: 16.sp,
+                          color: Theme.of(context).colorScheme.outline),
                     );
                   }
                   return null;
                 },
               ),
             ),
-          if (danmu.videoCover != null && danmu.videoCover!.isNotEmpty) SizedBox(width: 12.w),
+          if (danmu.videoCover != null && danmu.videoCover!.isNotEmpty)
+            SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,6 +309,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14.sp,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -263,7 +318,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
                   Text(
                     'ID: ${danmu.videoId}',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.outline,
                       fontSize: 12.sp,
                     ),
                   ),
@@ -282,7 +337,8 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
         // 用户信息和发布时间
         Row(
           children: [
-            Icon(Icons.person_outline, size: 16.sp, color: Colors.grey[600]),
+            Icon(Icons.person_outline,
+                size: 16.sp, color: Theme.of(context).colorScheme.outline),
             SizedBox(width: 4.w),
             Expanded(
               child: Column(
@@ -293,12 +349,13 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14.sp,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     controller.formatDateTime(danmu.postTime),
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.outline,
                       fontSize: 12.sp,
                     ),
                   ),
@@ -309,13 +366,13 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
                 controller.formatTime(danmu.time),
                 style: TextStyle(
-                  color: Colors.blue[700],
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -329,16 +386,13 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
         Container(
           width: double.infinity,
           padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8.r),
-          ),
           child: Text(
             danmu.text,
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w500,
               height: 1.4,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -355,14 +409,16 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Colors.green[50],
+              color: Theme.of(context).colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(4.r),
-              border: Border.all(color: Colors.green[200]!),
+              border: Border.all(
+                  color:
+                      Theme.of(context).colorScheme.primary.withOpacity(0.5)),
             ),
             child: Text(
               controller.getDanmuModeText(danmu.mode),
               style: TextStyle(
-                color: Colors.green[700],
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 12.sp,
               ),
             ),
@@ -376,14 +432,14 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
             decoration: BoxDecoration(
               color: _parseColor(danmu.color),
               borderRadius: BorderRadius.circular(4.r),
-              border: Border.all(color: Colors.grey[300]!),
+              border: Border.all(color: Theme.of(context).colorScheme.outline),
             ),
           ),
           SizedBox(width: 4.w),
           Text(
             danmu.color,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.outline,
               fontSize: 12.sp,
               fontFamily: 'monospace',
             ),
@@ -396,7 +452,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
             Text(
               'File: ${danmu.fileId}',
               style: TextStyle(
-                color: Colors.grey[500],
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.7),
                 fontSize: 11.sp,
               ),
             ),
@@ -413,7 +469,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
           Text(
             'ID: ${danmu.danmuId}',
             style: TextStyle(
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.outline,
               fontSize: 12.sp,
             ),
           ),
@@ -426,7 +482,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
             icon: Icon(Icons.delete_outline, size: 16.sp),
             label: Text('删除'),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+              foregroundColor: Theme.of(context).colorScheme.error,
               padding: EdgeInsets.symmetric(horizontal: 8.w),
             ),
           ),
@@ -463,7 +519,7 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
@@ -483,13 +539,21 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
                 Navigator.of(context).pop();
                 controller.deleteDanmu(danmu.danmuId);
               },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error),
               child: Text('删除'),
             ),
           ],
         );
       },
     );
+  }
+
+  /// 清空筛选条件
+  void _clearFilter() {
+    selectedVideoId.value = '';
+    selectedVideoName.value = '';
+    controller.clearFilter();
   }
 
   Color _parseColor(String colorStr) {
@@ -505,9 +569,9 @@ class _PlatformPageDanmakuState extends State<PlatformPageDanmaku> {
           return Color(int.parse('FF$hex', radix: 16));
         }
       }
-      return Colors.blue[600]!;
+      return Theme.of(context).colorScheme.primary;
     } catch (e) {
-      return Colors.blue[600]!;
+      return Theme.of(context).colorScheme.primary;
     }
   }
 }

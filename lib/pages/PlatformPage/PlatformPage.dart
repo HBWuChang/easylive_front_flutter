@@ -61,14 +61,15 @@ class _PlatformPageState extends State<PlatformPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                 SizedBox(height: 32.w),
+                SizedBox(height: 32.w),
                 Center(
                   child: Text(
                     '创作中心',
-                    style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
+                    style:
+                        TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
                   ),
                 ),
-                 SizedBox(height: 32.w),
+                SizedBox(height: 32.w),
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -82,8 +83,8 @@ class _PlatformPageState extends State<PlatformPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r)),
                       padding: EdgeInsets.symmetric(vertical: 14),
-                      textStyle:
-                          TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                      textStyle: TextStyle(
+                          fontSize: 18.sp, fontWeight: FontWeight.bold),
                     ),
                     onPressed: () => _jumpToPage(1),
                   ),
@@ -119,10 +120,10 @@ class _PlatformPageState extends State<PlatformPage> {
 Widget _sideBtn(String text, IconData icon, int pageIndex, bool selected,
     void Function(int) onTap) {
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.w),
     child: TextButton.icon(
       icon: Icon(icon,
-          size: 16,
+          size: 16.sp,
           color: selected
               ? Theme.of(Get.context!).colorScheme.primary
               : Theme.of(Get.context!).colorScheme.onSurface),
@@ -134,7 +135,7 @@ Widget _sideBtn(String text, IconData icon, int pageIndex, bool selected,
                   : Theme.of(Get.context!).colorScheme.onSurface)),
       style: TextButton.styleFrom(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: EdgeInsets.symmetric(vertical: 8.w, horizontal: 8.w),
         alignment: Alignment.centerLeft,
         backgroundColor: selected
             ? Theme.of(Get.context!).colorScheme.primary.withOpacity(0.08)

@@ -13,12 +13,18 @@ class VideoSelectionDialog extends StatefulWidget {
   final int? seriesId;
   final List<String> excludeVideoIds;
   final UhomeSeriesController uhomeSeriesController;
+  final bool singleSelection; // 新增：是否单选模式
+  final String? title; // 新增：自定义标题
+  final String? selectButtonText; // 新增：自定义选择按钮文字
 
   const VideoSelectionDialog({
     Key? key,
     required this.seriesId,
     required this.excludeVideoIds,
     required this.uhomeSeriesController,
+    this.singleSelection = false,
+    this.title,
+    this.selectButtonText,
   }) : super(key: key);
 
   @override
@@ -27,13 +33,22 @@ class VideoSelectionDialog extends StatefulWidget {
 
 class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
   List<VideoInfo> _allVideos = [];
+  List<VideoInfo> _filteredVideos = [];
   Set<String> _selectedVideoIds = <String>{};
   bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadAllVideos();
+    _searchController.addListener(_filterVideos);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAllVideos() async {
@@ -45,11 +60,30 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
         _allVideos = videos
             .where((video) => !widget.excludeVideoIds.contains(video.videoId))
             .toList();
+        _filteredVideos = List.from(_allVideos);
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _filterVideos() {
+    final query = _searchController.text.toLowerCase().trim();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredVideos = List.from(_allVideos);
+      } else {
+        _filteredVideos = _allVideos.where((video) {
+          final videoName = (video.videoName ?? '').toLowerCase();
+          final videoTags = (video.tags ?? '').toLowerCase();
+          final introduction = (video.introduction ?? '').toLowerCase();
+          return videoName.contains(query) || 
+                 videoTags.contains(query) || 
+                 introduction.contains(query);
+        }).toList();
+      }
+    });
   }
 
   @override
@@ -66,7 +100,7 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
             Row(
               children: [
                 Text(
-                  '选择要添加的视频',
+                  widget.title ?? '选择要添加的视频',
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
@@ -79,6 +113,34 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
                   icon: const Icon(Icons.close),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+
+            // 搜索框
+            StatefulBuilder(
+              builder: (context, setSearchState) {
+                _searchController.addListener(() => setSearchState(() {}));
+                return TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: '搜索视频标题、标签或简介...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setSearchState(() {});
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
 
@@ -99,7 +161,9 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '已选择 ${_selectedVideoIds.length} 个视频',
+                      widget.singleSelection 
+                          ? '已选择 1 个视频'
+                          : '已选择 ${_selectedVideoIds.length} 个视频',
                       style: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.w500,
@@ -115,10 +179,12 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : _allVideos.isEmpty
-                      ?  Center(
+                  : _filteredVideos.isEmpty
+                      ? Center(
                           child: Text(
-                            '没有可选择的视频',
+                            _searchController.text.isNotEmpty
+                                ? '没有找到匹配的视频'
+                                : '没有可选择的视频',
                             style: TextStyle(
                               fontSize: 16.sp,
                               color: Colors.grey,
@@ -126,21 +192,33 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
                           ),
                         )
                       : ListView.builder(
-                          itemCount: _allVideos.length,
+                          itemCount: _filteredVideos.length,
                           itemBuilder: (context, index) {
-                            final video = _allVideos[index];
+                            final video = _filteredVideos[index];
                             final isSelected =
                                 _selectedVideoIds.contains(video.videoId);
 
                             return VideoSelectionItem(
                               video: video,
                               isSelected: isSelected,
+                              singleSelection: widget.singleSelection,
                               onSelectionChanged: (selected) {
                                 setState(() {
-                                  if (selected) {
-                                    _selectedVideoIds.add(video.videoId!);
+                                  if (widget.singleSelection) {
+                                    // 单选模式：清空之前的选择，只保留当前选择
+                                    if (selected) {
+                                      _selectedVideoIds.clear();
+                                      _selectedVideoIds.add(video.videoId!);
+                                    } else {
+                                      _selectedVideoIds.clear();
+                                    }
                                   } else {
-                                    _selectedVideoIds.remove(video.videoId!);
+                                    // 多选模式：原有逻辑
+                                    if (selected) {
+                                      _selectedVideoIds.add(video.videoId!);
+                                    } else {
+                                      _selectedVideoIds.remove(video.videoId!);
+                                    }
                                   }
                                 });
                               },
@@ -176,7 +254,7 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: Text('确定 (${_selectedVideoIds.length})'),
+                    child: Text(widget.selectButtonText ?? '确定 (${_selectedVideoIds.length})'),
                   ),
                 ),
               ],
@@ -192,6 +270,7 @@ class _VideoSelectionDialogState extends State<VideoSelectionDialog> {
 class VideoSelectionItem extends StatefulWidget {
   final VideoInfo video;
   final bool isSelected;
+  final bool singleSelection; // 新增：是否单选模式
   final ValueChanged<bool> onSelectionChanged;
 
   const VideoSelectionItem({
@@ -199,6 +278,7 @@ class VideoSelectionItem extends StatefulWidget {
     required this.video,
     required this.isSelected,
     required this.onSelectionChanged,
+    this.singleSelection = false,
   }) : super(key: key);
 
   @override
@@ -368,13 +448,15 @@ class _VideoSelectionItemState extends State<VideoSelectionItem> {
                         : Colors.grey[400]!,
                     width: 2,
                   ),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: widget.singleSelection 
+                      ? BorderRadius.circular(12.r) // 单选时圆形
+                      : BorderRadius.circular(4.r), // 多选时方形
                 ),
                 child: widget.isSelected
-                    ? const Icon(
-                        Icons.check,
+                    ? Icon(
+                        widget.singleSelection ? Icons.circle : Icons.check,
                         color: Colors.white,
-                        size: 16,
+                        size: widget.singleSelection ? 12 : 16,
                       )
                     : null,
               ),

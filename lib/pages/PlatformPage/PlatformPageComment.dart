@@ -5,6 +5,9 @@ import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../classes.dart';
+import '../../controllers/controllers-class.dart';
+import '../../controllers/UhomeSeriesController.dart';
+import '../UHome/UhomeWidgets.dart';
 
 class PlatformPageComment extends StatefulWidget {
   const PlatformPageComment({Key? key}) : super(key: key);
@@ -14,22 +17,27 @@ class PlatformPageComment extends StatefulWidget {
 
 class _PlatformPageCommentState extends State<PlatformPageComment> {
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
-  
+  late UhomeSeriesController _uhomeSeriesController; // 添加控制器
+
   var comments = <VideoComment>[].obs;
   var currentPage = 1.obs;
   var totalCount = 0.obs;
   var pageSize = 15.obs;
   var hasMoreData = true.obs;
-  var videoNameFuzzy = ''.obs;
+  var selectedVideoId = ''.obs; // 替换原来的 videoNameFuzzy
+  var selectedVideoName = ''.obs; // 添加选中视频名称
   var isLoading = false.obs;
-  var isRefreshing = false.obs;
-
-  @override
+  var isRefreshing = false.obs;  @override
   void initState() {
     super.initState();
     print('PlatformPageComment initState');
     
+    // 初始化控制器
+    if (!Get.isRegistered<UhomeSeriesController>()) {
+      Get.put(UhomeSeriesController(userId: "1"));
+    }
+    _uhomeSeriesController = Get.find<UhomeSeriesController>();
+
     // 监听滚动事件，实现无限滚动
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
@@ -45,7 +53,6 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -59,35 +66,34 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
       if (!hasMoreData.value || isLoading.value) return;
       isLoading.value = true;
     }
-    
+
     try {
-      // 由于当前API需要videoId参数，我们传入空字符串尝试获取所有评论
-      // 如果API不支持，可能需要后端修改或使用其他方式
+      // 由于当前API需要videoId参数，我们传入选中的视频ID
       final response = await ApiService.ucenterLoadComment(
-        videoId: '', // 传入空字符串尝试获取所有评论
+        videoId: selectedVideoId.value.isEmpty ? '' : selectedVideoId.value,
         pageNo: currentPage.value,
       );
-      
+
       if (response['code'] == 200) {
         final data = response['data'];
         final List<dynamic> commentList = data['list'] ?? [];
-        
+
         // 转换为VideoComment对象
         final List<VideoComment> newComments = commentList
             .map((item) => VideoComment(item as Map<String, dynamic>))
             .toList();
-        
+
         // 更新数据
         if (isRefresh) {
           comments.value = newComments;
         } else {
           comments.addAll(newComments);
         }
-        
+
         // 更新分页信息
         totalCount.value = data['totalCount'] ?? 0;
         hasMoreData.value = newComments.length >= pageSize.value;
-        
+
         if (!isRefresh) {
           currentPage.value++;
         }
@@ -108,18 +114,18 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
       '成功',
       message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: Theme.of(Get.context!).colorScheme.primary.withOpacity(0.8),
+      backgroundColor:
+          Theme.of(Get.context!).colorScheme.primary.withOpacity(0.8),
       colorText: Theme.of(Get.context!).colorScheme.onPrimary,
       duration: Duration(milliseconds: 2000),
     );
   }
 
-
   /// 删除评论
   Future<void> _deleteComment(int commentId) async {
     try {
       final response = await ApiService.ucenterDelComment(commentId);
-      
+
       if (response['code'] == 200) {
         // 从列表中移除评论
         comments.removeWhere((comment) => comment.commentId == commentId);
@@ -131,13 +137,6 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
     } catch (e) {
       showErrorSnackbar('删除评论失败: ${e.toString()}');
     }
-  }
-
-  /// 搜索评论
-  Future<void> _searchComments(String keyword) async {
-    videoNameFuzzy.value = keyword;
-    // 目前API不支持搜索，可以在前端过滤
-    _loadComments(isRefresh: true);
   }
 
   /// 刷新评论列表
@@ -152,8 +151,8 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
 
   /// 清空搜索条件
   void _clearSearch() {
-    videoNameFuzzy.value = '';
-    _searchController.clear();
+    selectedVideoId.value = '';
+    selectedVideoName.value = '';
     _loadComments(isRefresh: true);
   }
 
@@ -192,34 +191,66 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: '请输入视频名称进行搜索',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.sp),
-                ),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16.sp, vertical: 12.sp),
+            child: Obx(() => Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 12.sp),
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).dividerColor),
+                borderRadius: BorderRadius.circular(8.sp),
               ),
-              onSubmitted: (value) => _searchComments(value),
-            ),
+              child: Row(
+                children: [
+                  Icon(Icons.video_library_outlined, 
+                       color: Theme.of(context).colorScheme.outline),
+                  SizedBox(width: 8.sp),
+                  Expanded(
+                    child: Text(
+                      selectedVideoName.value.isEmpty 
+                          ? '选择视频查看评论' 
+                          : selectedVideoName.value,
+                      style: TextStyle(
+                        color: selectedVideoName.value.isEmpty 
+                            ? Theme.of(context).colorScheme.outline
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontSize: 14.sp,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            )),
           ),
           SizedBox(width: 12.sp),
           ElevatedButton(
-            onPressed: () => _searchComments(_searchController.text),
+            onPressed: () async {
+              final selectedVideos = await Get.dialog<List<VideoInfo>>(
+                VideoSelectionDialog(
+                  excludeVideoIds: [],
+                  seriesId: null,
+                  uhomeSeriesController: _uhomeSeriesController,
+                  singleSelection: true,
+                  title: '选择要查看评论的视频',
+                  selectButtonText: '确定',
+                ),
+              );
+              
+              if (selectedVideos != null && selectedVideos.isNotEmpty) {
+                final video = selectedVideos.first;
+                selectedVideoId.value = video.videoId ?? '';
+                selectedVideoName.value = video.videoName ?? '';
+                _loadComments(isRefresh: true);
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
               padding: EdgeInsets.symmetric(horizontal: 24.sp, vertical: 12.sp),
             ),
-            child: Text('搜索'),
+            child: Text('选择视频'),
           ),
           SizedBox(width: 8.sp),
           OutlinedButton(
             onPressed: () {
-              _searchController.clear();
               _clearSearch();
             },
             child: Text('清空'),
@@ -250,11 +281,12 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
                 ),
               ),
               Spacer(),
-              if (videoNameFuzzy.value.isNotEmpty)
+              if (selectedVideoName.value.isNotEmpty)
                 Chip(
-                  label: Text('搜索: ${videoNameFuzzy.value}'),
+                  label: Text('视频: ${selectedVideoName.value}'),
                   onDeleted: () => _clearSearch(),
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
                   labelStyle: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
@@ -275,14 +307,13 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.comment_outlined, 
-                   size: 64.sp, 
-                   color: Theme.of(context).colorScheme.outline),
+              Icon(Icons.comment_outlined,
+                  size: 64.sp, color: Theme.of(context).colorScheme.outline),
               SizedBox(height: 16.sp),
               Text(
                 '暂无评论数据',
                 style: TextStyle(
-                  fontSize: 16.sp, 
+                  fontSize: 16.sp,
                   color: Theme.of(context).colorScheme.outline,
                 ),
               ),
@@ -312,6 +343,7 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
     return Card(
       margin: EdgeInsets.only(bottom: 12.sp),
       elevation: 2,
+      color: Theme.of(context).cardColor,
       child: Padding(
         padding: EdgeInsets.all(16.sp),
         child: Column(
@@ -363,10 +395,13 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
                     return Container(
                       width: 60.sp,
                       height: 40.sp,
-                      color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                      child: Icon(Icons.broken_image, 
-                                 size: 16.sp,
-                                 color: Theme.of(context).colorScheme.outline),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.3),
+                      child: Icon(Icons.broken_image,
+                          size: 16.sp,
+                          color: Theme.of(context).colorScheme.outline),
                     );
                   }
                   return null;
@@ -378,7 +413,8 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (comment.videoName != null)                    Text(
+                if (comment.videoName != null)
+                  Text(
                     comment.videoName!,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -491,9 +527,12 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
                     return Container(
                       width: 200.sp,
                       height: 150.sp,
-                      color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.3),
                       child: Icon(Icons.broken_image,
-                                 color: Theme.of(context).colorScheme.outline),
+                          color: Theme.of(context).colorScheme.outline),
                     );
                   }
                   return null;
@@ -512,13 +551,13 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(6.sp),
-        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.5)),
+        border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5)),
       ),
       child: Row(
         children: [
-          Icon(Icons.reply, 
-               size: 16.sp, 
-               color: Theme.of(context).colorScheme.primary),
+          Icon(Icons.reply,
+              size: 16.sp, color: Theme.of(context).colorScheme.primary),
           SizedBox(width: 4.sp),
           Text(
             '回复 ',
@@ -556,14 +595,13 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
           // 点赞数
           Row(
             children: [
-              Icon(Icons.thumb_up_outlined, 
-                   size: 16.sp, 
-                   color: Theme.of(context).colorScheme.outline),
+              Icon(Icons.thumb_up_outlined,
+                  size: 16.sp, color: Theme.of(context).colorScheme.outline),
               SizedBox(width: 4.sp),
               Text(
                 '${comment.likeCount ?? 0}',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.outline, 
+                  color: Theme.of(context).colorScheme.outline,
                   fontSize: 12.sp,
                 ),
               ),
@@ -575,13 +613,12 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
           Row(
             children: [
               Icon(Icons.thumb_down_outlined,
-                  size: 16.sp, 
-                  color: Theme.of(context).colorScheme.outline),
+                  size: 16.sp, color: Theme.of(context).colorScheme.outline),
               SizedBox(width: 4.sp),
               Text(
                 '${comment.hateCount ?? 0}',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.outline, 
+                  color: Theme.of(context).colorScheme.outline,
                   fontSize: 12.sp,
                 ),
               ),
@@ -612,7 +649,8 @@ class _PlatformPageCommentState extends State<PlatformPageComment> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(8.sp),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+        border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

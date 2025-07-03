@@ -33,7 +33,6 @@ class ControllersInitController extends GetxController {
   void initNeedControllers() {
     initLoginController();
     initAccountController();
-    // initPlatformPageSubmitController();
     initSysSettingGetSettingController();
     initCategoryLoadAllCategoryController();
     initAppBarController();
