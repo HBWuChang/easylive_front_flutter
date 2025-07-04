@@ -10,6 +10,8 @@ import '../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../widgets/avifOrExtendedImage.dart';
+
 class LoginPage extends StatefulWidget {
   final double? areaWidth;
   final double? areaHeight;
@@ -139,12 +141,7 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           // 背景网络图片
           Positioned.fill(
-            child: ExtendedImage.network(
-              ApiService.baseUrl +
-                  ApiAddr.fileGetResourcet +
-                  ApiAddr.LoginBackground,
-              fit: BoxFit.cover,
-            ),
+            child: avifOrExtendedImage(url: ApiAddr.LoginBackground),
           ),
           // 登录表单内容
           Padding(

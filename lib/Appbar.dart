@@ -357,7 +357,7 @@ class AppBarContent extends StatelessWidget {
                     Get.toNamed(Routes.platformPage, id: Routes.mainGetId);
                   },
                 )),
-                if (GetPlatform.isWindows)
+                if (!GetPlatform.isWeb)
                   IconButton(
                     tooltip: Texts.minimize,
                     icon: Icon(Icons.minimize, size: 13.sp),
@@ -366,7 +366,7 @@ class AppBarContent extends StatelessWidget {
                       windowManager.setSkipTaskbar(false);
                     },
                   ),
-                if (GetPlatform.isWindows)
+                if (!GetPlatform.isWeb)
                   IconButton(
                     tooltip: Texts.close,
                     icon: Icon(

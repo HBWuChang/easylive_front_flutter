@@ -7,6 +7,7 @@ import '../../enums.dart';
 import '../../settings.dart';
 import '../../api_service.dart';
 import '../../widgets/CategoryButtonsWidget.dart';
+import '../../widgets/avifOrExtendedImage.dart';
 import '../MainPage/VideoInfoWidget.dart';
 import 'package:extended_image/extended_image.dart';
 
@@ -140,23 +141,7 @@ class _CategoryPageState extends State<CategoryPage> {
         SizedBox(
           height: appBarController.imgHeight.w,
           width: double.infinity,
-          child: ExtendedImage.network(
-            Constants.baseUrl +
-                ApiAddr.fileGetResourcet +
-                ApiAddr.MainPageHeadImage,
-            fit: BoxFit.cover,
-            cache: true,
-            enableLoadState: true,
-            loadStateChanged: (state) {
-              if (state.extendedImageLoadState == LoadState.loading) {
-                return Center(child: CircularProgressIndicator());
-              } else if (state.extendedImageLoadState == LoadState.completed) {
-                return null; // 图片加载完成
-              } else {
-                return Center(child: Text('加载失败'));
-              }
-            },
-          ),
+          child: avifOrExtendedImage(url: ApiAddr.MainPageHeadImage),
         ),
         // 渐变遮罩
         Positioned.fill(

@@ -155,7 +155,9 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                 return null;
                               }
                               return ExtendedImage.asset(
-                                Constants.defaultUHomeBg,
+                                GetPlatform.isWeb
+                                    ? Constants.defaultUHomeBgjpeg
+                                    : Constants.defaultUHomeBg,
                                 fit: BoxFit.cover,
                               );
                             },
@@ -308,7 +310,9 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                   left: 48,
                   bottom: 0, // 从个人信息Row底部向上90像素
                   child: Obx(() => Avatar(
-                      radius: 60.r, avatarValue: userInfoController.avatar,showOnTap: true)),
+                      radius: 60.r,
+                      avatarValue: userInfoController.avatar,
+                      showOnTap: true)),
                 ),
               ],
             ),
@@ -353,16 +357,16 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
                                   children: [
                                     if (userInfoController.userId ==
                                         Get.find<AccountController>().userId)
-                                    IconButton(
-                                      tooltip: '编辑合集列表',
-                                      icon: Icon(Icons.edit,
-                                          size: 24,
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                      onPressed: () =>
-                                          _showEditSeriesListDialog(
-                                              context, userId),
-                                    ),
+                                      IconButton(
+                                        tooltip: '编辑合集列表',
+                                        icon: Icon(Icons.edit,
+                                            size: 24,
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                        onPressed: () =>
+                                            _showEditSeriesListDialog(
+                                                context, userId),
+                                      ),
                                     IconButton(
                                       icon: Iconify(
                                         localSettingsController.getSetting(
@@ -450,13 +454,13 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
       children: [
         Text(
           value?.toString() ?? '0',
-          style:
-              TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold), // 从20增加到24
+          style: TextStyle(
+              fontSize: 24.sp, fontWeight: FontWeight.bold), // 从20增加到24
         ),
         SizedBox(height: 2),
         Text(label,
-            style:
-                TextStyle(fontSize: 16.sp, color: Colors.grey[600])), // 从14增加到16
+            style: TextStyle(
+                fontSize: 16.sp, color: Colors.grey[600])), // 从14增加到16
       ],
     );
   }
@@ -488,8 +492,8 @@ class _UhomeState extends State<Uhome> with TickerProviderStateMixin {
       },
       child: Text(
         isFollowed ? '已关注' : '+ 关注',
-        style:
-            TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500), // 增加字体大小和权重
+        style: TextStyle(
+            fontSize: 16.sp, fontWeight: FontWeight.w500), // 增加字体大小和权重
       ),
     );
   }
@@ -561,7 +565,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                 ),
               ],
             ),
-             SizedBox(height: 24.w),
+            SizedBox(height: 24.w),
 
             // 添加合集按钮
             Container(
@@ -616,13 +620,13 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
               ),
             ),
 
-             SizedBox(height: 24.w),
+            SizedBox(height: 24.w),
 
             // 合集列表标题
             Row(
               children: [
                 const Icon(Icons.sort, size: 20),
-                 SizedBox(width: 8.w),
+                SizedBox(width: 8.w),
                 Text(
                   '合集排序',
                   style: TextStyle(
@@ -654,7 +658,7 @@ class _EditSeriesListDialogState extends State<EditSeriesListDialog> {
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: _sortableSeriesList.isEmpty
-                    ?  Center(
+                    ? Center(
                         child: Text(
                           '暂无合集',
                           style: TextStyle(
@@ -803,7 +807,7 @@ class DraggableSeriesItem extends StatelessWidget {
                         case LoadState.loading:
                           return Container(
                             color: Colors.grey[300],
-                            child:  Center(
+                            child: Center(
                               child: SizedBox(
                                 width: 16.w,
                                 height: 16.w,

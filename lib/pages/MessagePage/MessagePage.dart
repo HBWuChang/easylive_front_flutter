@@ -9,6 +9,8 @@ import '../../settings.dart';
 import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 
+import '../../widgets/avifOrExtendedImage.dart';
+
 class MessagePage extends StatefulWidget {
   const MessagePage({Key? key}) : super(key: key);
 
@@ -101,12 +103,7 @@ class _MessagePageState extends State<MessagePage> {
                 children: [
                   // 背景图片
                   Positioned.fill(
-                    child: ExtendedImage.network(
-                      ApiService.baseUrl +
-                          ApiAddr.fileGetResourcet +
-                          ApiAddr.LoginBackground,
-                      fit: BoxFit.cover,
-                    ),
+                    child: avifOrExtendedImage(url: ApiAddr.MainPageHeadImage),
                   ),
                   // 渐变遮罩
                   Positioned.fill(

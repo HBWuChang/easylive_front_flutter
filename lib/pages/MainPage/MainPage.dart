@@ -9,6 +9,8 @@ import '../../api_service.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../widgets/avifOrExtendedImage.dart';
+
 class MainPage extends StatefulWidget {
   MainPage({Key? key}) : super(key: key);
   @override
@@ -27,7 +29,7 @@ class _MainPageState extends State<MainPage> {
     if (_scrollController.offset < kToolbarHeight) {
       _scrollController.jumpTo(kToolbarHeight);
     }
-    
+
     // 管理 AppBar 透明度状态
     final threshold = appBarController.imgHeight;
     if (_scrollController.offset >= threshold &&
@@ -37,9 +39,10 @@ class _MainPageState extends State<MainPage> {
         appBarController.appBarOpaque.value) {
       appBarController.appBarOpaque.value = false;
     }
-    
+
     // 更新浮动分区栏显示状态
-    final shouldShowFloating = _scrollController.offset > appBarController.imgHeight+100;
+    final shouldShowFloating =
+        _scrollController.offset > appBarController.imgHeight + 100;
     if (appBarController.showFloatingCate.value != shouldShowFloating) {
       appBarController.showFloatingCate.value = shouldShowFloating;
     }
@@ -77,24 +80,7 @@ class _MainPageState extends State<MainPage> {
               SizedBox(
                 height: appBarController.imgHeight.w,
                 width: double.infinity,
-                child: ExtendedImage.network(
-                  Constants.baseUrl +
-                      ApiAddr.fileGetResourcet +
-                      ApiAddr.MainPageHeadImage,
-                  fit: BoxFit.cover,
-                  cache: true,
-                  enableLoadState: true,
-                  loadStateChanged: (state) {
-                    if (state.extendedImageLoadState == LoadState.loading) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (state.extendedImageLoadState ==
-                        LoadState.completed) {
-                      return null; // 图片加载完成
-                    } else {
-                      return Center(child: Text('加载失败'));
-                    }
-                  },
-                ),
+                child: avifOrExtendedImage(url: ApiAddr.MainPageHeadImage),
               ),
               // 渐变遮罩
               Positioned.fill(
@@ -130,24 +116,30 @@ class _MainPageState extends State<MainPage> {
                   if (displayName.contains('-')) {
                     // 二级分区：格式为 "一级分区名-二级分区名"
                     final firstDashIndex = displayName.indexOf('-');
-                    if (firstDashIndex > 0 && firstDashIndex < displayName.length - 1) {
-                      final pCategoryName = displayName.substring(0, firstDashIndex);
-                      final categoryName = displayName.substring(firstDashIndex + 1);
+                    if (firstDashIndex > 0 &&
+                        firstDashIndex < displayName.length - 1) {
+                      final pCategoryName =
+                          displayName.substring(0, firstDashIndex);
+                      final categoryName =
+                          displayName.substring(firstDashIndex + 1);
                       print('跳转到二级分区: $pCategoryName - $categoryName');
                       // 需要找到对应的分区ID
-                      final categories = categoryLoadAllCategoryController.categories;
+                      final categories =
+                          categoryLoadAllCategoryController.categories;
                       final parentCategory = categories.firstWhere(
                         (cat) => cat['categoryName'] == pCategoryName,
                         orElse: () => <String, dynamic>{},
                       );
                       if (parentCategory.isNotEmpty) {
-                        final children = List<Map<String, dynamic>>.from(parentCategory['children'] ?? []);
+                        final children = List<Map<String, dynamic>>.from(
+                            parentCategory['children'] ?? []);
                         final childCategory = children.firstWhere(
                           (child) => child['categoryName'] == categoryName,
                           orElse: () => <String, dynamic>{},
                         );
                         if (childCategory.isNotEmpty) {
-                          final url = '${Routes.categoryPage}?pCategoryId=${parentCategory['categoryId']}&categoryId=${childCategory['categoryId']}';
+                          final url =
+                              '${Routes.categoryPage}?pCategoryId=${parentCategory['categoryId']}&categoryId=${childCategory['categoryId']}';
                           print('跳转URL: $url');
                           Get.toNamed(url, id: Routes.mainGetId);
                         } else {
@@ -160,13 +152,15 @@ class _MainPageState extends State<MainPage> {
                   } else {
                     // 一级分区
                     print('跳转到一级分区: $displayName');
-                    final categories = categoryLoadAllCategoryController.categories;
+                    final categories =
+                        categoryLoadAllCategoryController.categories;
                     final category = categories.firstWhere(
                       (cat) => cat['categoryName'] == displayName,
                       orElse: () => <String, dynamic>{},
                     );
                     if (category.isNotEmpty) {
-                      final url = '${Routes.categoryPage}?pCategoryId=${category['categoryId']}';
+                      final url =
+                          '${Routes.categoryPage}?pCategoryId=${category['categoryId']}';
                       print('跳转URL: $url');
                       Get.toNamed(url, id: Routes.mainGetId);
                     }
@@ -200,19 +194,22 @@ class _MainPageState extends State<MainPage> {
                   if (parts.length == 2) {
                     print('浮动分区栏跳转到二级分区: ${parts[0]} - ${parts[1]}');
                     // 需要找到对应的分区ID
-                    final categories = categoryLoadAllCategoryController.categories;
+                    final categories =
+                        categoryLoadAllCategoryController.categories;
                     final parentCategory = categories.firstWhere(
                       (cat) => cat['categoryName'] == parts[0],
                       orElse: () => <String, dynamic>{},
                     );
                     if (parentCategory.isNotEmpty) {
-                      final children = List<Map<String, dynamic>>.from(parentCategory['children'] ?? []);
+                      final children = List<Map<String, dynamic>>.from(
+                          parentCategory['children'] ?? []);
                       final childCategory = children.firstWhere(
                         (child) => child['categoryName'] == parts[1],
                         orElse: () => <String, dynamic>{},
                       );
                       if (childCategory.isNotEmpty) {
-                        final url = '${Routes.categoryPage}?pCategoryId=${parentCategory['categoryId']}&categoryId=${childCategory['categoryId']}';
+                        final url =
+                            '${Routes.categoryPage}?pCategoryId=${parentCategory['categoryId']}&categoryId=${childCategory['categoryId']}';
                         print('浮动分区栏跳转URL: $url');
                         Get.toNamed(url, id: Routes.mainGetId);
                       }
@@ -221,13 +218,15 @@ class _MainPageState extends State<MainPage> {
                 } else {
                   // 一级分区
                   print('浮动分区栏跳转到一级分区: $displayName');
-                  final categories = categoryLoadAllCategoryController.categories;
+                  final categories =
+                      categoryLoadAllCategoryController.categories;
                   final category = categories.firstWhere(
                     (cat) => cat['categoryName'] == displayName,
                     orElse: () => <String, dynamic>{},
                   );
                   if (category.isNotEmpty) {
-                    final url = '${Routes.categoryPage}?pCategoryId=${category['categoryId']}';
+                    final url =
+                        '${Routes.categoryPage}?pCategoryId=${category['categoryId']}';
                     print('浮动分区栏跳转URL: $url');
                     Get.toNamed(url, id: Routes.mainGetId);
                   }

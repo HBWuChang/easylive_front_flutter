@@ -9,6 +9,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../enums.dart';
+import '../../widgets/avifOrExtendedImage.dart';
 
 class HotPage extends StatefulWidget {
   HotPage({Key? key}) : super(key: key);
@@ -97,24 +98,7 @@ class _HotPageState extends State<HotPage> {
               SizedBox(
                 height: appBarController.imgHeight.w,
                 width: double.infinity,
-                child: ExtendedImage.network(
-                  Constants.baseUrl +
-                      ApiAddr.fileGetResourcet +
-                      ApiAddr.MainPageHeadImage,
-                  fit: BoxFit.cover,
-                  cache: true,
-                  enableLoadState: true,
-                  loadStateChanged: (state) {
-                    if (state.extendedImageLoadState == LoadState.loading) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (state.extendedImageLoadState ==
-                        LoadState.completed) {
-                      return null; // 图片加载完成
-                    } else {
-                      return Center(child: Text('加载失败'));
-                    }
-                  },
-                ),
+                child: avifOrExtendedImage(url: ApiAddr.MainPageHeadImage),
               ),
               // 渐变遮罩
               Positioned.fill(

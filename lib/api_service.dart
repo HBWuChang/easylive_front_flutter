@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 
 // Platform-specific imports with fallbacks
 // Web 平台使用 fetch_client，其他平台使用虚假的 fetch_client
+// import 'package:fetch_client/fetch_client.dart' as fetch;
 import 'fakePackages/fake_fetch_client.dart' as fetch
     if (dart.library.html) 'package:fetch_client/fetch_client.dart';
 
@@ -1102,7 +1103,7 @@ class ApiService {
 
 class ApiAddr {
   static const String MainPageHeadImage =
-      'cover/202506/GVxi8ftxMmg1OobcrzYnAIAez7tVNz.avif';
+      'cover/202507/5TALWvGEk09mzInF96hMk0uT4XOAGO.jpeg';
   static const String LoginBackground =
       'cover/202506/VrTlLrAokaMhyOk8rjqMuV2VCCkltH.webp';
   static const String accountLogin = '/account/login';
